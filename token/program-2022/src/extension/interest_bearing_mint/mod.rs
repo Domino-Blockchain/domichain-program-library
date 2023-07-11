@@ -4,7 +4,7 @@ use {
         pod::{OptionalNonZeroPubkey, PodI16, PodI64},
     },
     bytemuck::{Pod, Zeroable},
-    solana_program::program_error::ProgramError,
+    domichain_program::program_error::ProgramError,
     std::convert::TryInto,
 };
 

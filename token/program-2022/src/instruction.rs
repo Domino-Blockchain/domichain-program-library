@@ -10,7 +10,7 @@ use {
         pod::{pod_from_bytes, pod_get_packed_len},
     },
     bytemuck::Pod,
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         program_option::COption,

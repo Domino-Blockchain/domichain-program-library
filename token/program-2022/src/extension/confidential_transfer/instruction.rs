@@ -1,6 +1,6 @@
 #[cfg(not(target_os = "solana"))]
-use solana_zk_token_sdk::encryption::auth_encryption::AeCiphertext;
-pub use solana_zk_token_sdk::zk_token_proof_instruction::*;
+use domichain_zk_token_sdk::encryption::auth_encryption::AeCiphertext;
+pub use domichain_zk_token_sdk::zk_token_proof_instruction::*;
 use {
     crate::{
         check_program_account,
@@ -9,13 +9,13 @@ use {
     },
     bytemuck::{Pod, Zeroable},
     num_enum::{IntoPrimitive, TryFromPrimitive},
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         pubkey::Pubkey,
         sysvar,
     },
-    solana_zk_token_sdk::zk_token_elgamal::pod,
+    domichain_zk_token_sdk::zk_token_elgamal::pod,
     std::convert::TryFrom,
 };
 

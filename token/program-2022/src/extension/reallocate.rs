@@ -8,7 +8,7 @@ use {
         processor::Processor,
         state::Account,
     },
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
         msg,

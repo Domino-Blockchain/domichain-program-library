@@ -5,7 +5,7 @@ use {
         state::Account,
     },
     bytemuck::{Pod, Zeroable},
-    solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT},
+    domichain_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT},
 };
 
 /// CPI Guard extension instructions

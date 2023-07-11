@@ -1,6 +1,6 @@
 use {
     crate::{check_program_account, error::TokenError, instruction::TokenInstruction},
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         program_option::COption,

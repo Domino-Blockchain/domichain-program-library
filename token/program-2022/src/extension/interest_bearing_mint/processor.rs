@@ -14,7 +14,7 @@ use {
         processor::Processor,
         state::Mint,
     },
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         clock::Clock,
         entrypoint::ProgramResult,

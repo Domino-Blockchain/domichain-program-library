@@ -5,8 +5,8 @@ use {
         pod::*,
     },
     bytemuck::{Pod, Zeroable},
-    solana_program::entrypoint::ProgramResult,
-    solana_zk_token_sdk::zk_token_elgamal::pod,
+    domichain_program::entrypoint::ProgramResult,
+    domichain_zk_token_sdk::zk_token_elgamal::pod,
 };
 
 /// Maximum bit length of any deposit or transfer amount

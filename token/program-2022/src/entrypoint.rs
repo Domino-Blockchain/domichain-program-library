@@ -2,7 +2,7 @@
 
 use {
     crate::{error::TokenError, processor::Processor},
-    solana_program::{
+    domichain_program::{
         account_info::AccountInfo, entrypoint, entrypoint::ProgramResult,
         program_error::PrintProgramError, pubkey::Pubkey,
     },

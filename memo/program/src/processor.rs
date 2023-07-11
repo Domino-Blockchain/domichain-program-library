@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program_error::ProgramError,
     pubkey::Pubkey,
 };
@@ -37,7 +37,7 @@ pub fn process_instruction(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use solana_program::{
+    use domichain_program::{
         account_info::IntoAccountInfo, program_error::ProgramError, pubkey::Pubkey,
     };
     use solana_sdk::account::Account;

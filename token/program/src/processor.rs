@@ -7,7 +7,7 @@ use crate::{
     state::{Account, AccountState, Mint, Multisig},
     try_ui_amount_into_amount,
 };
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     msg,
@@ -687,7 +687,7 @@ impl Processor {
                 authority_info,
                 account_info_iter.as_slice(),
             )?;
-        } else if !solana_program::incinerator::check_id(destination_account_info.key) {
+        } else if !domichain_program::incinerator::check_id(destination_account_info.key) {
             return Err(ProgramError::InvalidAccountData);
         }
 
@@ -1015,7 +1015,7 @@ fn delete_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
     account_info.assign(&system_program::id());
     let mut account_data = account_info.data.borrow_mut();
     let data_len = account_data.len();
-    solana_program::program_memory::sol_memset(*account_data, 0, data_len);
+    domichain_program::program_memory::sol_memset(*account_data, 0, data_len);
     Ok(())
 }
 
@@ -1031,7 +1031,7 @@ mod tests {
     use super::*;
     use crate::instruction::*;
     use serial_test::serial;
-    use solana_program::{
+    use domichain_program::{
         account_info::IntoAccountInfo,
         clock::Epoch,
         instruction::Instruction,
@@ -1081,7 +1081,7 @@ mod tests {
             unsafe {
                 *(var_addr as *mut _ as *mut Rent) = Rent::default();
             }
-            solana_program::entrypoint::SUCCESS
+            domichain_program::entrypoint::SUCCESS
         }
 
         fn sol_set_return_data(&self, data: &[u8]) {
@@ -4607,7 +4607,7 @@ mod tests {
                 &program_id,
                 &incinerator_account_key,
                 &mint_key,
-                &solana_program::incinerator::id(),
+                &domichain_program::incinerator::id(),
             )
             .unwrap(),
             vec![&mut incinerator_account, &mut mint_account],
@@ -4618,7 +4618,7 @@ mod tests {
                 &program_id,
                 &system_account_key,
                 &mint_key,
-                &solana_program::system_program::id(),
+                &domichain_program::system_program::id(),
             )
             .unwrap(),
             vec![&mut system_account, &mut mint_account],
@@ -4675,7 +4675,7 @@ mod tests {
                 close_account(
                     &program_id,
                     &incinerator_account_key,
-                    &solana_program::incinerator::id(),
+                    &domichain_program::incinerator::id(),
                     &owner_key,
                     &[]
                 )
@@ -4693,7 +4693,7 @@ mod tests {
                 close_account(
                     &program_id,
                     &system_account_key,
-                    &solana_program::incinerator::id(),
+                    &domichain_program::incinerator::id(),
                     &owner_key,
                     &[]
                 )
@@ -4785,7 +4785,7 @@ mod tests {
             close_account(
                 &program_id,
                 &incinerator_account_key,
-                &solana_program::incinerator::id(),
+                &domichain_program::incinerator::id(),
                 &owner_key,
                 &[],
             )
@@ -4802,7 +4802,7 @@ mod tests {
             close_account(
                 &program_id,
                 &system_account_key,
-                &solana_program::incinerator::id(),
+                &domichain_program::incinerator::id(),
                 &owner_key,
                 &[],
             )

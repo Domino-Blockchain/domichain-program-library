@@ -22,7 +22,7 @@ use {
         native_mint,
         state::{Account, AccountState, Mint, Multisig},
     },
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         clock::Clock,
         entrypoint::ProgramResult,
@@ -1008,7 +1008,7 @@ impl Processor {
                     authority_info_data_len,
                     account_info_iter.as_slice(),
                 )?;
-            } else if !solana_program::incinerator::check_id(destination_account_info.key) {
+            } else if !domichain_program::incinerator::check_id(destination_account_info.key) {
                 return Err(ProgramError::InvalidAccountData);
             }
 
@@ -1530,7 +1530,7 @@ fn delete_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
     account_info.assign(&system_program::id());
     let mut account_data = account_info.data.borrow_mut();
     let data_len = account_data.len();
-    solana_program::program_memory::sol_memset(*account_data, 0, data_len);
+    domichain_program::program_memory::sol_memset(*account_data, 0, data_len);
     Ok(())
 }
 
@@ -1549,7 +1549,7 @@ mod tests {
             extension::transfer_fee::instruction::initialize_transfer_fee_config, instruction::*,
         },
         serial_test::serial,
-        solana_program::{
+        domichain_program::{
             account_info::IntoAccountInfo,
             clock::Epoch,
             instruction::Instruction,
@@ -1587,7 +1587,7 @@ mod tests {
             unsafe {
                 *(var_addr as *mut _ as *mut Clock) = Clock::default();
             }
-            solana_program::entrypoint::SUCCESS
+            domichain_program::entrypoint::SUCCESS
         }
 
         fn sol_get_epoch_schedule_sysvar(&self, _var_addr: *mut u8) -> u64 {
@@ -1603,7 +1603,7 @@ mod tests {
             unsafe {
                 *(var_addr as *mut _ as *mut Rent) = Rent::default();
             }
-            solana_program::entrypoint::SUCCESS
+            domichain_program::entrypoint::SUCCESS
         }
 
         fn sol_set_return_data(&self, data: &[u8]) {

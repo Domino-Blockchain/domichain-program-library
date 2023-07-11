@@ -1,7 +1,7 @@
 //! Account utility functions
 
 use {
-    solana_program::{
+    domichain_program::{
         account_info::AccountInfo,
         entrypoint::ProgramResult,
         program::{get_return_data, invoke, invoke_signed},

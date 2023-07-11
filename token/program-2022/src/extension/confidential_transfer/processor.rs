@@ -10,7 +10,7 @@ use {
         processor::Processor,
         state::{Account, Mint},
     },
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
         msg,
@@ -22,16 +22,16 @@ use {
 #[cfg(feature = "zk-ops")]
 use {
     crate::extension::{non_transferable::NonTransferable, transfer_fee::TransferFeeConfig},
-    solana_zk_token_sdk::zk_token_elgamal::ops as syscall,
+    domichain_zk_token_sdk::zk_token_elgamal::ops as syscall,
 };
 
 #[cfg(feature = "proof-program")]
 use {
     crate::extension::memo_transfer::{check_previous_sibling_instruction_is_memo, memo_required},
-    solana_program::instruction::Instruction,
-    solana_program::sysvar::instructions::get_instruction_relative,
-    solana_program::{clock::Clock, sysvar::Sysvar},
-    solana_zk_token_sdk::zk_token_proof_program,
+    domichain_program::instruction::Instruction,
+    domichain_program::sysvar::instructions::get_instruction_relative,
+    domichain_program::{clock::Clock, sysvar::Sysvar},
+    domichain_zk_token_sdk::zk_token_proof_program,
 };
 
 /// Decodes the zero-knowledge proof instruction associated with the token instruction.

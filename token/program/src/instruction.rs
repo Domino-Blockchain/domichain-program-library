@@ -1,7 +1,7 @@
 //! Instruction types
 
 use crate::{check_program_account, error::TokenError};
-use solana_program::{
+use domichain_program::{
     instruction::{AccountMeta, Instruction},
     program_error::ProgramError,
     program_option::COption,

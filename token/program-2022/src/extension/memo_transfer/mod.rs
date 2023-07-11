@@ -6,7 +6,7 @@ use {
         state::Account,
     },
     bytemuck::{Pod, Zeroable},
-    solana_program::{
+    domichain_program::{
         instruction::get_processed_sibling_instruction, program_error::ProgramError, pubkey::Pubkey,
     },
 };

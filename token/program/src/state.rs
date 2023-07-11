@@ -3,7 +3,7 @@
 use crate::instruction::MAX_SIGNERS;
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
 use num_enum::TryFromPrimitive;
-use solana_program::{
+use domichain_program::{
     program_error::ProgramError,
     program_option::COption,
     program_pack::{IsInitialized, Pack, Sealed},
@@ -115,8 +115,8 @@ impl Account {
     }
     /// Checks if a token Account's owner is the system_program or the incinerator
     pub fn is_owned_by_system_program_or_incinerator(&self) -> bool {
-        solana_program::system_program::check_id(&self.owner)
-            || solana_program::incinerator::check_id(&self.owner)
+        domichain_program::system_program::check_id(&self.owner)
+            || domichain_program::incinerator::check_id(&self.owner)
     }
 }
 impl Sealed for Account {}

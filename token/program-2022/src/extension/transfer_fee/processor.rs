@@ -12,7 +12,7 @@ use {
         processor::Processor,
         state::{Account, Mint},
     },
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         clock::Clock,
         entrypoint::ProgramResult,

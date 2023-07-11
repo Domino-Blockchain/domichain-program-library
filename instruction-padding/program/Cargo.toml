@@ -14,11 +14,11 @@ test-sbf = []
 
 [dependencies]
 num_enum = "0.5.9"
-solana-program = "1.14.4"
+domichain-program = { path = "../../../domichain_backporting/sdk/program", version = "1.14.4" }
 
-[dev-dependencies]
-solana-program-test = "1.14.4"
-solana-sdk = "1.14.4"
+# [dev-dependencies]
+# solana-program-test = "1.14.4"
+# solana-sdk = "1.14.4"
 
 [lib]
 crate-type = ["cdylib", "lib"]

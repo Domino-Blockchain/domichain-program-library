@@ -4,7 +4,7 @@ use {
     crate::{get_associated_token_address_with_program_id, id},
     assert_matches::assert_matches,
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
     },
@@ -80,7 +80,7 @@ fn build_associated_token_account_instruction(
             AccountMeta::new(associated_account_address, false),
             AccountMeta::new_readonly(*wallet_address, false),
             AccountMeta::new_readonly(*token_mint_address, false),
-            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(domichain_program::system_program::id(), false),
             AccountMeta::new_readonly(*token_program_id, false),
         ],
         data: instruction.try_to_vec().unwrap(),
