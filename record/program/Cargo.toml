@@ -15,7 +15,7 @@ test-sbf = []
 borsh = "0.10"
 num-derive = "0.4"
 num-traits = "0.2"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 thiserror = "1.0"
 
 [dev-dependencies]

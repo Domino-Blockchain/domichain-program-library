@@ -17,7 +17,7 @@ borsh = "0.10"
 num-derive = "0.4"
 num-traits = "0.2"
 num_enum = "0.6.1"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token = { version = "4.0", path = "../../token/program", features = [ "no-entrypoint" ] }
 spl-associated-token-account = { version = "2.0", path = "../../associated-token-account/program", features = [ "no-entrypoint" ] }
 thiserror = "1.0"

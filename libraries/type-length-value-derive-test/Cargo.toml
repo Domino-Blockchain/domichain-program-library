@@ -9,6 +9,6 @@ edition = "2021"
 
 [dev-dependencies]
 borsh = "0.10"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-discriminator = { version = "0.1.0", path = "../discriminator" }
 spl-type-length-value = { version = "0.2.0", path = "../type-length-value", features = ["derive"] }

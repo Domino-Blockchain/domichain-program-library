@@ -10,7 +10,7 @@ edition = "2021"
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../../domichain/sdk/program" }
 syn = { version = "2.0", features = ["full"] }
 thiserror = "1.0"
 

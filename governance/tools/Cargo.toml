@@ -15,6 +15,6 @@ num-derive = "0.4"
 num-traits = "0.2"
 serde = "1.0.181"
 serde_derive = "1.0.103"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token = { version = "4.0", path = "../../token/program", features = [ "no-entrypoint" ] }
 thiserror = "1.0"

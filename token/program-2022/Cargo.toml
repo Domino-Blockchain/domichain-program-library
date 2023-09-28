@@ -23,8 +23,8 @@ bytemuck = { version = "1.13.1", features = ["derive"] }
 num-derive = "0.4"
 num-traits = "0.2"
 num_enum = "0.6.1"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
-domichain-zk-token-sdk = { path = "/home/zotho/domichain_backporting/zk-token-sdk" }
+domichain-program = { path = "../../../domichain/sdk/program" }
+domichain-zk-token-sdk = { path = "../../../domichain/zk-token-sdk" }
 spl-memo = { version = "4.0.0", path = "../../memo/program", features = [ "no-entrypoint" ] }
 spl-token = { version = "4.0",  path = "../program", features = ["no-entrypoint"] }
 spl-token-metadata-interface = { version = "0.1.0", path = "../../token-metadata/interface" }

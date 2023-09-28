@@ -13,7 +13,7 @@ test-sbf = []
 
 [dependencies]
 arrayref = "0.3.7"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-tlv-account-resolution = { version = "0.2.0" , path = "../../libraries/tlv-account-resolution" }
 spl-token-2022 = { version = "0.7",  path = "../program-2022", features = ["no-entrypoint"] }
 spl-transfer-hook-interface = { version = "0.1.0" , path = "../transfer-hook-interface" }

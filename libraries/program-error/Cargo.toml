@@ -10,7 +10,7 @@ edition = "2021"
 [dependencies]
 num-derive = "0.4"
 num-traits = "0.2"
-domichain-program = { path = "../../domichain/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-program-error-derive = { version = "0.2.0", path = "./derive" }
 thiserror = "1.0"
 

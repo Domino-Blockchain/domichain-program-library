@@ -17,7 +17,7 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 num-traits = "0.2"
 borsh = "0.10"
 num-derive = "0.4.0"

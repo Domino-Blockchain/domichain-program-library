@@ -15,7 +15,7 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 
 [dev-dependencies]
 solana-program-test = "1.16.3"

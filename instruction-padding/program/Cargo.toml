@@ -14,7 +14,7 @@ test-sbf = []
 
 [dependencies]
 num_enum = "0.6.1"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 
 [dev-dependencies]
 solana-program-test = "1.16.3"

@@ -16,7 +16,7 @@ arrayref = "0.3.7"
 bytemuck = "1.13.1"
 num-derive = "0.4"
 num-traits = "0.2"
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token = { version = "4.0", path = "../../token/program", features = [ "no-entrypoint" ] }
 thiserror = "1.0"
 uint = "0.9"

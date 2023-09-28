@@ -11,7 +11,7 @@ version = "0.0.1"
 test-sbf = []
 
 [dev-dependencies]
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 solana-program-test = "1.16.3"
 solana-sdk = "1.16.3"
 spl-associated-token-account = { version = "2.0", path = "../program", features = ["no-entrypoint"] }

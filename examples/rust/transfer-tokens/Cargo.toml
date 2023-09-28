@@ -12,7 +12,7 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
+domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token = { version = "4.0", path = "../../../token/program", features = [ "no-entrypoint" ] }
 
 [dev-dependencies]
