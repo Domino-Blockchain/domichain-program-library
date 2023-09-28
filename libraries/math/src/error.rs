@@ -2,7 +2,7 @@
 
 use {
     num_derive::FromPrimitive,
-    solana_program::{decode_error::DecodeError, program_error::ProgramError},
+    domichain_program::{decode_error::DecodeError, program_error::ProgramError},
     thiserror::Error,
 };
 
@@ -30,7 +30,7 @@ impl<T> DecodeError<T> for MathError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use solana_program::program_error::ProgramError;
+    use domichain_program::program_error::ProgramError;
 
     #[test]
     fn test_math_error_from() {

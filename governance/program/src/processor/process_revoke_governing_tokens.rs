@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     pubkey::Pubkey,
@@ -75,7 +75,7 @@ pub fn process_revoke_governing_tokens(
         .checked_sub(amount)
         .ok_or(GovernanceError::InvalidRevokeAmount)?;
 
-    token_owner_record_data.serialize(&mut *token_owner_record_info.data.borrow_mut())?;
+    token_owner_record_data.serialize(&mut token_owner_record_info.data.borrow_mut()[..])?;
 
     burn_spl_tokens_signed(
         governing_token_holding_info,

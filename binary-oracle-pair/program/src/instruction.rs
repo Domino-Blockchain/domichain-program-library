@@ -1,7 +1,7 @@
 //! Instruction types
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     clock::Slot,
     instruction::{AccountMeta, Instruction},
     program_error::ProgramError,

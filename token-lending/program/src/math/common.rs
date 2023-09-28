@@ -1,6 +1,6 @@
 //! Common module for Decimal and Rate
 
-use solana_program::program_error::ProgramError;
+use domichain_program::program_error::ProgramError;
 
 /// Scale of precision
 pub const SCALE: usize = 18;

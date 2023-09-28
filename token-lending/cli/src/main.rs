@@ -11,7 +11,7 @@ use {
         keypair::signer_from_path,
     },
     solana_client::rpc_client::RpcClient,
-    solana_program::{native_token::lamports_to_sol, program_pack::Pack, pubkey::Pubkey},
+    domichain_program::{native_token::lamports_to_sol, program_pack::Pack, pubkey::Pubkey},
     solana_sdk::{
         commitment_config::CommitmentConfig,
         message::Message,
@@ -48,7 +48,7 @@ type CommandResult = Result<(), Error>;
 const PYTH_PROGRAM_ID: &str = "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s";
 
 fn main() {
-    solana_logger::setup_with_default("solana=info");
+    solana_logger::setup_with_default("domichain=info");
 
     let default_lending_program_id: &str = &spl_token_lending::id().to_string();
 

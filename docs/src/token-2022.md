@@ -6,7 +6,11 @@ A token program on the Solana blockchain, defining a common implementation for
 fungible and non-fungible tokens.
 
 The Token-2022 Program is a superset of the functionality provided by the
-[Token Program](token.mdx), deployed to all networks.
+[Token Program](token.mdx).
+
+The program is still under audit and not meant for full production use. In the
+meantime, all clusters have the latest program deployed **for testing and development
+purposes ONLY**.
 
 | Information | Account Address |
 | --- | --- |
@@ -110,9 +114,11 @@ program, that creates new token accounts for either Token or Token-2022.
 To get started with Token-2022:
 
 - [Install the Solana Tools](https://docs.solana.com/cli/install-solana-cli-tools)
+- [Project Status](token-2022/status.md)
 - [Extension Guide](token-2022/extensions.mdx)
 - [Wallet Guide](token-2022/wallet.md)
 - [On-Chain Program Guide](token-2022/onchain.md)
+- [Presentation about Token-2022](token-2022/presentation.md)
 
 For existing functionality in the Token Program, see the [token docs](token.mdx).
 The Token functionality will always apply to Token-2022.
@@ -130,26 +136,17 @@ For information about the types and instructions, the Rust docs are available at
 The Token-2022 Program is currently under multiple audits to ensure safety of
 funds. All audits will be published here as they are completed.
 
-Here are the completed audits as of 12 December 2022:
+Here are the completed audits as of 3 April 2023:
 
 * Halborn
     - Review commit hash [`c3137a`](https://github.com/solana-labs/solana-program-library/tree/c3137af9dfa2cc0873cc84c4418dea88ac542965/token/program-2022)
-    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/HalbornToken2022Audit.pdf
+    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/HalbornToken2022Audit-2022-07-27.pdf
 * Zellic
     - Review commit hash [`54695b`](https://github.com/solana-labs/solana-program-library/tree/54695b233484722458b18c0e26ebb8334f98422c/token/program-2022)
-    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/ZellicToken2022Audit.pdf
-
-Here are the ongoing audits:
-
-* NCC Group
+    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/ZellicToken2022Audit-2022-12-05.pdf
 * Trail of Bits
-
-## Status and Upgradability
-
-The Token-2022 program is still under audit and not meant for full production use.
-All clusters have the latest program deployed **for testing and development purposes
-ONLY**.
-
-To facilitate deploying updates and security fixes, the program deployment remains
-upgradable. Once audits are complete, the deployment will be marked final and no
-further upgrades will be possible. This is expected to happen sometime in Q1 2023.
+    - Review commit hash [`50abad`](https://github.com/solana-labs/solana-program-library/tree/50abadd819df2e406567d6eca31c213264c1c7cd/token/program-2022)
+    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/TrailOfBitsToken2022Audit-2023-02-10.pdf
+* NCC Group
+    - Review commit hash [`4e43aa`](https://github.com/solana-labs/solana/tree/4e43aa6c18e6bb4d98559f80eb004de18bc6b418/zk-token-sdk)
+    - Final report https://github.com/solana-labs/security-audits/blob/master/spl/NCCToken2022Audit-2023-04-05.pdf

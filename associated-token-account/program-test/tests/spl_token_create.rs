@@ -5,7 +5,7 @@ mod program_test;
 
 use {
     program_test::program_test,
-    solana_program::pubkey::Pubkey,
+    domichain_program::pubkey::Pubkey,
     solana_program_test::*,
     solana_sdk::{program_pack::Pack, signature::Signer, transaction::Transaction},
     spl_associated_token_account::{

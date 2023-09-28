@@ -9,4 +9,4 @@ pub mod processor;
 // pub mod tools;
 
 // Export current sdk types for downstream users building with a different sdk version
-pub use solana_program;
+pub use domichain_program;

@@ -1,7 +1,7 @@
-solana_program::declare_id!("mTok58Lg4YfcmwqyrDHpf7ogp599WRhzb6PxjaBqAxS");
+domichain_program::declare_id!("mTok58Lg4YfcmwqyrDHpf7ogp599WRhzb6PxjaBqAxS");
 
 use borsh::BorshDeserialize;
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, msg, program::invoke,
     program_error::ProgramError, program_pack::Pack, pubkey::Pubkey, rent::Rent,
     system_instruction, sysvar::Sysvar,
@@ -28,7 +28,7 @@ use instruction::ManagedTokenInstruction;
 use token::{approve, burn, close, freeze, initialize_mint, mint_to, revoke, thaw, transfer};
 
 #[cfg(not(feature = "no-entrypoint"))]
-solana_program::entrypoint!(process_instruction);
+domichain_program::entrypoint!(process_instruction);
 
 #[inline]
 fn get_authority_seeds_checked(

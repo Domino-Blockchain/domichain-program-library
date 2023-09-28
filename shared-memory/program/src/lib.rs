@@ -7,9 +7,9 @@
 // This program is highly optimized for its particular use case and does not
 // implement the typical `process_instruction` entrypoint.
 
-extern crate solana_program;
+extern crate domichain_program;
 use arrayref::{array_refs, mut_array_refs};
-use solana_program::{
+use domichain_program::{
     declare_id, entrypoint::MAX_PERMITTED_DATA_INCREASE, entrypoint::SUCCESS,
     program_error::ProgramError, pubkey::Pubkey,
 };

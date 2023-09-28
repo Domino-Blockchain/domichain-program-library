@@ -2,7 +2,7 @@
 
 use borsh::BorshDeserialize;
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     clock::Slot,
     entrypoint::ProgramResult,

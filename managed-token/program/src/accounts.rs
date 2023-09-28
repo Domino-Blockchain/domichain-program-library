@@ -1,5 +1,5 @@
 use crate::assert_with_msg;
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     program_error::ProgramError,
     system_program,

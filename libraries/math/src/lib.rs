@@ -12,4 +12,4 @@ pub mod precise_number;
 pub mod processor;
 pub mod uint;
 
-solana_program::declare_id!("Math111111111111111111111111111111111111111");
+domichain_program::declare_id!("Math111111111111111111111111111111111111111");

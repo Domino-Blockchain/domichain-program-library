@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use cookies::{TokenAccountCookie, WalletCookie};
-use solana_program::{
+use domichain_program::{
     borsh::try_from_slice_unchecked, clock::Clock, instruction::Instruction,
     program_error::ProgramError, program_pack::Pack, pubkey::Pubkey, rent::Rent,
     stake_history::Epoch, system_instruction, system_program, sysvar,
@@ -357,7 +357,7 @@ impl ProgramTestBench {
         account: &T,
     ) {
         let mut account_data = vec![];
-        account.serialize(&mut account_data).unwrap();
+        borsh::to_writer(&mut account_data, &account).unwrap();
 
         let data = AccountSharedData::create(
             self.rent.minimum_balance(account_data.len()),

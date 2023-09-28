@@ -1,4 +1,4 @@
-use solana_program::{instruction::Instruction, pubkey::Pubkey};
+use domichain_program::{instruction::Instruction, pubkey::Pubkey};
 use solana_sdk::signature::Keypair;
 use spl_governance::state::{
     governance::GovernanceV2, native_treasury::NativeTreasury, program_metadata::ProgramMetadata,
@@ -157,7 +157,7 @@ pub struct ProposalDepositCookie {
 pub struct SignatoryRecordCookie {
     pub address: Pubkey,
     pub account: SignatoryRecordV2,
-    pub signatory: Keypair,
+    pub signatory: Option<Keypair>,
 }
 
 #[derive(Debug)]

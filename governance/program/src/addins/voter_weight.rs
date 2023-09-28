@@ -1,6 +1,6 @@
 //! VoterWeight Addin interface
 
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, clock::Clock, program_error::ProgramError, pubkey::Pubkey,
     sysvar::Sysvar,
 };

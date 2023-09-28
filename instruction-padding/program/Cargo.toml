@@ -13,12 +13,12 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-num_enum = "0.5.9"
-domichain-program = { path = "../../../domichain_backporting/sdk/program", version = "1.14.4" }
+num_enum = "0.6.1"
+domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
 
-# [dev-dependencies]
-# solana-program-test = "1.14.4"
-# solana-sdk = "1.14.4"
+[dev-dependencies]
+solana-program-test = "1.16.3"
+solana-sdk = "1.16.3"
 
 [lib]
 crate-type = ["cdylib", "lib"]

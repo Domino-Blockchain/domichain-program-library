@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     pubkey::Pubkey,
@@ -48,7 +48,7 @@ pub fn process_set_realm_authority(
 
     realm_data.authority = new_realm_authority;
 
-    realm_data.serialize(&mut *realm_info.data.borrow_mut())?;
+    realm_data.serialize(&mut realm_info.data.borrow_mut()[..])?;
 
     Ok(())
 }

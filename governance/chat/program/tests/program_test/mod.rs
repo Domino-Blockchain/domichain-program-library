@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use solana_program::{program_error::ProgramError, pubkey::Pubkey};
+use domichain_program::{program_error::ProgramError, pubkey::Pubkey};
 use solana_program_test::{processor, ProgramTest};
 
 use solana_sdk::{signature::Keypair, signer::Signer};

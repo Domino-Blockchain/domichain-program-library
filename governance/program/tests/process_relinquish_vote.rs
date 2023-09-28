@@ -2,7 +2,7 @@
 
 mod program_test;
 
-use solana_program::{instruction::AccountMeta, pubkey::Pubkey};
+use domichain_program::{instruction::AccountMeta, pubkey::Pubkey};
 use solana_program_test::tokio;
 
 use program_test::*;

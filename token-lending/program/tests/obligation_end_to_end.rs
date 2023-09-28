@@ -11,7 +11,7 @@ use solana_sdk::{
     system_instruction::create_account,
     transaction::Transaction,
 };
-use spl_token::{instruction::approve, solana_program::program_pack::Pack};
+use spl_token::{instruction::approve, domichain_program::program_pack::Pack};
 use spl_token_lending::{
     instruction::{
         borrow_obligation_liquidity, deposit_obligation_collateral, init_obligation,

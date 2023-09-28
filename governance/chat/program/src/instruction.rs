@@ -1,7 +1,7 @@
 //! Program instructions
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
     system_program,

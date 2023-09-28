@@ -1,10 +1,10 @@
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
 };
 
 use crate::helpers::flash_loan_receiver::FlashLoanReceiverError::InvalidInstruction;
 use spl_token::{
-    solana_program::{
+    domichain_program::{
         account_info::next_account_info, program::invoke_signed, program_error::ProgramError,
         program_pack::Pack,
     },

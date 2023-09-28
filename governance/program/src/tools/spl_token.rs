@@ -1,7 +1,7 @@
 //! General purpose SPL token utility functions
 
 use arrayref::array_ref;
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo,
     entrypoint::ProgramResult,
     msg,

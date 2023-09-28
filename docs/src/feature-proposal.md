@@ -19,7 +19,7 @@ simultaneously across all validators to avoid divergent behavior that would
 cause hard forks or otherwise break consensus.
 
 The
-[feature](https://docs.rs/solana-program/latest/solana_program/feature/index.html)
+[feature](https://docs.rs/solana-program/latest/domichain_program/feature/index.html)
 and [feature_set](https://docs.rs/solana-sdk/latest/solana_sdk/feature_set/index.html)
 Rust modules are the primitives for this facility, and the `solana feature`
 command-line subcommands allow for easy feature status inspection and feature

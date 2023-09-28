@@ -11,7 +11,7 @@ pub use obligation::*;
 pub use reserve::*;
 
 use crate::math::{Decimal, WAD};
-use solana_program::{
+use domichain_program::{
     clock::{DEFAULT_TICKS_PER_SECOND, DEFAULT_TICKS_PER_SLOT, SECONDS_PER_DAY},
     msg,
     program_error::ProgramError,

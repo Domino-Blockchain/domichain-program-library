@@ -3,7 +3,7 @@
 mod program_test;
 use program_test::*;
 
-use solana_program::instruction::AccountMeta;
+use domichain_program::instruction::AccountMeta;
 use solana_program_test::tokio;
 
 use spl_governance::{

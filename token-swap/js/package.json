@@ -1,6 +1,6 @@
 {
   "name": "@solana/spl-token-swap",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "description": "SPL Token Swap JavaScript API",
   "license": "MIT",
   "author": "Solana Labs Maintainers <maintainers@solanalabs.com>",
@@ -20,8 +20,9 @@
   "module": "dist/esm/index.js",
   "sideEffects": false,
   "exports": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+    "types": "./dist/types/index.d.ts",
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js"
   },
   "files": [
     "dist",
@@ -32,7 +33,8 @@
     "build": "tsc -p tsconfig.json && tsc-esm -p tsconfig.json && tsc -p tsconfig.cjs.json",
     "postbuild": "echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json && echo '{\"type\":\"module\"}' > dist/esm/package.json",
     "test": "ts-node test/main.ts",
-    "start-with-test-validator": "start-server-and-test 'solana-test-validator --bpf-program SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw ../../target/deploy/spl_token_swap.so --reset --quiet' http://localhost:8899/health test",
+    "start-with-test-validator-solana": "start-server-and-test '~/solana/target/release/solana-test-validator --bpf-program SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw ../../target/deploy/spl_token_swap.so --reset --quiet' http://127.0.0.1:8899/health test",
+    "start-with-test-validator": "start-server-and-test '~/domichain_backporting/target/release/domichain-test-validator --wasm-program SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw ../../target/wasm32-wasi/release/spl_token_swap.wasm --reset --quiet' http://127.0.0.1:8899/health test",
     "lint": "npm run pretty && eslint --max-warnings 0 .",
     "lint:fix": "npm run pretty:fix && eslint . --fix",
     "build:program": "cargo build-sbf --manifest-path ../program/Cargo.toml",
@@ -41,19 +43,20 @@
   },
   "keywords": [],
   "dependencies": {
-    "bn.js": "^5.1.3",
-    "@solana/web3.js": "^1.42.0",
-    "@solana/buffer-layout": "^4.0.0"
+    "@solana/buffer-layout": "^4.0.0",
+    "@solana/web3.js": "^1.42.0"
   },
   "devDependencies": {
-    "@solana/spl-token": "0.1.8",
+    "@solana/spl-token": "0.3.8",
     "@types/bn.js": "^5.1.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.31.0",
     "eslint-plugin-import": "^2.22.0",
-    "prettier": "^2.1.2",
-    "start-server-and-test": "^1.11.6",
+    "prettier": "^3.0.0",
+    "start-server-and-test": "^2.0.0",
     "ts-node": "^10.0.0",
-    "typescript": "^4.2.4",
+    "typescript": "^5.0.4",
     "typescript-esm": "^2.0.0"
   }
 }

@@ -5,7 +5,7 @@ mod helpers;
 
 use {
     helpers::*,
-    solana_program::{instruction::InstructionError, stake},
+    domichain_program::{instruction::InstructionError, stake},
     solana_program_test::*,
     solana_sdk::{
         borsh::try_from_slice_unchecked,

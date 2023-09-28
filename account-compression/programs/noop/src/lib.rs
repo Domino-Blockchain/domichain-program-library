@@ -1,4 +1,4 @@
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, declare_id, entrypoint::ProgramResult, instruction::Instruction,
     pubkey::Pubkey,
 };
@@ -6,7 +6,7 @@ use solana_program::{
 declare_id!("noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV");
 
 #[cfg(not(feature = "no-entrypoint"))]
-use solana_program::entrypoint;
+use domichain_program::entrypoint;
 
 #[cfg(not(feature = "no-entrypoint"))]
 entrypoint!(noop);

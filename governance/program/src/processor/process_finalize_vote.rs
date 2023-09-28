@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     clock::Clock,
     entrypoint::ProgramResult,
@@ -76,13 +76,13 @@ pub fn process_finalize_vote(program_id: &Pubkey, accounts: &[AccountInfo]) -> P
     )?;
 
     proposal_owner_record_data.decrease_outstanding_proposal_count();
-    proposal_owner_record_data.serialize(&mut *proposal_owner_record_info.data.borrow_mut())?;
+    proposal_owner_record_data.serialize(&mut proposal_owner_record_info.data.borrow_mut()[..])?;
 
-    proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;
+    proposal_data.serialize(&mut proposal_info.data.borrow_mut()[..])?;
 
     // Update  Governance active_proposal_count
     governance_data.active_proposal_count = governance_data.active_proposal_count.saturating_sub(1);
-    governance_data.serialize(&mut *governance_info.data.borrow_mut())?;
+    governance_data.serialize(&mut governance_info.data.borrow_mut()[..])?;
 
     Ok(())
 }

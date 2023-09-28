@@ -24,7 +24,7 @@
 
 use anchor_lang::{
     prelude::*,
-    solana_program::sysvar::{clock::Clock, rent::Rent},
+    domichain_program::sysvar::{clock::Clock, rent::Rent},
 };
 use borsh::{BorshDeserialize, BorshSerialize};
 
@@ -40,8 +40,8 @@ pub mod zero_copy;
 pub use crate::noop::{wrap_application_data_v1, Noop};
 
 use crate::canopy::{fill_in_proof_from_canopy, update_canopy};
-use crate::error::AccountCompressionError;
-use crate::events::{AccountCompressionEvent, ChangeLogEvent};
+pub use crate::error::AccountCompressionError;
+pub use crate::events::{AccountCompressionEvent, ChangeLogEvent};
 use crate::noop::wrap_event;
 use crate::state::{
     merkle_tree_get_size, ConcurrentMerkleTreeHeader, CONCURRENT_MERKLE_TREE_HEADER_SIZE_V1,

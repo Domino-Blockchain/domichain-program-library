@@ -1,5 +1,5 @@
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::pubkey::Pubkey;
+use domichain_program::pubkey::Pubkey;
 use spl_governance::state::{enums::GovernanceAccountType, governance::GovernanceV2};
 
 /// Legacy Governance account as of spl-gov V1

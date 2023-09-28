@@ -1,7 +1,7 @@
 //! Native treasury account
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::pubkey::Pubkey;
+use domichain_program::pubkey::Pubkey;
 use spl_governance_tools::account::AccountMaxSize;
 
 /// Treasury account

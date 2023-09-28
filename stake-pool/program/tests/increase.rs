@@ -6,7 +6,7 @@ mod helpers;
 use {
     bincode::deserialize,
     helpers::*,
-    solana_program::{clock::Epoch, instruction::InstructionError, pubkey::Pubkey, stake},
+    domichain_program::{clock::Epoch, instruction::InstructionError, pubkey::Pubkey, stake},
     solana_program_test::*,
     solana_sdk::{
         signature::Signer,
@@ -536,7 +536,7 @@ async fn fail_additional_with_decreasing() {
 
     // warp forward to activation
     let first_normal_slot = context.genesis_config().epoch_schedule.first_normal_slot;
-    context.warp_to_slot(first_normal_slot).unwrap();
+    context.warp_to_slot(first_normal_slot + 1).unwrap();
     let last_blockhash = context
         .banks_client
         .get_new_latest_blockhash(&context.last_blockhash)

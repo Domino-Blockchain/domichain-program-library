@@ -10,7 +10,7 @@ use crate::state::{
     realm::RealmConfig,
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     clock::{Slot, UnixTimestamp},
     program_pack::IsInitialized,
     pubkey::Pubkey,
@@ -152,7 +152,8 @@ pub fn is_governance_v1_account_type(account_type: &GovernanceAccountType) -> bo
         | GovernanceAccountType::VoteRecordV1
         | GovernanceAccountType::VoteRecordV2
         | GovernanceAccountType::ProgramMetadata
-        | GovernanceAccountType::ProposalDeposit => false,
+        | GovernanceAccountType::ProposalDeposit
+        | GovernanceAccountType::RequiredSignatory => false,
     }
 }
 

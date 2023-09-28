@@ -1,7 +1,7 @@
 //! ProgramMetadata Account
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, clock::Slot, program_error::ProgramError,
     program_pack::IsInitialized, pubkey::Pubkey,
 };

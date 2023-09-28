@@ -4,7 +4,7 @@
 mod helpers;
 
 use helpers::*;
-use solana_program::pubkey::Pubkey;
+use domichain_program::pubkey::Pubkey;
 use solana_program_test::*;
 use solana_sdk::{
     instruction::InstructionError,

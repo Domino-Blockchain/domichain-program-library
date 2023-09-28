@@ -2,7 +2,7 @@
 
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
-use solana_program::{
+use domichain_program::{
     decode_error::DecodeError, msg, program_error::PrintProgramError, program_error::ProgramError,
 };
 use thiserror::Error;

@@ -4,7 +4,7 @@ use crate::{
     math::{Decimal, Rate, TryAdd, TryDiv, TryMul, TrySub},
 };
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::{
+use domichain_program::{
     clock::Slot,
     entrypoint::ProgramResult,
     msg,

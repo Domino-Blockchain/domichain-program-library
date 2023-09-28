@@ -1,4 +1,4 @@
-use solana_program::{
+use domichain_program::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
     sysvar,
@@ -56,7 +56,7 @@ pub fn initialize_binary_option(
             AccountMeta::new_readonly(mint_authority, true),
             AccountMeta::new_readonly(update_authority, true),
             AccountMeta::new_readonly(spl_token::id(), false),
-            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(domichain_program::system_program::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
         data: BinaryOptionInstruction::InitializeBinaryOption(InitializeBinaryOptionArgs {
@@ -163,7 +163,7 @@ pub fn collect(
             AccountMeta::new(escrow_authority_account, false),
             AccountMeta::new_readonly(fee_payer_account, true),
             AccountMeta::new_readonly(spl_token::id(), false),
-            AccountMeta::new_readonly(solana_program::system_program::id(), false),
+            AccountMeta::new_readonly(domichain_program::system_program::id(), false),
             AccountMeta::new_readonly(sysvar::rent::id(), false),
         ],
         data: BinaryOptionInstruction::Collect.try_to_vec().unwrap(),

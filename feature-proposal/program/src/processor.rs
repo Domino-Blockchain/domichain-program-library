@@ -1,7 +1,7 @@
 //! Program state processor
 
 use crate::{instruction::*, state::*, *};
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     clock::Clock,
     entrypoint::ProgramResult,

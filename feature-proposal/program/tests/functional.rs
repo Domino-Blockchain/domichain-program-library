@@ -2,7 +2,7 @@
 #![cfg(feature = "test-sbf")]
 
 use {
-    solana_program::{
+    domichain_program::{
         feature::{self, Feature},
         program_option::COption,
         system_program,

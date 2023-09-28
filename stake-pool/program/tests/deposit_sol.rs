@@ -5,7 +5,7 @@ mod helpers;
 
 use {
     helpers::*,
-    solana_program::{
+    domichain_program::{
         borsh::try_from_slice_unchecked, instruction::InstructionError, pubkey::Pubkey,
     },
     solana_program_test::*,

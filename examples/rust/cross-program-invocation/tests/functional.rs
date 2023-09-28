@@ -2,7 +2,7 @@
 #![cfg(feature = "test-sbf")]
 
 use {
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
         rent::Rent,

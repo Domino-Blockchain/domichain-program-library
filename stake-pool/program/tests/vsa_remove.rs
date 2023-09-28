@@ -6,7 +6,7 @@ mod helpers;
 use {
     borsh::BorshSerialize,
     helpers::*,
-    solana_program::{
+    domichain_program::{
         borsh::try_from_slice_unchecked,
         instruction::{AccountMeta, Instruction, InstructionError},
         pubkey::Pubkey,
@@ -690,7 +690,7 @@ async fn success_with_hijacked_transient_account() {
     // warp forward to merge
     let first_normal_slot = context.genesis_config().epoch_schedule.first_normal_slot;
     let slots_per_epoch = context.genesis_config().epoch_schedule.slots_per_epoch;
-    let mut slot = first_normal_slot + slots_per_epoch;
+    let mut slot = first_normal_slot + slots_per_epoch + 1;
     context.warp_to_slot(slot).unwrap();
     stake_pool_accounts
         .update_all(

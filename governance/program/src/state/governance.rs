@@ -9,10 +9,10 @@ use crate::{
         realm::{assert_is_valid_realm, RealmV2},
         vote_record::VoteKind,
     },
-    tools::structs::Reserved120,
+    tools::structs::Reserved119,
 };
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,
     pubkey::Pubkey, rent::Rent,
 };
@@ -104,7 +104,10 @@ pub struct GovernanceV2 {
     /// Reserved space for versions v2 and onwards
     /// Note 1: V1 accounts must be resized before using this space
     /// Note 2: The reserved space should be used from the end to also allow the config to grow if needed
-    pub reserved_v2: Reserved120,
+    pub reserved_v2: Reserved119,
+
+    /// The number of required signatories for proposals in the Governance
+    pub required_signatories_count: u8,
 
     /// The number of active proposals where active means Draft, SigningOff or Voting state
     ///
@@ -146,7 +149,8 @@ pub fn is_governance_v2_account_type(account_type: &GovernanceAccountType) -> bo
         | GovernanceAccountType::VoteRecordV1
         | GovernanceAccountType::VoteRecordV2
         | GovernanceAccountType::ProgramMetadata
-        | GovernanceAccountType::ProposalDeposit => false,
+        | GovernanceAccountType::ProposalDeposit
+        | GovernanceAccountType::RequiredSignatory => false,
     }
 }
 
@@ -180,7 +184,8 @@ pub fn try_get_governance_v2_type_for_v1(
         | GovernanceAccountType::VoteRecordV1
         | GovernanceAccountType::VoteRecordV2
         | GovernanceAccountType::ProgramMetadata
-        | GovernanceAccountType::ProposalDeposit => None,
+        | GovernanceAccountType::ProposalDeposit
+        | GovernanceAccountType::RequiredSignatory => None,
     }
 }
 
@@ -227,7 +232,8 @@ impl GovernanceV2 {
             | GovernanceAccountType::ProposalDeposit
             | GovernanceAccountType::RealmV2
             | GovernanceAccountType::TokenOwnerRecordV2
-            | GovernanceAccountType::SignatoryRecordV2 => {
+            | GovernanceAccountType::SignatoryRecordV2
+            | GovernanceAccountType::RequiredSignatory => {
                 return Err(GovernanceToolsError::InvalidAccountType.into())
             }
         };
@@ -236,14 +242,14 @@ impl GovernanceV2 {
     }
 
     /// Serializes account into the target buffer
-    pub fn serialize<W: Write>(self, writer: &mut W) -> Result<(), ProgramError> {
+    pub fn serialize<W: Write>(self, writer: W) -> Result<(), ProgramError> {
         if is_governance_v2_account_type(&self.account_type) {
-            BorshSerialize::serialize(&self, writer)?
+            borsh::to_writer(writer, &self)?
         } else if is_governance_v1_account_type(&self.account_type) {
             // V1 account can't be resized and we have to translate it back to the original format
 
             // If reserved_v2 is used it must be individually assessed for GovernanceV1 account backward compatibility impact
-            if self.reserved_v2 != Reserved120::default() {
+            if self.reserved_v2 != Reserved119::default() {
                 panic!("Extended data not supported by GovernanceV1")
             }
 
@@ -258,7 +264,7 @@ impl GovernanceV2 {
                 config: self.config,
             };
 
-            BorshSerialize::serialize(&governance_data_v1, writer)?;
+            borsh::to_writer(writer, &governance_data_v1)?
         }
 
         Ok(())
@@ -289,7 +295,7 @@ impl GovernanceV2 {
             )?;
         }
 
-        self.serialize(&mut *governance_info.data.borrow_mut())
+        self.serialize(&mut governance_info.data.borrow_mut()[..])
     }
 
     /// Asserts the provided voting population represented by the given governing_token_mint
@@ -352,7 +358,7 @@ impl GovernanceV2 {
     }
 
     /// Returns the required deposit amount for creating Nth Proposal based on the number of active proposals
-    /// where N equals to active_proposal_count - deposit_exempt_proposal_count  
+    /// where N equals to active_proposal_count - deposit_exempt_proposal_count
     /// The deposit is not payed unless there are more active Proposal than the exempt amount
     ///
     /// Note: The exact deposit payed for Nth Proposal is N*SECURITY_DEPOSIT_BASE_LAMPORTS + min_rent_for(ProposalDeposit)
@@ -388,7 +394,8 @@ pub fn get_governance_data(
             governed_account: governance_data_v1.governed_account,
             reserved1: 0,
             config: governance_data_v1.config,
-            reserved_v2: Reserved120::default(),
+            reserved_v2: Reserved119::default(),
+            required_signatories_count: 0,
             // GovernanceV1 layout doesn't support active_proposal_count
             // For any legacy GovernanceV1 account it's not preserved until the account layout is migrated to GovernanceV2 in CreateProposal
             active_proposal_count: 0,
@@ -622,7 +629,7 @@ pub fn assert_is_valid_vote_threshold(vote_threshold: &VoteThreshold) -> Result<
 
 #[cfg(test)]
 mod test {
-    use solana_program::clock::Epoch;
+    use domichain_program::clock::Epoch;
 
     use super::*;
 
@@ -650,8 +657,9 @@ mod test {
             governed_account: Pubkey::new_unique(),
             reserved1: 0,
             config: create_test_governance_config(),
-            reserved_v2: Reserved120::default(),
+            reserved_v2: Reserved119::default(),
             active_proposal_count: 10,
+            required_signatories_count: 0,
         }
     }
 

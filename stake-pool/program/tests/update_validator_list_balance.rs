@@ -5,7 +5,7 @@ mod helpers;
 
 use {
     helpers::*,
-    solana_program::{borsh::try_from_slice_unchecked, program_pack::Pack, pubkey::Pubkey},
+    domichain_program::{borsh::try_from_slice_unchecked, program_pack::Pack, pubkey::Pubkey},
     solana_program_test::*,
     solana_sdk::{hash::Hash, signature::Signer, stake::state::StakeState},
     spl_stake_pool::{
@@ -31,7 +31,7 @@ async fn setup(
     let mut context = program_test().start_with_context().await;
     let first_normal_slot = context.genesis_config().epoch_schedule.first_normal_slot;
     let slots_per_epoch = context.genesis_config().epoch_schedule.slots_per_epoch;
-    let mut slot = first_normal_slot;
+    let mut slot = first_normal_slot + 1;
     context.warp_to_slot(slot).unwrap();
 
     let reserve_stake_amount = TEST_STAKE_AMOUNT * 2 * num_validators as u64;

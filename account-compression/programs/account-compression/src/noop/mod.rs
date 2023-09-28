@@ -8,7 +8,7 @@
 //! deserializing the CPI instruction data.
 
 use crate::events::{AccountCompressionEvent, ApplicationDataEvent, ApplicationDataEventV1};
-use anchor_lang::{prelude::*, solana_program::program::invoke};
+use anchor_lang::{prelude::*, domichain_program::program::invoke};
 
 #[derive(Clone)]
 pub struct Noop;

@@ -2,7 +2,7 @@
 
 #![cfg(not(feature = "no-entrypoint"))]
 
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo,
     entrypoint,
     entrypoint::{ProgramResult, HEAP_LENGTH, HEAP_START_ADDRESS},
@@ -40,7 +40,7 @@ unsafe impl std::alloc::GlobalAlloc for BumpAllocator {
     }
 }
 
-#[cfg(target_os = "solana")]
+#[cfg(target_os = "wasi")]
 #[global_allocator]
 static A: BumpAllocator = BumpAllocator;
 

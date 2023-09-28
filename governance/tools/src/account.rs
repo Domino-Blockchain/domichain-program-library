@@ -1,7 +1,7 @@
 //! General purpose account utility functions
 
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo,
     borsh::try_from_slice_unchecked,
     msg,
@@ -72,7 +72,7 @@ pub fn create_and_serialize_account<'a, T: BorshSerialize + AccountMaxSize>(
             .borrow_mut()
             .copy_from_slice(&serialized_data);
     } else {
-        account_data.serialize(&mut *account_info.data.borrow_mut())?;
+        borsh::to_writer(&mut account_info.data.borrow_mut()[..], account_data)?;
     }
 
     Ok(())
@@ -201,7 +201,7 @@ pub fn create_and_serialize_account_with_owner_signed<'a, T: BorshSerialize + Ac
             .borrow_mut()
             .copy_from_slice(&serialized_data);
     } else if account_size > 0 {
-        account_data.serialize(&mut *account_info.data.borrow_mut())?;
+        borsh::to_writer(&mut account_info.data.borrow_mut()[..], account_data)?;
     }
 
     Ok(())

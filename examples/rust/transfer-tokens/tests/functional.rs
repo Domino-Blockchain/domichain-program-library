@@ -1,5 +1,5 @@
 use {
-    solana_program::{
+    domichain_program::{
         instruction::{AccountMeta, Instruction},
         program_pack::Pack,
         pubkey::Pubkey,

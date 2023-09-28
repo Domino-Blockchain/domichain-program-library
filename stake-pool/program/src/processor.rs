@@ -4,6 +4,12 @@ use {
     crate::{
         error::StakePoolError,
         find_deposit_authority_program_address,
+        inline_mpl_token_metadata::{
+            self,
+            instruction::{create_metadata_accounts_v3, update_metadata_accounts_v2},
+            pda::find_metadata_account,
+            state::DataV2,
+        },
         instruction::{FundingType, PreferredValidatorType, StakePoolInstruction},
         minimum_delegation, minimum_reserve_lamports, minimum_stake_lamports,
         state::{
@@ -14,14 +20,9 @@ use {
         AUTHORITY_DEPOSIT, AUTHORITY_WITHDRAW, EPHEMERAL_STAKE_SEED_PREFIX,
         TRANSIENT_STAKE_SEED_PREFIX,
     },
-    borsh::{BorshDeserialize, BorshSerialize},
-    mpl_token_metadata::{
-        instruction::{create_metadata_accounts_v3, update_metadata_accounts_v2},
-        pda::find_metadata_account,
-        state::DataV2,
-    },
+    borsh::BorshDeserialize,
     num_traits::FromPrimitive,
-    solana_program::{
+    domichain_program::{
         account_info::{next_account_info, AccountInfo},
         borsh::try_from_slice_unchecked,
         clock::{Clock, Epoch},
@@ -161,10 +162,10 @@ fn check_stake_program(program_id: &Pubkey) -> Result<(), ProgramError> {
 
 /// Check mpl metadata program
 fn check_mpl_metadata_program(program_id: &Pubkey) -> Result<(), ProgramError> {
-    if *program_id != mpl_token_metadata::id() {
+    if *program_id != inline_mpl_token_metadata::id() {
         msg!(
             "Expected mpl metadata program {}, received {}",
-            mpl_token_metadata::id(),
+            inline_mpl_token_metadata::id(),
             program_id
         );
         Err(ProgramError::IncorrectProgramId)
@@ -336,20 +337,19 @@ fn check_transient_stake_account(
 }
 
 /// Create a stake account on a PDA without transferring lamports
-fn create_stake_account<'a>(
-    stake_account_info: AccountInfo<'a>,
+fn create_stake_account(
+    stake_account_info: AccountInfo<'_>,
     stake_account_signer_seeds: &[&[u8]],
-    system_program_info: AccountInfo<'a>,
     stake_space: usize,
 ) -> Result<(), ProgramError> {
     invoke_signed(
         &system_instruction::allocate(stake_account_info.key, stake_space as u64),
-        &[stake_account_info.clone(), system_program_info.clone()],
+        &[stake_account_info.clone()],
         &[stake_account_signer_seeds],
     )?;
     invoke_signed(
         &system_instruction::assign(stake_account_info.key, &stake::program::id()),
-        &[stake_account_info, system_program_info],
+        &[stake_account_info],
         &[stake_account_signer_seeds],
     )
 }
@@ -446,7 +446,6 @@ impl Processor {
         destination_account: AccountInfo<'a>,
         clock: AccountInfo<'a>,
         stake_history: AccountInfo<'a>,
-        stake_program_info: AccountInfo<'a>,
     ) -> Result<(), ProgramError> {
         let authority_signature_seeds = [stake_pool.as_ref(), authority_type, &[bump_seed]];
         let signers = &[&authority_signature_seeds[..]];
@@ -462,7 +461,6 @@ impl Processor {
                 clock,
                 stake_history,
                 authority,
-                stake_program_info,
             ],
             signers,
         )
@@ -474,7 +472,6 @@ impl Processor {
         stake_authority: AccountInfo<'a>,
         new_stake_authority: &Pubkey,
         clock: AccountInfo<'a>,
-        stake_program_info: AccountInfo<'a>,
     ) -> Result<(), ProgramError> {
         let authorize_instruction = stake::instruction::authorize(
             stake_account.key,
@@ -490,7 +487,6 @@ impl Processor {
                 stake_account.clone(),
                 clock.clone(),
                 stake_authority.clone(),
-                stake_program_info.clone(),
             ],
         )?;
 
@@ -504,7 +500,7 @@ impl Processor {
 
         invoke(
             &authorize_instruction,
-            &[stake_account, clock, stake_authority, stake_program_info],
+            &[stake_account, clock, stake_authority],
         )
     }
 
@@ -518,7 +514,6 @@ impl Processor {
         bump_seed: u8,
         new_stake_authority: &Pubkey,
         clock: AccountInfo<'a>,
-        stake_program_info: AccountInfo<'a>,
     ) -> Result<(), ProgramError> {
         let authority_signature_seeds = [stake_pool.as_ref(), authority_type, &[bump_seed]];
         let signers = &[&authority_signature_seeds[..]];
@@ -537,7 +532,6 @@ impl Processor {
                 stake_account.clone(),
                 clock.clone(),
                 stake_authority.clone(),
-                stake_program_info.clone(),
             ],
             signers,
         )?;
@@ -551,7 +545,7 @@ impl Processor {
         );
         invoke_signed(
             &authorize_instruction,
-            &[stake_account, clock, stake_authority, stake_program_info],
+            &[stake_account, clock, stake_authority],
             signers,
         )
     }
@@ -567,7 +561,6 @@ impl Processor {
         destination_account: AccountInfo<'a>,
         clock: AccountInfo<'a>,
         stake_history: AccountInfo<'a>,
-        stake_program_info: AccountInfo<'a>,
         lamports: u64,
     ) -> Result<(), ProgramError> {
         let authority_signature_seeds = [stake_pool.as_ref(), authority_type, &[bump_seed]];
@@ -590,7 +583,6 @@ impl Processor {
                 clock,
                 stake_history,
                 authority,
-                stake_program_info,
             ],
             signers,
         )
@@ -649,7 +641,7 @@ impl Processor {
             amount,
         )?;
 
-        invoke(&ix, &[burn_account, mint, authority, token_program])
+        invoke(&ix, &[burn_account, mint, authority])
     }
 
     /// Issue a spl_token `MintTo` instruction.
@@ -676,7 +668,7 @@ impl Processor {
             amount,
         )?;
 
-        invoke_signed(&ix, &[mint, destination, authority, token_program], signers)
+        invoke_signed(&ix, &[mint, destination, authority], signers)
     }
 
     /// Issue a spl_token `Transfer` instruction.
@@ -700,17 +692,16 @@ impl Processor {
             amount,
             decimals,
         )?;
-        invoke(&ix, &[source, mint, destination, authority, token_program])
+        invoke(&ix, &[source, mint, destination, authority])
     }
 
     fn sol_transfer<'a>(
         source: AccountInfo<'a>,
         destination: AccountInfo<'a>,
-        system_program: AccountInfo<'a>,
         amount: u64,
     ) -> Result<(), ProgramError> {
-        let ix = solana_program::system_instruction::transfer(source.key, destination.key, amount);
-        invoke(&ix, &[source, destination, system_program])
+        let ix = domichain_program::system_instruction::transfer(source.key, destination.key, amount);
+        invoke(&ix, &[source, destination])
     }
 
     /// Processes `Initialize` instruction.
@@ -911,7 +902,10 @@ impl Processor {
             )?;
         }
 
-        validator_list.serialize(&mut *validator_list_info.data.borrow_mut())?;
+        borsh::to_writer(
+            &mut validator_list_info.data.borrow_mut()[..],
+            &validator_list,
+        )?;
 
         stake_pool.account_type = AccountType::StakePool;
         stake_pool.manager = *manager_info.key;
@@ -942,8 +936,7 @@ impl Processor {
         stake_pool.last_epoch_pool_token_supply = 0;
         stake_pool.last_epoch_total_lamports = 0;
 
-        stake_pool
-            .serialize(&mut *stake_pool_info.data.borrow_mut())
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)
             .map_err(|e| e.into())
     }
 
@@ -1058,12 +1051,7 @@ impl Processor {
         }
 
         // Create new stake account
-        create_stake_account(
-            stake_info.clone(),
-            stake_account_signer_seeds,
-            system_program_info.clone(),
-            stake_space,
-        )?;
+        create_stake_account(stake_info.clone(), stake_account_signer_seeds, stake_space)?;
         // split into validator stake account
         Self::stake_split(
             stake_pool_info.key,
@@ -1231,7 +1219,7 @@ impl Processor {
         if stake_pool.preferred_withdraw_validator_vote_address == Some(vote_account_address) {
             stake_pool.preferred_withdraw_validator_vote_address = None;
         }
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         Ok(())
     }
@@ -1388,7 +1376,6 @@ impl Processor {
                 create_stake_account(
                     ephemeral_stake_account_info.clone(),
                     ephemeral_stake_account_signer_seeds,
-                    system_program_info.clone(),
                     stake_space,
                 )?;
 
@@ -1440,7 +1427,6 @@ impl Processor {
                 transient_stake_account_info.clone(),
                 clock_info.clone(),
                 stake_history_info.clone(),
-                stake_program_info.clone(),
             )?;
         } else {
             let transient_stake_account_signer_seeds: &[&[_]] = &[
@@ -1454,7 +1440,6 @@ impl Processor {
             create_stake_account(
                 transient_stake_account_info.clone(),
                 transient_stake_account_signer_seeds,
-                system_program_info.clone(),
                 stake_space,
             )?;
 
@@ -1666,7 +1651,6 @@ impl Processor {
                 create_stake_account(
                     ephemeral_stake_account_info.clone(),
                     ephemeral_stake_account_signer_seeds,
-                    system_program_info.clone(),
                     stake_space,
                 )?;
 
@@ -1720,7 +1704,6 @@ impl Processor {
                 transient_stake_account_info.clone(),
                 clock_info.clone(),
                 stake_history_info.clone(),
-                stake_program_info.clone(),
             )?;
         } else {
             // no transient stake, split
@@ -1735,7 +1718,6 @@ impl Processor {
             create_stake_account(
                 transient_stake_account_info.clone(),
                 transient_stake_account_signer_seeds,
-                system_program_info.clone(),
                 stake_space,
             )?;
 
@@ -1947,7 +1929,6 @@ impl Processor {
             create_stake_account(
                 source_transient_stake_account_info.clone(),
                 source_transient_stake_account_signer_seeds,
-                system_program_info.clone(),
                 stake_space,
             )?;
 
@@ -1979,7 +1960,6 @@ impl Processor {
             create_stake_account(
                 ephemeral_stake_account_info.clone(),
                 ephemeral_stake_account_signer_seeds,
-                system_program_info.clone(),
                 stake_space,
             )?;
             Self::stake_redelegate(
@@ -2063,7 +2043,6 @@ impl Processor {
                     destination_transient_stake_account_info.clone(),
                     clock_info.clone(),
                     stake_history_info.clone(),
-                    stake_program_info.clone(),
                 )?;
             } else {
                 // otherwise, create the new account and split into it
@@ -2084,7 +2063,6 @@ impl Processor {
                 create_stake_account(
                     destination_transient_stake_account_info.clone(),
                     destination_transient_stake_account_signer_seeds,
-                    system_program_info.clone(),
                     stake_space,
                 )?;
                 Self::stake_split(
@@ -2161,7 +2139,7 @@ impl Processor {
                 stake_pool.preferred_withdraw_validator_vote_address = vote_account_address
             }
         };
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
         Ok(())
     }
 
@@ -2292,7 +2270,6 @@ impl Processor {
                                 reserve_stake_info.clone(),
                                 clock_info.clone(),
                                 stake_history_info.clone(),
-                                stake_program_info.clone(),
                             )?;
                             validator_stake_record.status.remove_transient_stake();
                         }
@@ -2317,7 +2294,6 @@ impl Processor {
                                 reserve_stake_info.clone(),
                                 clock_info.clone(),
                                 stake_history_info.clone(),
-                                stake_program_info.clone(),
                             )?;
                             validator_stake_record.status.remove_transient_stake();
                         } else if stake.delegation.activation_epoch < clock.epoch {
@@ -2334,7 +2310,6 @@ impl Processor {
                                         validator_stake_info.clone(),
                                         clock_info.clone(),
                                         stake_history_info.clone(),
-                                        stake_program_info.clone(),
                                     )?;
                                 } else {
                                     msg!("Stake activating or just active, not ready to merge");
@@ -2385,7 +2360,6 @@ impl Processor {
                             reserve_stake_info.clone(),
                             clock_info.clone(),
                             stake_history_info.clone(),
-                            stake_program_info.clone(),
                             additional_lamports,
                         )?;
                     }
@@ -2413,7 +2387,6 @@ impl Processor {
                                     reserve_stake_info.clone(),
                                     clock_info.clone(),
                                     stake_history_info.clone(),
-                                    stake_program_info.clone(),
                                 )?;
                                 validator_stake_record.status.remove_validator_stake();
                             }
@@ -2443,7 +2416,6 @@ impl Processor {
                         reserve_stake_info.clone(),
                         clock_info.clone(),
                         stake_history_info.clone(),
-                        stake_program_info.clone(),
                     )?;
                     validator_stake_record.status.remove_validator_stake();
                 }
@@ -2580,7 +2552,7 @@ impl Processor {
         let pool_mint = StateWithExtensions::<Mint>::unpack(&pool_mint_data)?;
         stake_pool.pool_token_supply = pool_mint.base.supply;
 
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         Ok(())
     }
@@ -2610,7 +2582,7 @@ impl Processor {
             return Err(StakePoolError::InvalidState.into());
         }
 
-        validator_list.retain::<ValidatorStakeInfo>(ValidatorStakeInfo::is_not_removed)?;
+        validator_list.retain::<ValidatorStakeInfo, _>(ValidatorStakeInfo::is_not_removed)?;
 
         Ok(())
     }
@@ -2726,7 +2698,6 @@ impl Processor {
                 deposit_bump_seed,
                 withdraw_authority_info.key,
                 clock_info.clone(),
-                stake_program_info.clone(),
             )?;
         } else {
             Self::stake_authorize(
@@ -2734,7 +2705,6 @@ impl Processor {
                 stake_deposit_authority_info.clone(),
                 withdraw_authority_info.key,
                 clock_info.clone(),
-                stake_program_info.clone(),
             )?;
         }
 
@@ -2747,7 +2717,6 @@ impl Processor {
             validator_stake_account_info.clone(),
             clock_info.clone(),
             stake_history_info.clone(),
-            stake_program_info.clone(),
         )?;
 
         let (_, post_validator_stake) = get_stake_state(validator_stake_account_info)?;
@@ -2862,7 +2831,6 @@ impl Processor {
                 reserve_stake_account_info.clone(),
                 clock_info.clone(),
                 stake_history_info.clone(),
-                stake_program_info.clone(),
                 sol_deposit_lamports,
             )?;
         }
@@ -2877,7 +2845,7 @@ impl Processor {
             .total_lamports
             .checked_add(total_deposit_lamports)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         validator_stake_info.active_stake_lamports = validator_stake_account_info.lamports();
 
@@ -2979,7 +2947,6 @@ impl Processor {
         Self::sol_transfer(
             from_user_lamports_info.clone(),
             reserve_stake_account_info.clone(),
-            system_program_info.clone(),
             deposit_lamports,
         )?;
 
@@ -3028,7 +2995,7 @@ impl Processor {
             .total_lamports
             .checked_add(deposit_lamports)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         Ok(())
     }
@@ -3286,7 +3253,6 @@ impl Processor {
             stake_pool.stake_withdraw_bump_seed,
             user_stake_authority_info.key,
             clock_info.clone(),
-            stake_program_info.clone(),
         )?;
 
         if pool_tokens_fee > 0 {
@@ -3309,7 +3275,7 @@ impl Processor {
             .total_lamports
             .checked_sub(withdraw_lamports)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         if let Some((validator_list_item, withdraw_source)) = validator_list_item_info {
             match withdraw_source {
@@ -3476,7 +3442,6 @@ impl Processor {
             destination_lamports_info.clone(),
             clock_info.clone(),
             stake_history_info.clone(),
-            stake_program_info.clone(),
             withdraw_lamports,
         )?;
 
@@ -3488,7 +3453,7 @@ impl Processor {
             .total_lamports
             .checked_sub(withdraw_lamports)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
 
         Ok(())
     }
@@ -3548,13 +3513,6 @@ impl Processor {
             name,
             symbol,
             uri,
-            None,
-            0,
-            true,
-            true,
-            None,
-            None,
-            None,
         );
 
         let (_, stake_withdraw_bump_seed) =
@@ -3575,7 +3533,6 @@ impl Processor {
                 payer_info.clone(),
                 withdraw_authority_info.clone(),
                 system_program_info.clone(),
-                mpl_token_metadata_program_info.clone(),
             ],
             &[token_mint_authority_signer_seeds],
         )?;
@@ -3648,11 +3605,7 @@ impl Processor {
 
         invoke_signed(
             &update_metadata_accounts_instruction,
-            &[
-                metadata_info.clone(),
-                withdraw_authority_info.clone(),
-                mpl_token_metadata_program_info.clone(),
-            ],
+            &[metadata_info.clone(), withdraw_authority_info.clone()],
             &[token_mint_authority_signer_seeds],
         )?;
 
@@ -3685,7 +3638,7 @@ impl Processor {
 
         stake_pool.manager = *new_manager_info.key;
         stake_pool.manager_fee_account = *new_manager_fee_info.key;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
         Ok(())
     }
 
@@ -3714,7 +3667,7 @@ impl Processor {
 
         fee.check_too_high()?;
         stake_pool.update_fee(&fee)?;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
         Ok(())
     }
 
@@ -3738,7 +3691,7 @@ impl Processor {
             return Err(StakePoolError::SignatureMissing.into());
         }
         stake_pool.staker = *new_staker_info.key;
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
         Ok(())
     }
 
@@ -3772,7 +3725,7 @@ impl Processor {
             FundingType::SolDeposit => stake_pool.sol_deposit_authority = new_authority,
             FundingType::SolWithdraw => stake_pool.sol_withdraw_authority = new_authority,
         }
-        stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
+        borsh::to_writer(&mut stake_pool_info.data.borrow_mut()[..], &stake_pool)?;
         Ok(())
     }
 

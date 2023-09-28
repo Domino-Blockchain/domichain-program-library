@@ -11,12 +11,12 @@ edition = "2021"
 test-sbf = []
 
 [dependencies]
-arrayref = "0.3.6"
-solana-program = "=1.14.12"
+arrayref = "0.3.7"
+domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
 
 [dev-dependencies]
-solana-program-test = "=1.14.12"
-solana-sdk = "=1.14.12"
+solana-program-test = "=1.16.3"
+solana-sdk = "=1.16.3"
 
 [lib]
 crate-type = ["cdylib", "lib"]

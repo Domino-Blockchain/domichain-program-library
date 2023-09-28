@@ -1,6 +1,6 @@
 #![cfg(feature = "test-sbf")]
 
-use solana_program::program_error::ProgramError;
+use domichain_program::program_error::ProgramError;
 use solana_program_test::*;
 
 mod program_test;

@@ -1,4 +1,4 @@
-use solana_program::program_option::COption;
+use domichain_program::program_option::COption;
 use solana_program_test::*;
 use solana_sdk::{
     commitment_config::CommitmentLevel,
@@ -25,7 +25,7 @@ async fn process_transaction(
     client: &mut BanksClient,
     instructions: Vec<Instruction>,
     signers: Vec<&Keypair>,
-) -> anyhow::Result<Signature> {
+) -> Result<Signature, BanksClientError> {
     let mut tx = Transaction::new_with_payer(&instructions, Some(&signers[0].pubkey()));
     tx.partial_sign(&signers, client.get_latest_blockhash().await?);
     let sig = tx.signatures[0];
@@ -40,7 +40,7 @@ async fn transfer(
     payer: &Keypair,
     receiver: &Pubkey,
     amount: u64,
-) -> anyhow::Result<Signature> {
+) -> Result<Signature, BanksClientError> {
     let ixs = vec![system_instruction::transfer(
         &payer.pubkey(),
         receiver,

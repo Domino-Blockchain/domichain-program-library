@@ -4,7 +4,7 @@
 mod helpers;
 
 use helpers::*;
-use solana_program::instruction::{AccountMeta, Instruction};
+use domichain_program::instruction::{AccountMeta, Instruction};
 use solana_program_test::*;
 use solana_sdk::{
     instruction::InstructionError,

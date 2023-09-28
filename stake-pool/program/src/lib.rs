@@ -4,6 +4,7 @@
 
 pub mod big_vec;
 pub mod error;
+pub mod inline_mpl_token_metadata;
 pub mod instruction;
 pub mod processor;
 pub mod state;
@@ -12,10 +13,10 @@ pub mod state;
 pub mod entrypoint;
 
 // Export current sdk types for downstream users building with a different sdk version
-pub use solana_program;
+pub use domichain_program;
 use {
     crate::state::Fee,
-    solana_program::{pubkey::Pubkey, stake::state::Meta},
+    domichain_program::{pubkey::Pubkey, stake::state::Meta},
     std::num::NonZeroU32,
 };
 
@@ -157,7 +158,7 @@ pub fn find_ephemeral_stake_program_address(
     )
 }
 
-solana_program::declare_id!("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
+domichain_program::declare_id!("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
 
 #[cfg(test)]
 mod test {

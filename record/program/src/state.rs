@@ -1,7 +1,7 @@
 //! Program state
 use {
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    solana_program::{program_pack::IsInitialized, pubkey::Pubkey},
+    domichain_program::{program_pack::IsInitialized, pubkey::Pubkey},
 };
 
 /// Struct wrapping data and providing metadata
@@ -47,7 +47,7 @@ impl IsInitialized for RecordData {
 #[cfg(test)]
 pub mod tests {
     use super::*;
-    use solana_program::program_error::ProgramError;
+    use domichain_program::program_error::ProgramError;
 
     /// Version for tests
     pub const TEST_VERSION: u8 = 1;

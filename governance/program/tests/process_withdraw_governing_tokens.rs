@@ -1,6 +1,6 @@
 #![cfg(feature = "test-sbf")]
 
-use solana_program::{instruction::AccountMeta, pubkey::Pubkey};
+use domichain_program::{instruction::AccountMeta, pubkey::Pubkey};
 use solana_program_test::*;
 
 mod program_test;

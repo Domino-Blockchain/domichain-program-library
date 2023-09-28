@@ -4,7 +4,7 @@ use crate::{
     math::{Decimal, Rate, TryAdd, TryDiv, TryMul, TrySub},
 };
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::{
+use domichain_program::{
     clock::Slot,
     entrypoint::ProgramResult,
     msg,
@@ -462,7 +462,7 @@ impl Pack for Obligation {
             let (deposit_reserve, deposited_amount, market_value) =
                 array_refs![deposits_flat, PUBKEY_BYTES, 8, 16];
             deposits.push(ObligationCollateral {
-                deposit_reserve: Pubkey::new(deposit_reserve),
+                deposit_reserve: Pubkey::new_from_array(*deposit_reserve),
                 deposited_amount: u64::from_le_bytes(*deposited_amount),
                 market_value: unpack_decimal(market_value),
             });
@@ -474,7 +474,7 @@ impl Pack for Obligation {
             let (borrow_reserve, cumulative_borrow_rate_wads, borrowed_amount_wads, market_value) =
                 array_refs![borrows_flat, PUBKEY_BYTES, 16, 16, 16];
             borrows.push(ObligationLiquidity {
-                borrow_reserve: Pubkey::new(borrow_reserve),
+                borrow_reserve: Pubkey::new_from_array(*borrow_reserve),
                 cumulative_borrow_rate_wads: unpack_decimal(cumulative_borrow_rate_wads),
                 borrowed_amount_wads: unpack_decimal(borrowed_amount_wads),
                 market_value: unpack_decimal(market_value),

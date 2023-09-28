@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     clock::Clock,
     entrypoint::ProgramResult,
@@ -56,10 +56,10 @@ pub fn process_flag_transaction_error(
     }
 
     proposal_data.state = ProposalState::ExecutingWithErrors;
-    proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;
+    proposal_data.serialize(&mut proposal_info.data.borrow_mut()[..])?;
 
     proposal_transaction_data.execution_status = TransactionExecutionStatus::Error;
-    proposal_transaction_data.serialize(&mut *proposal_transaction_info.data.borrow_mut())?;
+    proposal_transaction_data.serialize(&mut proposal_transaction_info.data.borrow_mut()[..])?;
 
     Ok(())
 }

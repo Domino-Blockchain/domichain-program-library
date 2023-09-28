@@ -2,7 +2,7 @@
 
 use std::cmp::Ordering;
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     pubkey::Pubkey,
@@ -83,7 +83,7 @@ pub fn process_insert_transaction(
     }
 
     option.transactions_count = option.transactions_count.checked_add(1).unwrap();
-    proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;
+    proposal_data.serialize(&mut proposal_info.data.borrow_mut()[..])?;
 
     let proposal_transaction_data = ProposalTransactionV2 {
         account_type: GovernanceAccountType::ProposalTransactionV2,

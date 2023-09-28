@@ -8,7 +8,7 @@ use {
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
     num_derive::FromPrimitive,
     num_traits::FromPrimitive,
-    solana_program::{
+    domichain_program::{
         account_info::AccountInfo,
         borsh::get_instance_packed_len,
         msg,
@@ -26,20 +26,15 @@ use {
 };
 
 /// Enum representing the account type managed by the program
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+#[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum AccountType {
     /// If the account has not been initialized, the enum will be 0
+    #[default]
     Uninitialized,
     /// Stake pool
     StakePool,
     /// Validator stake list
     ValidatorList,
-}
-
-impl Default for AccountType {
-    fn default() -> Self {
-        AccountType::Uninitialized
-    }
 }
 
 /// Initialized program details.
@@ -497,12 +492,14 @@ impl StakePool {
 
 /// Checks if the given extension is supported for the stake pool mint
 pub fn is_extension_supported_for_mint(extension_type: &ExtensionType) -> bool {
-    const SUPPORTED_EXTENSIONS: [ExtensionType; 5] = [
+    const SUPPORTED_EXTENSIONS: [ExtensionType; 7] = [
         ExtensionType::Uninitialized,
         ExtensionType::TransferFeeConfig,
         ExtensionType::ConfidentialTransferMint,
         ExtensionType::DefaultAccountState, // ok, but a freeze authority is not
         ExtensionType::InterestBearingConfig,
+        ExtensionType::MetadataPointer,
+        ExtensionType::TokenMetadata,
     ];
     if !SUPPORTED_EXTENSIONS.contains(extension_type) {
         msg!(
@@ -701,7 +698,7 @@ impl Pack for ValidatorStakeInfo {
         let mut data = data;
         // Removing this unwrap would require changing from `Pack` to some other
         // trait or `bytemuck`, so it stays in for now
-        self.serialize(&mut data).unwrap();
+        borsh::to_writer(&mut data, self).unwrap();
     }
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         let unpacked = Self::try_from_slice(src)?;
@@ -978,7 +975,7 @@ mod test {
     use {
         super::*,
         proptest::prelude::*,
-        solana_program::{
+        domichain_program::{
             borsh::{get_instance_packed_len, get_packed_len, try_from_slice_unchecked},
             clock::{DEFAULT_SLOTS_PER_EPOCH, DEFAULT_S_PER_SLOT, SECONDS_PER_DAY},
             native_token::LAMPORTS_PER_SOL,
@@ -1042,8 +1039,8 @@ mod test {
         let size = get_instance_packed_len(&ValidatorList::new(max_validators)).unwrap();
         let stake_list = uninitialized_validator_list();
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
 
@@ -1056,16 +1053,16 @@ mod test {
             validators: vec![],
         };
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
 
         // With several accounts
         let stake_list = test_validator_list(max_validators);
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
     }

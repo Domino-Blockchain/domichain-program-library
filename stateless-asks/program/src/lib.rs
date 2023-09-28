@@ -7,4 +7,4 @@ pub mod validation_utils;
 mod entrypoint;
 
 // Export current sdk types for downstream users building with a different sdk version
-pub use solana_program;
+pub use domichain_program;

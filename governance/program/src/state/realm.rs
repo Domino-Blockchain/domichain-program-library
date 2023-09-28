@@ -4,7 +4,7 @@ use borsh::maybestd::io::Write;
 use std::slice::Iter;
 
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     program_error::ProgramError,
     program_pack::IsInitialized,
@@ -191,7 +191,8 @@ pub fn is_realm_account_type(account_type: &GovernanceAccountType) -> bool {
         | GovernanceAccountType::VoteRecordV1
         | GovernanceAccountType::VoteRecordV2
         | GovernanceAccountType::ProgramMetadata
-        | GovernanceAccountType::ProposalDeposit => false,
+        | GovernanceAccountType::ProposalDeposit
+        | GovernanceAccountType::RequiredSignatory => false,
     }
 }
 
@@ -303,9 +304,9 @@ impl RealmV2 {
     }
 
     /// Serializes account into the target buffer
-    pub fn serialize<W: Write>(self, writer: &mut W) -> Result<(), ProgramError> {
+    pub fn serialize<W: Write>(self, writer: W) -> Result<(), ProgramError> {
         if self.account_type == GovernanceAccountType::RealmV2 {
-            BorshSerialize::serialize(&self, writer)?
+            borsh::to_writer(writer, &self)?
         } else if self.account_type == GovernanceAccountType::RealmV1 {
             // V1 account can't be resized and we have to translate it back to the original format
 
@@ -324,7 +325,7 @@ impl RealmV2 {
                 name: self.name,
             };
 
-            BorshSerialize::serialize(&realm_data_v1, writer)?;
+            borsh::to_writer(writer, &realm_data_v1)?
         }
 
         Ok(())
@@ -457,7 +458,7 @@ pub fn assert_valid_realm_config_args(
 mod test {
 
     use crate::instruction::GovernanceInstruction;
-    use solana_program::borsh::try_from_slice_unchecked;
+    use domichain_program::borsh::try_from_slice_unchecked;
 
     use super::*;
 
@@ -512,7 +513,7 @@ mod test {
             name: String,
 
             #[allow(dead_code)]
-            /// Realm config args     
+            /// Realm config args
             config_args: RealmConfigArgsV1,
         },
 

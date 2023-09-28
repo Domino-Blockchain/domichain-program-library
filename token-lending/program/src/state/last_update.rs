@@ -1,5 +1,5 @@
 use crate::error::LendingError;
-use solana_program::{clock::Slot, program_error::ProgramError};
+use domichain_program::{clock::Slot, program_error::ProgramError};
 use std::cmp::Ordering;
 
 /// Number of slots to consider stale after

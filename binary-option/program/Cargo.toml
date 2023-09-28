@@ -9,11 +9,11 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-solana-program = "1.14.12"
+domichain-program = { path = "/home/zotho/domichain_backporting/sdk/program" }
 thiserror = "1.0"
-spl-token = {version = "3.1.1", path = "../../token/program", features = ["no-entrypoint"]}
-arrayref = "0.3.6"
-borsh = "0.9"
+spl-token = {version = "4.0", path = "../../token/program", features = ["no-entrypoint"]}
+arrayref = "0.3.7"
+borsh = "0.10"
 uint = "0.9"
 
 [lib]

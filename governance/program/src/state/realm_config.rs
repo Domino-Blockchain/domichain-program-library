@@ -1,9 +1,9 @@
 //! RealmConfig account
 use std::slice::Iter;
 
-use solana_program::account_info::next_account_info;
+use domichain_program::account_info::next_account_info;
 
-use solana_program::{
+use domichain_program::{
     account_info::AccountInfo, program_error::ProgramError, program_pack::IsInitialized,
     pubkey::Pubkey,
 };

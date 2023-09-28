@@ -1,12 +1,12 @@
 #![cfg(feature = "test-sbf")]
 use std::str::FromStr;
 
-use solana_program::{instruction::Instruction, program_pack::Pack, pubkey::Pubkey};
+use domichain_program::{instruction::Instruction, program_pack::Pack, pubkey::Pubkey};
 use solana_program_test::{
     processor, tokio, ProgramTest, ProgramTestBanksClientExt, ProgramTestContext,
 };
 
-use solana_program::hash::hashv;
+use domichain_program::hash::hashv;
 use solana_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,

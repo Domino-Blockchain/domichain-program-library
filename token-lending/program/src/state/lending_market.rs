@@ -1,6 +1,6 @@
 use super::*;
 use arrayref::{array_mut_ref, array_ref, array_refs, mut_array_refs};
-use solana_program::{
+use domichain_program::{
     msg,
     program_error::ProgramError,
     program_pack::{IsInitialized, Pack, Sealed},

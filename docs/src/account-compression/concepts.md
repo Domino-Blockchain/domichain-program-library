@@ -10,7 +10,7 @@ To understand concurrent merkle trees we must first briefly understand merkle tr
 A merkle tree is a hash based data structure that encodes data into a tree.
 The tree has nodes that are hashes of it's children and each leaf node is a hash of the data.
 
-Each node has a 256 bit (32 byte) string represented by X<sub>i</sub> ∈ {0,1}^256 which is hashed using `H: {0, 1}^256 × {0, 1}^256 → {0, 1}^256`, meaning two child nodes with their 256 bit strings are hashed into one parent node with a 256 bit string. You can use can use any hash function that satisfies this property but we use SHA256.
+Each node has a 256 bit (32 byte) string represented by X<sub>i</sub> ∈ {0,1}^256 which is hashed using `H: {0, 1}^256 × {0, 1}^256 → {0, 1}^256`, meaning two child nodes with their 256 bit strings are hashed into one parent node with a 256 bit string. You can use any hash function that satisfies this property but we use SHA256.
 
 Important properties of merkle trees:
 - The tree must be a fully balanced binary tree
@@ -33,7 +33,7 @@ If you change X5 to X5' then you will have to recompute the root hash in the fol
 - X1' = H(X2',X3)
 
 ### Concurrent leaf replacement
-We know that there can be multiple concurrent requests to write to the same state, however when the root changes while the first write is happenning the second write will generate an invalid root, in other words everytime a root is modified all modifications in progress will be invalid.
+We know that there can be multiple concurrent requests to write to the same state, however when the root changes while the first write is happening the second write will generate an invalid root, in other words everytime a root is modified all modifications in progress will be invalid.
 ```txt
           X1'              X1''
         /    \           /    \

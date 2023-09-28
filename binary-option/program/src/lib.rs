@@ -8,6 +8,6 @@ pub mod state;
 pub mod system_utils;
 pub mod validation_utils;
 // Export current sdk types for downstream users building with a different sdk version
-pub use solana_program;
+pub use domichain_program;
 
-solana_program::declare_id!("betw959P4WToez4DkuXwNsJszqbpe3HuY56AcG5yevx");
+domichain_program::declare_id!("betw959P4WToez4DkuXwNsJszqbpe3HuY56AcG5yevx");

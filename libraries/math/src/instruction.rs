@@ -3,7 +3,7 @@
 use {
     crate::id,
     borsh::{BorshDeserialize, BorshSerialize},
-    solana_program::instruction::Instruction,
+    domichain_program::instruction::Instruction,
 };
 
 /// Instructions supported by the math program, used for testing instruction

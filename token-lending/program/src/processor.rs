@@ -13,7 +13,7 @@ use crate::{
     },
 };
 use num_traits::FromPrimitive;
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     decode_error::DecodeError,
     entrypoint::ProgramResult,
@@ -25,7 +25,7 @@ use solana_program::{
     pubkey::Pubkey,
     sysvar::{clock::Clock, rent::Rent, Sysvar},
 };
-use spl_token::solana_program::instruction::AccountMeta;
+use spl_token::domichain_program::instruction::AccountMeta;
 use spl_token::state::{Account, Mint};
 use std::convert::TryInto;
 

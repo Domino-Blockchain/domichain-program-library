@@ -1,6 +1,6 @@
 //! Program state processor
 
-use solana_program::{
+use domichain_program::{
     account_info::{next_account_info, AccountInfo},
     entrypoint::ProgramResult,
     pubkey::Pubkey,
@@ -42,10 +42,10 @@ pub fn process_remove_transaction(program_id: &Pubkey, accounts: &[AccountInfo])
 
     dispose_account(proposal_transaction_info, beneficiary_info)?;
 
-    let mut option = &mut proposal_data.options[proposal_transaction_data.option_index as usize];
+    let option = &mut proposal_data.options[proposal_transaction_data.option_index as usize];
     option.transactions_count = option.transactions_count.checked_sub(1).unwrap();
 
-    proposal_data.serialize(&mut *proposal_info.data.borrow_mut())?;
+    proposal_data.serialize(&mut proposal_info.data.borrow_mut()[..])?;
 
     Ok(())
 }

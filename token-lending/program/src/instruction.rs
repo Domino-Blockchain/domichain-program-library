@@ -4,7 +4,7 @@ use crate::{
     error::LendingError,
     state::{ReserveConfig, ReserveFees},
 };
-use solana_program::{
+use domichain_program::{
     instruction::{AccountMeta, Instruction},
     msg,
     program_error::ProgramError,
@@ -449,7 +449,7 @@ impl LendingInstruction {
             return Err(LendingError::InstructionUnpackError.into());
         }
         let (key, rest) = input.split_at(PUBKEY_BYTES);
-        let pk = Pubkey::new(key);
+        let pk = Pubkey::try_from(key).map_err(|_| LendingError::InstructionUnpackError)?;
         Ok((pk, rest))
     }
 

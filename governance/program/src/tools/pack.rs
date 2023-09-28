@@ -1,7 +1,7 @@
 //! General purpose packing utility functions
 
 use arrayref::array_refs;
-use solana_program::{program_error::ProgramError, program_option::COption, pubkey::Pubkey};
+use domichain_program::{program_error::ProgramError, program_option::COption, pubkey::Pubkey};
 
 /// Unpacks COption from a slice
 pub fn unpack_coption_pubkey(src: &[u8; 36]) -> Result<COption<Pubkey>, ProgramError> {

@@ -5,7 +5,7 @@ mod helpers;
 
 use {
     helpers::*,
-    solana_program::{instruction::InstructionError, pubkey::Pubkey, stake},
+    domichain_program::{instruction::InstructionError, pubkey::Pubkey, stake},
     solana_program_test::*,
     solana_sdk::{
         account::{Account, WritableAccount},
