@@ -1,0 +1,15 @@
+[package]
+name = "flash_loan_receiver"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+arrayref = "0.3.6"
+domichain-program = { path = "../../../domichain/sdk/program" }
+spl-token = { version = "3.5", path = "../../token/program", features=["no-entrypoint"] }
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
