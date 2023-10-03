@@ -1,10 +1,10 @@
-# Solana Program Library
+# domichain Program Library
 
-The Solana Program Library (SPL) is a collection of on-chain programs targeting
+The domichain Program Library (SPL) is a collection of on-chain programs targeting
 the [Sealevel parallel
 runtime](https://medium.com/solana-labs/sealevel-parallel-processing-thousands-of-smart-contracts-d814b378192).
-These programs are tested against Solana's implementation of Sealevel,
-solana-runtime, and some are deployed to Mainnet Beta.  As others implement
+These programs are tested against domichain's implementation of Sealevel,
+domichain-runtime, and some are deployed to Mainnet Beta.  As others implement
 Sealevel, we will graciously accept patches to ensure the programs here are
 portable across all implementations.
 
@@ -12,8 +12,8 @@ For more information see the [SPL documentation](https://spl.solana.com) and the
 
 ## Audits
 
-Only a subset of programs within the Solana Program Library repo are deployed to
-the Solana Mainnet Beta. Currently, this includes:
+Only a subset of programs within the domichain Program Library repo are deployed to
+the domichain Mainnet Beta. Currently, this includes:
 
 | Program | Last Audit Date | Version |
 | --- | --- | --- |
@@ -33,7 +33,7 @@ audited, so fork and deploy them at your own risk. Here is the full list of
 unaudited programs:
 
 * [binary-option](https://github.com/solana-labs/solana-program-library/tree/master/binary-option/program)
-* [binary-oracle-pair](https://github.com/solana-labs/solana-program-library/tree/master/binary-oracle-pair/program)
+* [binary-oracle-pair](https://github.com/domichain-labs/solana-program-library/tree/master/binary-oracle-pair/program)
 * [instruction-padding](https://github.com/solana-labs/solana-program-library/tree/master/instruction-padding/program)
 * [managed-token](https://github.com/solana-labs/solana-program-library/tree/master/managed-token/program)
 * [record](https://github.com/solana-labs/solana-program-library/tree/master/record/program)
@@ -52,12 +52,12 @@ all past and present program audits.
 
 | Package | Description | Version | Docs |
 | :-- | :-- | :--| :-- |
-| `spl-token` | ERC20-like token program on Solana | [![Crates.io](https://img.shields.io/crates/v/spl-token)](https://crates.io/crates/spl-token) | [![Docs.rs](https://docs.rs/spl-token/badge.svg)](https://docs.rs/spl-token) |
+| `spl-token` | ERC20-like token program on domichain | [![Crates.io](https://img.shields.io/crates/v/spl-token)](https://crates.io/crates/spl-token) | [![Docs.rs](https://docs.rs/spl-token/badge.svg)](https://docs.rs/spl-token) |
 | `spl-token-2022` | Token program compatible with `spl-token`, with extensions | [![Crates.io](https://img.shields.io/crates/v/spl-token-2022)](https://crates.io/crates/spl-token-2022) | [![Docs.rs](https://docs.rs/spl-token-2022/badge.svg)](https://docs.rs/spl-token-2022) |
 | `spl-associated-token-account` | Stateless protocol defining a canonical "associated" token account for a wallet | [![Crates.io](https://img.shields.io/crates/v/spl-associated-token-account)](https://crates.io/crates/spl-associated-token-account) | [![Docs.rs](https://docs.rs/spl-associated-token-account/badge.svg)](https://docs.rs/spl-associated-token-account) |
 | `spl-governance` | DAO program using tokens for voting | [![Crates.io](https://img.shields.io/crates/v/spl-governance)](https://crates.io/crates/spl-governance) | [![Docs.rs](https://docs.rs/spl-governance/badge.svg)](https://docs.rs/spl-governance) |
 | `spl-account-compression` | Program for managing compressed accounts stored in an off-chain merkle tree | [![Crates.io](https://img.shields.io/crates/v/spl-account-compression)](https://crates.io/crates/spl-account-compression) | [![Docs.rs](https://docs.rs/spl-account-compression/badge.svg)](https://docs.rs/spl-account-compression) |
-| `spl-feature-proposal` | Program using tokens to vote on enabling Solana network features | [![Crates.io](https://img.shields.io/crates/v/spl-feature-proposal)](https://crates.io/crates/spl-feature-proposal) | [![Docs.rs](https://docs.rs/spl-feature-proposal/badge.svg)](https://docs.rs/spl-feature-proposal) |
+| `spl-feature-proposal` | Program using tokens to vote on enabling domichain network features | [![Crates.io](https://img.shields.io/crates/v/spl-feature-proposal)](https://crates.io/crates/spl-feature-proposal) | [![Docs.rs](https://docs.rs/spl-feature-proposal/badge.svg)](https://docs.rs/spl-feature-proposal) |
 | `spl-noop` | Program that does nothing, used for logging instruction data | [![Crates.io](https://img.shields.io/crates/v/spl-noop)](https://crates.io/crates/spl-noop) | [![Docs.rs](https://docs.rs/spl-noop/badge.svg)](https://docs.rs/spl-noop) |
 | `spl-memo` | Program for logging signed memos on-chain | [![Crates.io](https://img.shields.io/crates/v/spl-memo)](https://crates.io/crates/spl-memo) | [![Docs.rs](https://docs.rs/spl-memo/badge.svg)](https://docs.rs/spl-memo) |
 | `spl-name-service` | Program for managing ownership of data on-chain | [![Crates.io](https://img.shields.io/crates/v/spl-name-service)](https://crates.io/crates/spl-name-service) | [![Docs.rs](https://docs.rs/spl-name-service/badge.svg)](https://docs.rs/spl-name-service) |
@@ -84,7 +84,7 @@ all past and present program audits.
 
 | Package | Description | Version | Docs |
 | :-- | :-- | :--| :-- |
-| `@solana/spl-token` | Bindings for the token, token-2022, and associated-token-account programs | [![npm](https://img.shields.io/npm/v/@solana/spl-token.svg)](https://www.npmjs.com/package/@solana/spl-token) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://solana-labs.github.io/solana-program-library/token/js) |
+| `@domichain/spl-token` | Bindings for the token, token-2022, and associated-token-account programs | [![npm](https://img.shields.io/npm/v/@solana/spl-token.svg)](https://www.npmjs.com/package/@solana/spl-token) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://solana-labs.github.io/solana-program-library/token/js) |
 | `@solana/spl-governance` | Bindings for the governance program | [![npm](https://img.shields.io/npm/v/@solana/spl-governance.svg)](https://www.npmjs.com/package/@solana/spl-governance) | N/A |
 | `@solana/spl-account-compression` | Bindings for the account-compression program | [![npm](https://img.shields.io/npm/v/@solana/spl-account-compression.svg)](https://www.npmjs.com/package/@solana/spl-account-compression) | [![Docs](https://img.shields.io/badge/docs-typedoc-blue)](https://solana-labs.github.io/solana-program-library/account-compression/sdk/docs) |
 | `@solana/spl-memo` | Bindings for the memo program | [![npm](https://img.shields.io/npm/v/@solana/spl-memo.svg)](https://www.npmjs.com/package/@solana/spl-memo) | N/A |
@@ -227,7 +227,7 @@ to test the build. Then run `cargo publish`.
 
 All claims, content, designs, algorithms, estimates, roadmaps,
 specifications, and performance measurements described in this project
-are done with the Solana Labs, Inc. (“SL”) best efforts. It is up to
+are done with the domichain Labs, Inc. (“SL”) best efforts. It is up to
 the reader to check and validate their accuracy and truthfulness.
 Furthermore nothing in this project constitutes a solicitation for
 investment.
@@ -235,7 +235,7 @@ investment.
 Any content produced by SL or developer resources that SL provides, are
 for educational and inspiration purposes only. SL does not encourage,
 induce or sanction the deployment, integration or use of any such
-applications (including the code comprising the Solana blockchain
+applications (including the code comprising the domichain blockchain
 protocol) in violation of applicable laws or regulations and hereby
 prohibits any such deployment, integration or use. This includes use of
 any such applications by the reader (a) in violation of export control
