@@ -1539,7 +1539,7 @@ checksum = "fea41bba32d969b513997752735605054bc0dfa92b4c56bf1189f2e174be7a10"
 
 [[package]]
 name = "domichain-frozen-abi"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "ahash 0.8.3",
  "blake3",
@@ -1570,7 +1570,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-frozen-abi-macro"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "proc-macro2 1.0.67",
  "quote 1.0.33",
@@ -1580,7 +1580,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-logger"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "env_logger",
  "lazy_static",
@@ -1589,7 +1589,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-program"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "ark-bn254",
  "ark-ec",
@@ -1641,7 +1641,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-sdk"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "assert_matches",
  "base64 0.21.4",
@@ -1692,7 +1692,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-sdk-macro"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "bs58",
  "proc-macro2 1.0.67",
@@ -1703,7 +1703,7 @@ dependencies = [
 
 [[package]]
 name = "domichain-zk-token-sdk"
-version = "1.16.1"
+version = "1.0.0"
 dependencies = [
  "aes-gcm-siv",
  "arrayref",

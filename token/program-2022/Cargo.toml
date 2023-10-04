@@ -23,8 +23,8 @@ bytemuck = { version = "1.13.0", features = ["derive"] }
 num-derive = "0.3"
 num-traits = "0.2"
 num_enum = "0.5.9"
-domichain-program = { path = "../../../domichain/sdk/program", version = "1.14.12" }
-domichain-zk-token-sdk = { path = "../../../domichain/zk-token-sdk", version = "1.14.12" }
+domichain-program = { path = "../../../domichain/sdk/program", version = "1.0.0" }
+domichain-zk-token-sdk = { path = "../../../domichain/zk-token-sdk", version = "1.0.0" }
 spl-memo = { version = "3.0.1", path = "../../memo/program", features = [ "no-entrypoint" ] }
 spl-token = { version = "3.5",  path = "../program", features = ["no-entrypoint"] }
 thiserror = "1.0"
