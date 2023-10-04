@@ -80,9 +80,9 @@ async function getConnection(): Promise<Connection> {
 
   const url = 'http://localhost:8899';
   connection = new Connection(url, 'recent');
-  const version = await connection.getVersion();
+  // const version = await connection.getVersion();
 
-  console.log('Connection to cluster established:', url, version);
+  console.log('Connection to cluster established:', url, 'version');
   return connection;
 }
 
