@@ -287,7 +287,7 @@ async fn command_create_accounts(
         .get_minimum_balance_for_rent_exemption(Account::get_packed_len())
         .await?;
 
-    let mut lamports_required = 0;
+    let mut satomis_required = 0;
 
     let token_addresses_with_seed = get_token_addresses_with_seed(&program_id, token, owner, n);
     let mut messages = vec![];
@@ -298,7 +298,7 @@ async fn command_create_accounts(
 
         for (account, (address, seed)) in accounts_chunk.iter().zip(address_chunk) {
             if account.is_none() {
-                lamports_required += minimum_balance_for_rent_exemption;
+                satomis_required += minimum_balance_for_rent_exemption;
                 messages.push(Message::new(
                     &[
                         system_instruction::create_account_with_seed(
@@ -318,7 +318,7 @@ async fn command_create_accounts(
         }
     }
 
-    send_messages(config, &messages, lamports_required, signers).await
+    send_messages(config, &messages, satomis_required, signers).await
 }
 
 async fn command_close_accounts(
@@ -429,7 +429,7 @@ async fn command_deposit_into_or_withdraw_from(
 async fn send_messages(
     config: &Config<'_>,
     messages: &[Message],
-    mut lamports_required: u64,
+    mut satomis_required: u64,
     signers: Vec<Arc<dyn Signer>>,
 ) -> Result<(), Error> {
     if messages.is_empty() {
@@ -440,16 +440,16 @@ async fn send_messages(
     let blockhash = config.rpc_client.get_latest_blockhash().await?;
     let mut message = messages[0].clone();
     message.recent_blockhash = blockhash;
-    lamports_required +=
+    satomis_required +=
         config.rpc_client.get_fee_for_message(&message).await? * messages.len() as u64;
 
     println!(
         "Sending {:?} messages for ~{}",
         messages.len(),
-        Sol(lamports_required)
+        Sol(satomis_required)
     );
 
-    crate::check_fee_payer_balance(config, lamports_required).await?;
+    crate::check_fee_payer_balance(config, satomis_required).await?;
 
     // TODO use async tpu client once it's available in 1.11
     let start = Instant::now();

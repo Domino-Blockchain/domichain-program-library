@@ -50,7 +50,7 @@ export async function addAssociatedTokenAccount(
     }
   } catch (err: any) {
     // INVALID_ACCOUNT_OWNER can be possible if the associatedAddress has
-    // already been received some lamports (= became system accounts).
+    // already been received some satomis (= became system accounts).
     // Assuming program derived addressing is safe, this is the only case
     // for the INVALID_ACCOUNT_OWNER in this code-path
     if (err.message === FAILED_TO_FIND_ACCOUNT || err.message === INVALID_ACCOUNT_OWNER) {

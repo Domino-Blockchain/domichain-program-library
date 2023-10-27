@@ -20,7 +20,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError, find_transient_stake_program_address, id, instruction, state,
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
     std::num::NonZeroU32,
 };
@@ -33,7 +33,7 @@ async fn setup() -> (ProgramTestContext, StakePoolAccounts, ValidatorStakeAccoun
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            10_000_000_000 + MINIMUM_RESERVE_LAMPORTS,
+            10_000_000_000 + MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -545,8 +545,8 @@ async fn success_with_deactivating_transient_stake() {
             status: state::StakeStatus::DeactivatingAll,
             vote_account_address: validator_stake.vote.pubkey(),
             last_update_epoch: 0,
-            active_stake_lamports: stake_rent + current_minimum_delegation,
-            transient_stake_lamports: TEST_STAKE_AMOUNT + stake_rent,
+            active_stake_satomis: stake_rent + current_minimum_delegation,
+            transient_stake_satomis: TEST_STAKE_AMOUNT + stake_rent,
             transient_seed_suffix: validator_stake.transient_stake_seed,
             unused: 0,
             validator_seed_suffix: validator_stake

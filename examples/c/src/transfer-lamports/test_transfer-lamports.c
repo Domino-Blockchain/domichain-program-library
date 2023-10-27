@@ -1,4 +1,4 @@
-#include "transfer-lamports.c"
+#include "transfer-satomis.c"
 #include <criterion/criterion.h>
 
 Test(transfer, sanity) {
@@ -9,7 +9,7 @@ Test(transfer, sanity) {
   SolPubkey source_key = {.x = {
                               2,
                           }};
-  uint64_t source_lamports = 5;
+  uint64_t source_satomis = 5;
   uint8_t source_data[] = {};
   SolPubkey destination_program_id = {.x = {
                                           3,
@@ -17,11 +17,11 @@ Test(transfer, sanity) {
   SolPubkey destination_key = {.x = {
                                    4,
                                }};
-  uint64_t destination_lamports = 0;
+  uint64_t destination_satomis = 0;
   uint8_t destination_data[] = {};
   SolAccountInfo accounts[] = {{
                                    &source_key,
-                                   &source_lamports,
+                                   &source_satomis,
                                    sizeof(source_data),
                                    source_data,
                                    &program_id,
@@ -32,7 +32,7 @@ Test(transfer, sanity) {
                                },
                                {
                                    &destination_key,
-                                   &destination_lamports,
+                                   &destination_satomis,
                                    sizeof(destination_data),
                                    destination_data,
                                    &program_id,
@@ -46,6 +46,6 @@ Test(transfer, sanity) {
                           &program_id};
 
   cr_assert(SUCCESS == transfer(&params));
-  cr_assert(0 == *accounts[0].lamports);
-  cr_assert(5 == *accounts[1].lamports);
+  cr_assert(0 == *accounts[0].satomis);
+  cr_assert(5 == *accounts[1].satomis);
 }

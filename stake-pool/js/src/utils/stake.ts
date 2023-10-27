@@ -9,7 +9,7 @@ import {
 import { findStakeProgramAddress, findTransientStakeProgramAddress } from './program-address';
 import BN from 'bn.js';
 
-import { lamportsToSol } from './math';
+import { satomisToSol } from './math';
 import { WithdrawAccount } from '../index';
 import {
   Fee,
@@ -30,7 +30,7 @@ export async function getValidatorListAccount(connection: Connection, pubkey: Pu
     account: {
       data: ValidatorListLayout.decode(account?.data) as ValidatorList,
       executable: account.executable,
-      lamports: account.lamports,
+      satomis: account.satomis,
       owner: account.owner,
     },
   };
@@ -40,7 +40,7 @@ export interface ValidatorAccount {
   type: 'preferred' | 'active' | 'transient' | 'reserve';
   voteAddress?: PublicKey | undefined;
   stakeAddress: PublicKey;
-  lamports: number;
+  satomis: number;
 }
 
 export async function prepareWithdrawAccounts(
@@ -67,7 +67,7 @@ export async function prepareWithdrawAccounts(
     type: 'preferred' | 'active' | 'transient' | 'reserve';
     voteAddress?: PublicKey | undefined;
     stakeAddress: PublicKey;
-    lamports: number;
+    satomis: number;
   }>;
 
   // Prepare accounts
@@ -82,7 +82,7 @@ export async function prepareWithdrawAccounts(
       stakePoolAddress,
     );
 
-    if (!validator.activeStakeLamports.isZero()) {
+    if (!validator.activeStakeSatomis.isZero()) {
       const isPreferred = stakePool?.preferredWithdrawValidatorVoteAddress?.equals(
         validator.voteAccountAddress,
       );
@@ -90,12 +90,12 @@ export async function prepareWithdrawAccounts(
         type: isPreferred ? 'preferred' : 'active',
         voteAddress: validator.voteAccountAddress,
         stakeAddress: stakeAccountAddress,
-        lamports: validator.activeStakeLamports.toNumber(),
+        satomis: validator.activeStakeSatomis.toNumber(),
       });
     }
 
-    const transientStakeLamports = validator.transientStakeLamports.toNumber() - minBalance;
-    if (transientStakeLamports > 0) {
+    const transientStakeSatomis = validator.transientStakeSatomis.toNumber() - minBalance;
+    if (transientStakeSatomis > 0) {
       const transientStakeAccountAddress = await findTransientStakeProgramAddress(
         STAKE_POOL_PROGRAM_ID,
         validator.voteAccountAddress,
@@ -106,21 +106,21 @@ export async function prepareWithdrawAccounts(
         type: 'transient',
         voteAddress: validator.voteAccountAddress,
         stakeAddress: transientStakeAccountAddress,
-        lamports: transientStakeLamports,
+        satomis: transientStakeSatomis,
       });
     }
   }
 
   // Sort from highest to lowest balance
-  accounts = accounts.sort(compareFn ? compareFn : (a, b) => b.lamports - a.lamports);
+  accounts = accounts.sort(compareFn ? compareFn : (a, b) => b.satomis - a.satomis);
 
   const reserveStake = await connection.getAccountInfo(stakePool.reserveStake);
-  const reserveStakeBalance = (reserveStake?.lamports ?? 0) - minBalanceForRentExemption - 1;
+  const reserveStakeBalance = (reserveStake?.satomis ?? 0) - minBalanceForRentExemption - 1;
   if (reserveStakeBalance > 0) {
     accounts.push({
       type: 'reserve',
       stakeAddress: stakePool.reserveStake,
-      lamports: reserveStakeBalance,
+      satomis: reserveStakeBalance,
     });
   }
 
@@ -137,12 +137,12 @@ export async function prepareWithdrawAccounts(
   for (const type of ['preferred', 'active', 'transient', 'reserve']) {
     const filteredAccounts = accounts.filter((a) => a.type == type);
 
-    for (const { stakeAddress, voteAddress, lamports } of filteredAccounts) {
-      if (lamports <= minBalance && type == 'transient') {
+    for (const { stakeAddress, voteAddress, satomis } of filteredAccounts) {
+      if (satomis <= minBalance && type == 'transient') {
         continue;
       }
 
-      let availableForWithdrawal = calcPoolTokensForDeposit(stakePool, lamports);
+      let availableForWithdrawal = calcPoolTokensForDeposit(stakePool, satomis);
 
       if (!skipFee && !inverseFee.numerator.isZero()) {
         availableForWithdrawal = divideBnToNumber(
@@ -173,7 +173,7 @@ export async function prepareWithdrawAccounts(
   // Not enough stake to withdraw the specified amount
   if (remainingAmount > 0) {
     throw new Error(
-      `No stake accounts found in this pool with enough balance to withdraw ${lamportsToSol(
+      `No stake accounts found in this pool with enough balance to withdraw ${satomisToSol(
         amount,
       )} pool tokens.`,
     );
@@ -183,22 +183,22 @@ export async function prepareWithdrawAccounts(
 }
 
 /**
- * Calculate the pool tokens that should be minted for a deposit of `stakeLamports`
+ * Calculate the pool tokens that should be minted for a deposit of `stakeSatomis`
  */
-export function calcPoolTokensForDeposit(stakePool: StakePool, stakeLamports: number): number {
-  if (stakePool.poolTokenSupply.isZero() || stakePool.totalLamports.isZero()) {
-    return stakeLamports;
+export function calcPoolTokensForDeposit(stakePool: StakePool, stakeSatomis: number): number {
+  if (stakePool.poolTokenSupply.isZero() || stakePool.totalSatomis.isZero()) {
+    return stakeSatomis;
   }
   return Math.floor(
-    divideBnToNumber(new BN(stakeLamports).mul(stakePool.poolTokenSupply), stakePool.totalLamports),
+    divideBnToNumber(new BN(stakeSatomis).mul(stakePool.poolTokenSupply), stakePool.totalSatomis),
   );
 }
 
 /**
- * Calculate lamports amount on withdrawal
+ * Calculate satomis amount on withdrawal
  */
-export function calcLamportsWithdrawAmount(stakePool: StakePool, poolTokens: number): number {
-  const numerator = new BN(poolTokens).mul(stakePool.totalLamports);
+export function calcSatomisWithdrawAmount(stakePool: StakePool, poolTokens: number): number {
+  const numerator = new BN(poolTokens).mul(stakePool.totalSatomis);
   const denominator = stakePool.poolTokenSupply;
   if (numerator.lt(denominator)) {
     return 0;
@@ -219,7 +219,7 @@ export function divideBnToNumber(numerator: BN, denominator: BN): number {
 export function newStakeAccount(
   feePayer: PublicKey,
   instructions: TransactionInstruction[],
-  lamports: number,
+  satomis: number,
 ): Keypair {
   // Account for tokens not specified, creating one
   const stakeReceiverKeypair = Keypair.generate();
@@ -230,7 +230,7 @@ export function newStakeAccount(
     SystemProgram.createAccount({
       fromPubkey: feePayer,
       newAccountPubkey: stakeReceiverKeypair.publicKey,
-      lamports,
+      satomis,
       space: StakeProgram.space,
       programId: StakeProgram.programId,
     }),

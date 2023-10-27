@@ -470,10 +470,10 @@ pub fn check_pda_rent_exempt<'a, 'b>(
     fix: bool,
 ) -> ProgramResult {
     let rent = Rent::get()?;
-    let cur_balance = target_account.try_lamports()?;
+    let cur_balance = target_account.try_satomis()?;
     let min_balance = rent.minimum_balance(data_size);
     if cur_balance < min_balance {
-        let signer_balance = signer_account.try_lamports()?;
+        let signer_balance = signer_account.try_satomis()?;
         let signer_min_balance = rent.minimum_balance(signer_account.data_len());
         if !fix
             || signer_balance <= signer_min_balance
@@ -491,7 +491,7 @@ pub fn check_pda_rent_exempt<'a, 'b>(
             &[signer_account.clone(), target_account.clone()],
             &[seeds],
         )?;
-        assert!(target_account.try_lamports()? >= min_balance);
+        assert!(target_account.try_satomis()? >= min_balance);
     }
     Ok(())
 }

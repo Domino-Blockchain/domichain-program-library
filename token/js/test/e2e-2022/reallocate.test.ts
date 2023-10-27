@@ -7,7 +7,7 @@ import { Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js
 
 import { ExtensionType, createAccount, createMint, createReallocateInstruction, getAccountLen } from '../../src';
 
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 const TEST_TOKEN_DECIMALS = 2;
 const EXTENSIONS = [ExtensionType.ImmutableOwner];
 describe('reallocate', () => {
@@ -18,7 +18,7 @@ describe('reallocate', () => {
     let mint: PublicKey;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
     });
     beforeEach(async () => {
         const mintAuthority = Keypair.generate();

@@ -5,7 +5,7 @@ from spl.token.constants import TOKEN_PROGRAM_ID
 
 from stake_pool.constants import \
     find_withdraw_authority_program_address, \
-    MINIMUM_RESERVE_LAMPORTS, \
+    MINIMUM_RESERVE_SATOMIS, \
     STAKE_POOL_PROGRAM_ID
 from stake_pool.state import StakePool, Fee
 
@@ -22,7 +22,7 @@ async def test_create_stake_pool(async_client, payer):
         STAKE_POOL_PROGRAM_ID, stake_pool.public_key)
 
     reserve_stake = Keypair()
-    await create_stake(async_client, payer, reserve_stake, pool_withdraw_authority, MINIMUM_RESERVE_LAMPORTS)
+    await create_stake(async_client, payer, reserve_stake, pool_withdraw_authority, MINIMUM_RESERVE_SATOMIS)
 
     pool_mint = Keypair()
     await create_mint(async_client, payer, pool_mint, pool_withdraw_authority)
@@ -51,7 +51,7 @@ async def test_create_stake_pool(async_client, payer):
     assert pool_data.pool_mint == pool_mint.public_key
     assert pool_data.manager_fee_account == manager_fee_account
     assert pool_data.token_program_id == TOKEN_PROGRAM_ID
-    assert pool_data.total_lamports == 0
+    assert pool_data.total_satomis == 0
     assert pool_data.pool_token_supply == 0
     assert pool_data.epoch_fee == fee
     assert pool_data.next_epoch_fee is None
@@ -68,4 +68,4 @@ async def test_create_stake_pool(async_client, payer):
     assert pool_data.sol_withdrawal_fee == fee
     assert pool_data.next_sol_withdrawal_fee is None
     assert pool_data.last_epoch_pool_token_supply == 0
-    assert pool_data.last_epoch_total_lamports == 0
+    assert pool_data.last_epoch_total_satomis == 0

@@ -18,10 +18,10 @@ impl Display for CliStakePools {
         for pool in &self.pools {
             writeln!(
                 f,
-                "Address: {}\tManager: {}\tLamports: {}\tPool tokens: {}\tValidators: {}",
+                "Address: {}\tManager: {}\tSatomis: {}\tPool tokens: {}\tValidators: {}",
                 pool.address,
                 pool.manager,
-                pool.total_lamports,
+                pool.total_satomis,
                 pool.pool_token_supply,
                 pool.validator_list.len()
             )?;
@@ -50,7 +50,7 @@ pub(crate) struct CliStakePool {
     pub pool_mint: String,
     pub manager_fee_account: String,
     pub token_program_id: String,
-    pub total_lamports: u64,
+    pub total_satomis: u64,
     pub pool_token_supply: u64,
     pub last_update_epoch: u64,
     pub lockup: CliStakePoolLockup,
@@ -69,7 +69,7 @@ pub(crate) struct CliStakePool {
     pub sol_withdrawal_fee: CliStakePoolFee,
     pub next_sol_withdrawal_fee: Option<CliStakePoolFee>,
     pub last_epoch_pool_token_supply: u64,
-    pub last_epoch_total_lamports: u64,
+    pub last_epoch_total_satomis: u64,
     pub details: Option<CliStakePoolDetails>,
 }
 
@@ -238,10 +238,10 @@ impl Display for CliStakePool {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct CliStakePoolDetails {
     pub reserve_stake_account_address: String,
-    pub reserve_stake_lamports: u64,
+    pub reserve_stake_satomis: u64,
     pub minimum_reserve_stake_balance: u64,
     pub stake_accounts: Vec<CliStakePoolStakeAccountInfo>,
-    pub total_lamports: u64,
+    pub total_satomis: u64,
     pub total_pool_tokens: f64,
     pub current_number_of_validators: u32,
     pub max_number_of_validators: u32,
@@ -254,21 +254,21 @@ impl Display for CliStakePoolDetails {
             f,
             "Reserve Account: {}\tAvailable Balance: {}",
             &self.reserve_stake_account_address,
-            Sol(self.reserve_stake_lamports - self.minimum_reserve_stake_balance),
+            Sol(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
         )?;
         for stake_account in &self.stake_accounts {
             writeln!(
                 f,
                 "Vote Account: {}\tBalance: {}\tLast Update Epoch: {}",
                 stake_account.vote_account_address,
-                Sol(stake_account.validator_lamports),
+                Sol(stake_account.validator_satomis),
                 stake_account.validator_last_update_epoch,
             )?;
         }
         writeln!(
             f,
             "Total Pool Stake: {} {}",
-            Sol(self.total_lamports),
+            Sol(self.total_satomis),
             if self.update_required {
                 " [UPDATE REQUIRED]"
             } else {
@@ -299,7 +299,7 @@ impl VerboseDisplay for CliStakePoolDetails {
             w,
             "Reserve Account: {}\tAvailable Balance: {}",
             &self.reserve_stake_account_address,
-            Sol(self.reserve_stake_lamports - self.minimum_reserve_stake_balance),
+            Sol(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
         )?;
         for stake_account in &self.stake_accounts {
             writeln!(
@@ -307,9 +307,9 @@ impl VerboseDisplay for CliStakePoolDetails {
                 "Vote Account: {}\tStake Account: {}\tActive Balance: {}\tTransient Stake Account: {}\tTransient Balance: {}\tLast Update Epoch: {}{}",
                 stake_account.vote_account_address,
                 stake_account.stake_account_address,
-                Sol(stake_account.validator_active_stake_lamports),
+                Sol(stake_account.validator_active_stake_satomis),
                 stake_account.validator_transient_stake_account_address,
-                Sol(stake_account.validator_transient_stake_lamports),
+                Sol(stake_account.validator_transient_stake_satomis),
                 stake_account.validator_last_update_epoch,
                 if stake_account.update_required {
                     " [UPDATE REQUIRED]"
@@ -321,7 +321,7 @@ impl VerboseDisplay for CliStakePoolDetails {
         writeln!(
             w,
             "Total Pool Stake: {} {}",
-            Sol(self.total_lamports),
+            Sol(self.total_satomis),
             if self.update_required {
                 " [UPDATE REQUIRED]"
             } else {
@@ -348,19 +348,19 @@ impl VerboseDisplay for CliStakePoolDetails {
 pub(crate) struct CliStakePoolStakeAccountInfo {
     pub vote_account_address: String,
     pub stake_account_address: String,
-    pub validator_active_stake_lamports: u64,
+    pub validator_active_stake_satomis: u64,
     pub validator_last_update_epoch: u64,
-    pub validator_lamports: u64,
+    pub validator_satomis: u64,
     pub validator_transient_stake_account_address: String,
-    pub validator_transient_stake_lamports: u64,
+    pub validator_transient_stake_satomis: u64,
     pub update_required: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct CliStakePoolValidator {
-    pub active_stake_lamports: u64,
-    pub transient_stake_lamports: u64,
+    pub active_stake_satomis: u64,
+    pub transient_stake_satomis: u64,
     pub last_update_epoch: u64,
     pub transient_seed_suffix: u64,
     pub unused: u32,
@@ -372,8 +372,8 @@ pub(crate) struct CliStakePoolValidator {
 impl From<ValidatorStakeInfo> for CliStakePoolValidator {
     fn from(v: ValidatorStakeInfo) -> Self {
         Self {
-            active_stake_lamports: v.active_stake_lamports,
-            transient_stake_lamports: v.transient_stake_lamports,
+            active_stake_satomis: v.active_stake_satomis,
+            transient_stake_satomis: v.transient_stake_satomis,
             last_update_epoch: v.last_update_epoch,
             transient_seed_suffix: v.transient_seed_suffix,
             unused: v.unused,
@@ -470,7 +470,7 @@ impl From<(Pubkey, StakePool, ValidatorList, Pubkey)> for CliStakePool {
             pool_mint: stake_pool.pool_mint.to_string(),
             manager_fee_account: stake_pool.manager_fee_account.to_string(),
             token_program_id: stake_pool.token_program_id.to_string(),
-            total_lamports: stake_pool.total_lamports,
+            total_satomis: stake_pool.total_satomis,
             pool_token_supply: stake_pool.pool_token_supply,
             last_update_epoch: stake_pool.last_update_epoch,
             lockup: CliStakePoolLockup::from(stake_pool.lockup),
@@ -496,7 +496,7 @@ impl From<(Pubkey, StakePool, ValidatorList, Pubkey)> for CliStakePool {
             next_sol_withdrawal_fee: Option::<Fee>::from(stake_pool.next_sol_withdrawal_fee)
                 .map(CliStakePoolFee::from),
             last_epoch_pool_token_supply: stake_pool.last_epoch_pool_token_supply,
-            last_epoch_total_lamports: stake_pool.last_epoch_total_lamports,
+            last_epoch_total_satomis: stake_pool.last_epoch_total_satomis,
             details: None,
         }
     }

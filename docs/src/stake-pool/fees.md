@@ -88,8 +88,8 @@ staker needs to send roughly 200 transactions to update the stake pool balances,
 followed by up to 1000 transactions to increase or decrease the stake on every
 validator.
 
-At the time of writing, the current transaction fee is 5,000 lamports per signature,
-so the minimum cost for these 1,200 transactions is 6,000,000 lamports, or 0.006 SOL.
+At the time of writing, the current transaction fee is 5,000 satomis per signature,
+so the minimum cost for these 1,200 transactions is 6,000,000 satomis, or 0.006 SOL.
 For the stake pool manager to break even, they must earn 0.006 SOL per epoch in
 fees.
 

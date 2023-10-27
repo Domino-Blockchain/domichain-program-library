@@ -12,7 +12,7 @@ use {
         signature::{Keypair, Signer},
         transaction::TransactionError,
     },
-    spl_stake_pool::{error::StakePoolError, state::StakePool, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error::StakePoolError, state::StakePool, MINIMUM_RESERVE_SATOMIS},
 };
 
 #[tokio::test]
@@ -26,7 +26,7 @@ async fn success_initialize() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -51,7 +51,7 @@ async fn success_deposit() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -73,7 +73,7 @@ async fn success_deposit() {
         withdrawer: user.pubkey(),
     };
 
-    let _stake_lamports = create_independent_stake_account(
+    let _stake_satomis = create_independent_stake_account(
         &mut banks_client,
         &payer,
         &recent_blockhash,
@@ -134,7 +134,7 @@ async fn fail_deposit_without_authority_signature() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -156,7 +156,7 @@ async fn fail_deposit_without_authority_signature() {
         withdrawer: user.pubkey(),
     };
 
-    let _stake_lamports = create_independent_stake_account(
+    let _stake_satomis = create_independent_stake_account(
         &mut banks_client,
         &payer,
         &recent_blockhash,

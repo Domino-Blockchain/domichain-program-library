@@ -25,8 +25,8 @@ pub enum PoolError {
     /// Invalid authority account provided
     #[error("Invalid authority account provided")]
     InvalidAuthorityAccount,
-    /// Lamport balance below rent-exempt threshold.
-    #[error("Lamport balance below rent-exempt threshold")]
+    /// Satomi balance below rent-exempt threshold.
+    #[error("Satomi balance below rent-exempt threshold")]
     NotRentExempt,
     /// Expected an SPL Token mint
     #[error("Input token mint account is not valid")]
@@ -79,7 +79,7 @@ impl PrintProgramError for PoolError {
                 msg!("Error: Failed to generate program account because of invalid data")
             }
             PoolError::InvalidAuthorityAccount => msg!("Error: Invalid authority account provided"),
-            PoolError::NotRentExempt => msg!("Error: Lamport balance below rent-exempt threshold"),
+            PoolError::NotRentExempt => msg!("Error: Satomi balance below rent-exempt threshold"),
             PoolError::InvalidTokenMint => msg!("Error: Input token mint account is not valid"),
             PoolError::InvalidAmount => msg!("Error: Amount should be more than zero"),
             PoolError::WrongDeciderAccount => msg!("Error: Wrong decider account was sent"),

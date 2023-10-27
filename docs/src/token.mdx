@@ -132,7 +132,7 @@ $ solana airdrop 1
   <TabItem value="jsx" label="JS">
 
 ```jsx
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 
 const payer = Keypair.generate();
 
@@ -143,7 +143,7 @@ const connection = new Connection(
 
 const airdropSignature = await connection.requestAirdrop(
   payer.publicKey,
-  LAMPORTS_PER_SOL,
+  SATOMIS_PER_SOL,
 );
 
 await connection.confirmTransaction(airdropSignature);
@@ -168,7 +168,7 @@ Signature: 47hsLFxWRCg8azaZZPSnQR8DNTRsGyPNfUK7jqyzgt7wf9eag3nSnewqoZrVZHKm8zt3B
 
 ```jsx
 import { createMint } from '@solana/spl-token';
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 
 const payer = Keypair.generate();
 const mintAuthority = Keypair.generate();
@@ -409,7 +409,7 @@ When you want to wrap SOL, you can send SOL to an associated token account
 on the native mint and call `syncNative`. `syncNative` updates the `amount`
 field on the token account to match the amount of wrapped SOL available.
 That SOL is only retrievable by closing the token account and choosing
-the desired address to send the token account's lamports.
+the desired address to send the token account's satomis.
 
 <Tabs className="unique-tabs" groupId="language-selection">
   <TabItem value="cli" label="CLI" default>
@@ -425,7 +425,7 @@ Signature: 4f4s5QVMKisLS6ihZcXXPbiBAzjnvkBcp2A7KKER7k9DwJ4qjbVsQBKv2rAyBumXC1gLn
 
 ```jsx
 import {NATIVE_MINT, createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createSyncNativeInstruction, getAccount} from "@solana/spl-token";
-import {clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL, SystemProgram, Transaction, sendAndConfirmTransaction} from "@solana/web3.js";
+import {clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL, SystemProgram, Transaction, sendAndConfirmTransaction} from "@solana/web3.js";
 
 (async () => {
 
@@ -435,7 +435,7 @@ const wallet = Keypair.generate();
 
 const airdropSignature = await connection.requestAirdrop(
   wallet.publicKey,
-  2 * LAMPORTS_PER_SOL,
+  2 * SATOMIS_PER_SOL,
 );
 
 await connection.confirmTransaction(airdropSignature);
@@ -464,7 +464,7 @@ const solTransferTransaction = new Transaction()
     SystemProgram.transfer({
         fromPubkey: wallet.publicKey,
         toPubkey: associatedTokenAccount,
-        lamports: LAMPORTS_PER_SOL
+        satomis: SATOMIS_PER_SOL
       }),
       createSyncNativeInstruction(
         associatedTokenAccount
@@ -475,7 +475,7 @@ await sendAndConfirmTransaction(connection, solTransferTransaction, [wallet]);
 
 const accountInfo = await getAccount(connection, associatedTokenAccount);
 
-console.log(`Native: ${accountInfo.isNative}, Lamports: ${accountInfo.amount}`);
+console.log(`Native: ${accountInfo.isNative}, Satomis: ${accountInfo.amount}`);
 
 })();
 ```
@@ -517,7 +517,7 @@ Balance after unwrapping 1 WSOL: 1999985000
 */
 ```
 
-*Note*: Some lamports were removed for transaction fees
+*Note*: Some satomis were removed for transaction fees
 
   </TabItem>
 </Tabs>
@@ -546,7 +546,7 @@ Signature: 5a3qbvoJQnTAxGPHCugibZTbSu7xuTgkxvF4EJupRjRXGgZZrnWFmKzfEzcqKF2ogCaF4
   <TabItem value="jsx" label="JS">
 
 ```jsx
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from '@solana/spl-token';
 
 (async () => {
@@ -555,7 +555,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from 
 
     // Generate a new wallet keypair and airdrop SOL
     const fromWallet = Keypair.generate();
-    const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, LAMPORTS_PER_SOL);
+    const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, SATOMIS_PER_SOL);
 
     // Wait for airdrop confirmation
     await connection.confirmTransaction(fromAirdropSignature);
@@ -687,7 +687,7 @@ CqAxDdBRnawzx9q4PYM3wrybLHBhDZ4P6BTV13WsRJYJ  AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe
 
 ```jsx
 import {getAccount, createMint, createAccount, mintTo, getOrCreateAssociatedTokenAccount, transfer} from "@solana/spl-token";
-import {clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL} from "@solana/web3.js";
+import {clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL} from "@solana/web3.js";
 
 (async () => {
 
@@ -698,7 +698,7 @@ import {clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL} from "@solana/web3
 
   const airdropSignature = await connection.requestAirdrop(
     wallet.publicKey,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
   );
 
   await connection.confirmTransaction(airdropSignature);
@@ -1264,7 +1264,7 @@ $ solana nonce-account Fjyud2VXixk2vCs4DkBpfpsq48d81rbEzh6deKt7WvPj
 Balance: 0.01 SOL
 Minimum Balance Required: 0.00144768 SOL
 Nonce blockhash: 6DPt2TfFBG7sR4Hqu16fbMXPj8ddHKkbU4Y3EEEWrC2E
-Fee: 5000 lamports per signature
+Fee: 5000 satomis per signature
 Authority: 5hbZyJ3KRuFvdy5QBxvE9KwK17hzkAUkQHZTxPbiWffE
 ```
 
@@ -1291,7 +1291,7 @@ const transaction = new Transaction()
     fromPubkey: onlineAccount.publicKey,
     noncePubkey: nonceAccount.publicKey,
     authorizedPubkey: onlineAccount.publicKey,
-    lamports: minimumAmount,
+    satomis: minimumAmount,
   }),
 );
 
@@ -1307,7 +1307,7 @@ console.log(nonceAccountData);
 NonceAccount {
   authorizedPubkey: '5hbZyJ3KRuFvdy5QBxvE9KwK17hzkAUkQHZTxPbiWffE'
   nonce: '6DPt2TfFBG7sR4Hqu16fbMXPj8ddHKkbU4Y3EEEWrC2E',
-  feeCalculator: { lamportsPerSignature: 5000 }
+  feeCalculator: { satomisPerSignature: 5000 }
 }
  */
 ```

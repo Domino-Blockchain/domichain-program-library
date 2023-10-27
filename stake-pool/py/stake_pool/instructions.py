@@ -167,8 +167,8 @@ class DecreaseValidatorStakeParams(NamedTuple):
     """`[]` Stake program."""
 
     # Params
-    lamports: int
-    """Amount of lamports to split into the transient stake account."""
+    satomis: int
+    """Amount of satomis to split into the transient stake account."""
     transient_stake_seed: int
     """Seed to used to create the transient stake account."""
 
@@ -209,8 +209,8 @@ class IncreaseValidatorStakeParams(NamedTuple):
     """`[]` Stake program."""
 
     # Params
-    lamports: int
-    """Amount of lamports to split into the transient stake account."""
+    satomis: int
+    """Amount of satomis to split into the transient stake account."""
     transient_stake_seed: int
     """Seed to used to create the transient stake account."""
 
@@ -425,7 +425,7 @@ class WithdrawSolParams(NamedTuple):
     reserve_stake: PublicKey
     """`[w]` Stake pool's reserve."""
     destination_system_account: PublicKey
-    """`[w]` Destination system account to receive lamports from the reserve."""
+    """`[w]` Destination system account to receive satomis from the reserve."""
     manager_fee_account: PublicKey
     """`[w]` Manager's pool token account to receive fee."""
     pool_mint: PublicKey
@@ -479,7 +479,7 @@ INITIALIZE_LAYOUT = Struct(
 )
 
 MOVE_STAKE_LAYOUT = Struct(
-    "lamports" / Int64ul,
+    "satomis" / Int64ul,
     "transient_stake_seed" / Int64ul,
 )
 
@@ -883,7 +883,7 @@ def increase_validator_stake(params: IncreaseValidatorStakeParams) -> Transactio
             dict(
                 instruction_type=InstructionType.INCREASE_VALIDATOR_STAKE,
                 args={
-                    'lamports': params.lamports,
+                    'satomis': params.satomis,
                     'transient_stake_seed': params.transient_stake_seed
                 }
             )
@@ -911,7 +911,7 @@ def decrease_validator_stake(params: DecreaseValidatorStakeParams) -> Transactio
             dict(
                 instruction_type=InstructionType.DECREASE_VALIDATOR_STAKE,
                 args={
-                    'lamports': params.lamports,
+                    'satomis': params.satomis,
                     'transient_stake_seed': params.transient_stake_seed
                 }
             )

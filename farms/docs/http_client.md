@@ -1440,7 +1440,7 @@ Returns a new Instruction for creating system account
 
 `wallet_address`: `Pubkey`  
 `new_address`: `Pubkey`  
-`lamports`: `u64`  
+`satomis`: `u64`  
 `space`: `u64`  
 `owner`: `Pubkey`
 
@@ -1459,7 +1459,7 @@ Returns a new Instruction for creating system account with seed
 `wallet_address`: `Pubkey`  
 `base_address`: `Pubkey`  
 `seed`: `String`  
-`lamports`: `u64`  
+`satomis`: `u64`  
 `space`: `u64`  
 `owner`: `Pubkey`
 
@@ -2663,7 +2663,7 @@ Creates a new system account
 
 `wallet_keypair`: `Keypair`  
 `new_account_keypair`: `Keypair`  
-`lamports`: `u64`  
+`satomis`: `u64`  
 `space`: `u64`  
 `owner`: `Pubkey`
 
@@ -2682,7 +2682,7 @@ Creates a new system account with seed
 `wallet_keypair`: `Keypair`  
 `base_address`: `Pubkey`  
 `seed`: `String`  
-`lamports`: `u64`  
+`satomis`: `u64`  
 `space`: `u64`  
 `owner`: `Pubkey`
 

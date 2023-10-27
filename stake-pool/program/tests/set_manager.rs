@@ -18,7 +18,7 @@ use {
         transaction::{Transaction, TransactionError},
         transport::TransportError,
     },
-    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_SATOMIS},
 };
 
 async fn setup() -> (
@@ -36,7 +36,7 @@ async fn setup() -> (
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -224,7 +224,7 @@ async fn test_set_manager_with_wrong_mint_for_pool_fee_acc() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

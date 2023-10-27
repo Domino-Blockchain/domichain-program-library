@@ -87,9 +87,9 @@ pub enum StakePoolError {
     /// Pool token supply is not zero on initialization
     #[error("NonZeroPoolTokenSupply")]
     NonZeroPoolTokenSupply,
-    /// The lamports in the validator stake account is not equal to the minimum
-    #[error("StakeLamportsNotEqualToMinimum")]
-    StakeLamportsNotEqualToMinimum,
+    /// The satomis in the validator stake account is not equal to the minimum
+    #[error("StakeSatomisNotEqualToMinimum")]
+    StakeSatomisNotEqualToMinimum,
     /// The provided deposit stake account is not delegated to the preferred deposit vote account
     #[error("IncorrectDepositVoteAddress")]
     IncorrectDepositVoteAddress,
@@ -104,10 +104,10 @@ pub enum StakePoolError {
     /// Proposed fee increase exceeds stipulated ratio
     #[error("FeeIncreaseTooHigh")]
     FeeIncreaseTooHigh,
-    /// Not enough pool tokens provided to withdraw stake with one lamport
+    /// Not enough pool tokens provided to withdraw stake with one satomi
     #[error("WithdrawalTooSmall")]
     WithdrawalTooSmall,
-    /// Not enough lamports provided for deposit to result in one pool token
+    /// Not enough satomis provided for deposit to result in one pool token
     #[error("DepositTooSmall")]
     DepositTooSmall,
 

@@ -100,7 +100,7 @@ async fn try_recover_nested(
         .await
         .unwrap()
         .unwrap();
-    let lamports = nested_account.lamports;
+    let satomis = nested_account.satomis;
 
     // mint to nested account
     let amount = 100;
@@ -157,7 +157,7 @@ async fn try_recover_nested(
             .await
             .unwrap()
             .unwrap();
-        assert_eq!(wallet_account.lamports, lamports);
+        assert_eq!(wallet_account.satomis, satomis);
     }
 }
 

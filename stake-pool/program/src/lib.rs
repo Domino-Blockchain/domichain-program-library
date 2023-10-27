@@ -31,14 +31,14 @@ const TRANSIENT_STAKE_SEED_PREFIX: &[u8] = b"transient";
 /// Seed for ephemeral stake account
 const EPHEMERAL_STAKE_SEED_PREFIX: &[u8] = b"ephemeral";
 
-/// Minimum amount of staked lamports required in a validator stake account to allow
+/// Minimum amount of staked satomis required in a validator stake account to allow
 /// for merges without a mismatch on credits observed
 pub const MINIMUM_ACTIVE_STAKE: u64 = 1_000_000;
 
-/// Minimum amount of lamports in the reserve
+/// Minimum amount of satomis in the reserve
 /// NOTE: This can be changed to 0 once the `stake_allow_zero_undelegated_amount`
 /// feature is enabled on all clusters
-pub const MINIMUM_RESERVE_LAMPORTS: u64 = 1;
+pub const MINIMUM_RESERVE_SATOMIS: u64 = 1;
 
 /// Maximum amount of validator stake accounts to update per
 /// `UpdateValidatorListBalance` instruction, based on compute limits
@@ -64,7 +64,7 @@ pub const MAX_TRANSIENT_STAKE_ACCOUNTS: usize = 10;
 /// Get the stake amount under consideration when calculating pool token
 /// conversions
 #[inline]
-pub fn minimum_stake_lamports(meta: &Meta, stake_program_minimum_delegation: u64) -> u64 {
+pub fn minimum_stake_satomis(meta: &Meta, stake_program_minimum_delegation: u64) -> u64 {
     meta.rent_exempt_reserve
         .saturating_add(minimum_delegation(stake_program_minimum_delegation))
 }
@@ -78,9 +78,9 @@ pub fn minimum_delegation(stake_program_minimum_delegation: u64) -> u64 {
 /// Get the stake amount under consideration when calculating pool token
 /// conversions
 #[inline]
-pub fn minimum_reserve_lamports(meta: &Meta) -> u64 {
+pub fn minimum_reserve_satomis(meta: &Meta) -> u64 {
     meta.rent_exempt_reserve
-        .saturating_add(MINIMUM_RESERVE_LAMPORTS)
+        .saturating_add(MINIMUM_RESERVE_SATOMIS)
 }
 
 /// Generates the deposit authority program address for the stake pool

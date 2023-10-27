@@ -123,12 +123,12 @@ export async function getMultipleAccounts(
     return addresses.map((address, i) => unpackAccount(address, infos[i], programId));
 }
 
-/** Get the minimum lamport balance for a base token account to be rent exempt
+/** Get the minimum satomi balance for a base token account to be rent exempt
  *
  * @param connection Connection to use
  * @param commitment Desired level of commitment for querying the state
  *
- * @return Amount of lamports required
+ * @return Amount of satomis required
  */
 export async function getMinimumBalanceForRentExemptAccount(
     connection: Connection,
@@ -137,12 +137,12 @@ export async function getMinimumBalanceForRentExemptAccount(
     return await getMinimumBalanceForRentExemptAccountWithExtensions(connection, [], commitment);
 }
 
-/** Get the minimum lamport balance for a rent-exempt token account with extensions
+/** Get the minimum satomi balance for a rent-exempt token account with extensions
  *
  * @param connection Connection to use
  * @param commitment Desired level of commitment for querying the state
  *
- * @return Amount of lamports required
+ * @return Amount of satomis required
  */
 export async function getMinimumBalanceForRentExemptAccountWithExtensions(
     connection: Connection,

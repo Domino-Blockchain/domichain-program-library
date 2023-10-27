@@ -1,4 +1,4 @@
-//! A program demonstrating the transfer of lamports
+//! A program demonstrating the transfer of satomis
 #![deny(missing_docs)]
 #![forbid(unsafe_code)]
 

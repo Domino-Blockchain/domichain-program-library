@@ -22,7 +22,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError, find_stake_program_address, id, instruction, state,
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
 };
 
@@ -48,7 +48,7 @@ async fn setup(
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS + num_validators * minimum_for_validator,
+            MINIMUM_RESERVE_SATOMIS + num_validators * minimum_for_validator,
         )
         .await
         .unwrap();
@@ -113,8 +113,8 @@ async fn success() {
                 status: state::StakeStatus::Active,
                 vote_account_address: validator_stake.vote.pubkey(),
                 last_update_epoch: 0,
-                active_stake_lamports: stake_rent + current_minimum_delegation,
-                transient_stake_lamports: 0,
+                active_stake_satomis: stake_rent + current_minimum_delegation,
+                transient_stake_satomis: 0,
                 transient_seed_suffix: 0,
                 unused: 0,
                 validator_seed_suffix: validator_stake
@@ -444,7 +444,7 @@ async fn fail_add_too_many_validator_stake_accounts() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS + 2 * minimum_for_validator,
+            MINIMUM_RESERVE_SATOMIS + 2 * minimum_for_validator,
         )
         .await
         .unwrap();
@@ -566,7 +566,7 @@ async fn fail_on_incorrectly_derived_stake_account() {
 }
 
 #[tokio::test]
-async fn success_with_lamports_in_account() {
+async fn success_with_satomis_in_account() {
     let (mut banks_client, payer, recent_blockhash, stake_pool_accounts, validator_stake) =
         setup(1).await;
 
@@ -610,7 +610,7 @@ async fn success_with_lamports_in_account() {
 }
 
 #[tokio::test]
-async fn fail_with_not_enough_reserve_lamports() {
+async fn fail_with_not_enough_reserve_satomis() {
     let (mut banks_client, payer, recent_blockhash, stake_pool_accounts, validator_stake) =
         setup(0).await;
 

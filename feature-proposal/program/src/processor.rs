@@ -264,7 +264,7 @@ pub fn process_instruction(
             )?;
 
             // Fully fund the feature id account so the `Tally` instruction will not require any
-            // lamports from the caller
+            // satomis from the caller
             msg!("Funding feature id account");
             invoke(
                 &system_instruction::transfer(

@@ -1,7 +1,7 @@
 import {
   Connection,
   Keypair,
-  LAMPORTS_PER_SOL,
+  SATOMIS_PER_SOL,
   PublicKey,
   sendAndConfirmTransaction,
   Transaction,
@@ -33,7 +33,7 @@ describe('Name Service Program', async () => {
   before(async () => {
     const airdropSignature = await connection.requestAirdrop(
       payer.publicKey,
-      LAMPORTS_PER_SOL
+      SATOMIS_PER_SOL
     );
     await connection.confirmTransaction({
       signature: airdropSignature,
@@ -44,7 +44,7 @@ describe('Name Service Program', async () => {
   beforeEach(async () => {
     name = Math.random().toString() + '.sol';
     nameKey = await getNameKey(name);
-    const lamports = await connection.getMinimumBalanceForRentExemption(
+    const satomis = await connection.getMinimumBalanceForRentExemption(
       space + NameRegistryState.HEADER_LEN
     );
     const inst = await createNameRegistry(
@@ -53,7 +53,7 @@ describe('Name Service Program', async () => {
       space,
       payer.publicKey,
       owner.publicKey,
-      lamports
+      satomis
     );
     const tx = new Transaction().add(inst);
     await sendAndConfirmTransaction(connection, tx, [payer]);

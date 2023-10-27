@@ -132,7 +132,7 @@ async fn success_init_after_close_account() {
         .await
         .unwrap()
         .unwrap();
-    assert!(destination.lamports > 0);
+    assert!(destination.satomis > 0);
 }
 
 #[tokio::test]

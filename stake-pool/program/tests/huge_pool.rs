@@ -8,7 +8,7 @@ use {
     domichain_program::{borsh::try_from_slice_unchecked, pubkey::Pubkey, stake},
     domichain_program_test::*,
     solana_sdk::{
-        native_token::LAMPORTS_PER_SOL,
+        native_token::SATOMIS_PER_SOL,
         signature::{Keypair, Signer},
         transaction::Transaction,
     },
@@ -121,7 +121,7 @@ async fn setup(
         withdrawer: user.pubkey(),
     };
 
-    let _stake_lamports = create_independent_stake_account(
+    let _stake_satomis = create_independent_stake_account(
         &mut context.banks_client,
         &context.payer,
         &context.last_blockhash,
@@ -210,7 +210,7 @@ async fn update(max_validators: u32) {
 #[tokio::test]
 async fn remove_validator_from_pool(max_validators: u32) {
     let (mut context, stake_pool_accounts, vote_account_pubkeys, _, _, _, _) =
-        setup(max_validators, max_validators, LAMPORTS_PER_SOL).await;
+        setup(max_validators, max_validators, SATOMIS_PER_SOL).await;
 
     let first_vote = vote_account_pubkeys[0];
     let (stake_address, _) = find_stake_program_address(
@@ -300,26 +300,26 @@ async fn remove_validator_from_pool(max_validators: u32) {
     let first_element = &validator_list.validators[0];
     assert_eq!(first_element.status, StakeStatus::DeactivatingValidator);
     assert_eq!(
-        first_element.active_stake_lamports,
-        LAMPORTS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
+        first_element.active_stake_satomis,
+        SATOMIS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
     );
-    assert_eq!(first_element.transient_stake_lamports, 0);
+    assert_eq!(first_element.transient_stake_satomis, 0);
 
     let middle_element = &validator_list.validators[middle_index];
     assert_eq!(middle_element.status, StakeStatus::DeactivatingValidator);
     assert_eq!(
-        middle_element.active_stake_lamports,
-        LAMPORTS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
+        middle_element.active_stake_satomis,
+        SATOMIS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
     );
-    assert_eq!(middle_element.transient_stake_lamports, 0);
+    assert_eq!(middle_element.transient_stake_satomis, 0);
 
     let last_element = &validator_list.validators[last_index];
     assert_eq!(last_element.status, StakeStatus::DeactivatingValidator);
     assert_eq!(
-        last_element.active_stake_lamports,
-        LAMPORTS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
+        last_element.active_stake_satomis,
+        SATOMIS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
     );
-    assert_eq!(last_element.transient_stake_lamports, 0);
+    assert_eq!(last_element.transient_stake_satomis, 0);
 
     let error = stake_pool_accounts
         .update_validator_list_balance(
@@ -467,10 +467,10 @@ async fn add_validator_to_pool(max_validators: u32) {
     let last_element = validator_list.validators[last_index];
     assert_eq!(last_element.status, StakeStatus::Active);
     assert_eq!(
-        last_element.active_stake_lamports,
-        LAMPORTS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
+        last_element.active_stake_satomis,
+        SATOMIS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
     );
-    assert_eq!(last_element.transient_stake_lamports, 0);
+    assert_eq!(last_element.transient_stake_satomis, 0);
     assert_eq!(last_element.vote_account_address, test_vote_address);
 
     let transient_stake_seed = u64::MAX;
@@ -480,7 +480,7 @@ async fn add_validator_to_pool(max_validators: u32) {
         &stake_pool_pubkey,
         transient_stake_seed,
     );
-    let increase_amount = LAMPORTS_PER_SOL;
+    let increase_amount = SATOMIS_PER_SOL;
     let error = stake_pool_accounts
         .increase_validator_stake(
             &mut context.banks_client,
@@ -505,11 +505,11 @@ async fn add_validator_to_pool(max_validators: u32) {
     let last_element = validator_list.validators[last_index];
     assert_eq!(last_element.status, StakeStatus::Active);
     assert_eq!(
-        last_element.active_stake_lamports,
-        LAMPORTS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
+        last_element.active_stake_satomis,
+        SATOMIS_PER_SOL + STAKE_ACCOUNT_RENT_EXEMPTION
     );
     assert_eq!(
-        last_element.transient_stake_lamports,
+        last_element.transient_stake_satomis,
         increase_amount + STAKE_ACCOUNT_RENT_EXEMPTION
     );
     assert_eq!(last_element.vote_account_address, test_vote_address);

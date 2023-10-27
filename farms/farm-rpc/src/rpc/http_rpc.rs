@@ -1113,11 +1113,11 @@ async fn get_managed_funds(
 }
 
 /// Creates a new system account
-#[post("/create_system_account?<wallet_keypair>&<new_account_keypair>&<lamports>&<space>&<owner>")]
+#[post("/create_system_account?<wallet_keypair>&<new_account_keypair>&<satomis>&<space>&<owner>")]
 async fn create_system_account(
     wallet_keypair: Option<KeypairParam>,
     new_account_keypair: Option<KeypairParam>,
-    lamports: u64,
+    satomis: u64,
     space: usize,
     owner: Option<PubkeyParam>,
     farm_client: &State<FarmClientArc>,
@@ -1133,7 +1133,7 @@ async fn create_system_account(
         .create_system_account(
             &wallet_keypair,
             &new_account_keypair,
-            lamports,
+            satomis,
             space,
             &owner,
         )
@@ -1143,12 +1143,12 @@ async fn create_system_account(
 }
 
 /// Creates a new system account with seed
-#[post("/create_system_account_with_seed?<wallet_keypair>&<base_address>&<seed>&<lamports>&<space>&<owner>")]
+#[post("/create_system_account_with_seed?<wallet_keypair>&<base_address>&<seed>&<satomis>&<space>&<owner>")]
 async fn create_system_account_with_seed(
     wallet_keypair: Option<KeypairParam>,
     base_address: Option<PubkeyParam>,
     seed: &str,
-    lamports: u64,
+    satomis: u64,
     space: usize,
     owner: Option<PubkeyParam>,
     farm_client: &State<FarmClientArc>,
@@ -1165,7 +1165,7 @@ async fn create_system_account_with_seed(
             &wallet_keypair,
             &base_address,
             seed,
-            lamports,
+            satomis,
             space,
             &owner,
         )
@@ -2994,11 +2994,11 @@ async fn fund_remove_unlocked_liquidity_vault(
 }
 
 /// Returns a new Instruction for creating system account
-#[get("/new_instruction_create_system_account?<wallet_address>&<new_address>&<lamports>&<space>&<owner>")]
+#[get("/new_instruction_create_system_account?<wallet_address>&<new_address>&<satomis>&<space>&<owner>")]
 async fn new_instruction_create_system_account(
     wallet_address: Option<PubkeyParam>,
     new_address: Option<PubkeyParam>,
-    lamports: u64,
+    satomis: u64,
     space: usize,
     owner: Option<PubkeyParam>,
     farm_client: &State<FarmClientArc>,
@@ -3014,7 +3014,7 @@ async fn new_instruction_create_system_account(
         .new_instruction_create_system_account(
             &wallet_address,
             &new_address,
-            lamports,
+            satomis,
             space,
             &owner,
         )
@@ -3024,12 +3024,12 @@ async fn new_instruction_create_system_account(
 }
 
 /// Returns a new Instruction for creating system account with seed
-#[get("/new_instruction_create_system_account_with_seed?<wallet_address>&<base_address>&<seed>&<lamports>&<space>&<owner>")]
+#[get("/new_instruction_create_system_account_with_seed?<wallet_address>&<base_address>&<seed>&<satomis>&<space>&<owner>")]
 async fn new_instruction_create_system_account_with_seed(
     wallet_address: Option<PubkeyParam>,
     base_address: Option<PubkeyParam>,
     seed: &str,
-    lamports: u64,
+    satomis: u64,
     space: usize,
     owner: Option<PubkeyParam>,
     farm_client: &State<FarmClientArc>,
@@ -3046,7 +3046,7 @@ async fn new_instruction_create_system_account_with_seed(
             &wallet_address,
             &base_address,
             seed,
-            lamports,
+            satomis,
             space,
             &owner,
         )

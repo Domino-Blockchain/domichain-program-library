@@ -29,10 +29,10 @@ async fn test_withdraw_fixed_amount() {
     // limit to track compute unit increase
     test.set_compute_max_units(50_000);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 200 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 200 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
     const USDC_BORROW_AMOUNT_FRACTIONAL: u64 = 1_000 * FRACTIONAL_TO_USDC;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
-    const WITHDRAW_AMOUNT: u64 = 100 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
+    const WITHDRAW_AMOUNT: u64 = 100 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
 
     let user_accounts_owner = Keypair::new();
     let lending_market = add_lending_market(&mut test);
@@ -47,7 +47,7 @@ async fn test_withdraw_fixed_amount() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            collateral_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            collateral_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
@@ -79,7 +79,7 @@ async fn test_withdraw_fixed_amount() {
         &lending_market,
         &user_accounts_owner,
         AddObligationArgs {
-            deposits: &[(&sol_test_reserve, SOL_DEPOSIT_AMOUNT_LAMPORTS)],
+            deposits: &[(&sol_test_reserve, SOL_DEPOSIT_AMOUNT_SATOMIS)],
             borrows: &[(&usdc_test_reserve, USDC_BORROW_AMOUNT_FRACTIONAL)],
             ..AddObligationArgs::default()
         },
@@ -141,7 +141,7 @@ async fn test_withdraw_fixed_amount() {
     let collateral = &obligation.deposits[0];
     assert_eq!(
         collateral.deposited_amount,
-        SOL_DEPOSIT_AMOUNT_LAMPORTS - WITHDRAW_AMOUNT
+        SOL_DEPOSIT_AMOUNT_SATOMIS - WITHDRAW_AMOUNT
     );
 }
 
@@ -262,10 +262,10 @@ async fn test_withdraw_too_large() {
         processor!(process_instruction),
     );
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 200 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 200 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
     const USDC_BORROW_AMOUNT_FRACTIONAL: u64 = 1_000 * FRACTIONAL_TO_USDC;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
-    const WITHDRAW_AMOUNT: u64 = (100 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO) + 1;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
+    const WITHDRAW_AMOUNT: u64 = (100 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO) + 1;
 
     let user_accounts_owner = Keypair::new();
     let lending_market = add_lending_market(&mut test);
@@ -280,7 +280,7 @@ async fn test_withdraw_too_large() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            collateral_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            collateral_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
@@ -312,7 +312,7 @@ async fn test_withdraw_too_large() {
         &lending_market,
         &user_accounts_owner,
         AddObligationArgs {
-            deposits: &[(&sol_test_reserve, SOL_DEPOSIT_AMOUNT_LAMPORTS)],
+            deposits: &[(&sol_test_reserve, SOL_DEPOSIT_AMOUNT_SATOMIS)],
             borrows: &[(&usdc_test_reserve, USDC_BORROW_AMOUNT_FRACTIONAL)],
             ..AddObligationArgs::default()
         },

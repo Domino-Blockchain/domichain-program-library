@@ -28,14 +28,14 @@ export async function createMint(
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID
 ): Promise<PublicKey> {
-    const lamports = await getMinimumBalanceForRentExemptMint(connection);
+    const satomis = await getMinimumBalanceForRentExemptMint(connection);
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: keypair.publicKey,
             space: MINT_SIZE,
-            lamports,
+            satomis,
             programId,
         }),
         createInitializeMint2Instruction(keypair.publicKey, decimals, mintAuthority, freezeAuthority, programId)

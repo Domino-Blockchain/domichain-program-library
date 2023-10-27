@@ -1296,14 +1296,14 @@ impl FarmClient {
         &self,
         signer: &dyn Signer,
         new_account_signer: &dyn Signer,
-        lamports: u64,
+        satomis: u64,
         space: usize,
         owner: &Pubkey,
     ) -> Result<Signature, FarmClientError> {
         let inst = self.new_instruction_create_system_account(
             &signer.pubkey(),
             &new_account_signer.pubkey(),
-            lamports,
+            satomis,
             space,
             owner,
         )?;
@@ -1329,7 +1329,7 @@ impl FarmClient {
         signer: &dyn Signer,
         base_address: &Pubkey,
         seed: &str,
-        lamports: u64,
+        satomis: u64,
         space: usize,
         owner: &Pubkey,
     ) -> Result<Signature, FarmClientError> {
@@ -1337,7 +1337,7 @@ impl FarmClient {
             &signer.pubkey(),
             base_address,
             seed,
-            lamports,
+            satomis,
             space,
             owner,
         )?;

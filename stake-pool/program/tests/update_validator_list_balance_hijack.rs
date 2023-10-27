@@ -18,7 +18,7 @@ use {
     spl_stake_pool::{
         error::StakePoolError, find_stake_program_address, find_transient_stake_program_address,
         find_withdraw_authority_program_address, id, instruction, state::StakePool,
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
     std::num::NonZeroU32,
 };
@@ -48,7 +48,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            reserve_stake_amount + MINIMUM_RESERVE_LAMPORTS,
+            reserve_stake_amount + MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -200,7 +200,7 @@ async fn check_ignored_hijacked_transient_stake(
         stake_pool_accounts,
         stake_accounts,
         _,
-        lamports,
+        satomis,
         _,
         mut slot,
     ) = setup(num_validators).await;
@@ -208,7 +208,7 @@ async fn check_ignored_hijacked_transient_stake(
     let rent = context.banks_client.get_rent().await.unwrap();
     let stake_rent = rent.minimum_balance(std::mem::size_of::<StakeState>());
 
-    let pre_lamports = get_validator_list_sum(
+    let pre_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
@@ -226,7 +226,7 @@ async fn check_ignored_hijacked_transient_stake(
             &last_blockhash,
             &stake_account.stake_account,
             &stake_account.transient_stake_account,
-            lamports,
+            satomis,
             stake_account.transient_stake_seed,
         )
         .await;
@@ -264,7 +264,7 @@ async fn check_ignored_hijacked_transient_stake(
             system_instruction::transfer(
                 &context.payer.pubkey(),
                 &transient_stake_address,
-                stake_rent + MINIMUM_RESERVE_LAMPORTS,
+                stake_rent + MINIMUM_RESERVE_SATOMIS,
             ),
             stake::instruction::initialize(
                 &transient_stake_address,
@@ -298,7 +298,7 @@ async fn check_ignored_hijacked_transient_stake(
         .err();
     assert!(error.is_none());
 
-    println!("Update again normally, should be no change in the lamports");
+    println!("Update again normally, should be no change in the satomis");
     let last_blockhash = context
         .banks_client
         .get_new_latest_blockhash(&last_blockhash)
@@ -318,13 +318,13 @@ async fn check_ignored_hijacked_transient_stake(
         )
         .await;
 
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
 
     let stake_pool_info = get_account(
         &mut context.banks_client,
@@ -332,7 +332,7 @@ async fn check_ignored_hijacked_transient_stake(
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(pre_lamports, stake_pool.total_lamports);
+    assert_eq!(pre_satomis, stake_pool.total_satomis);
 }
 
 #[tokio::test]
@@ -365,7 +365,7 @@ async fn check_ignored_hijacked_validator_stake(
         stake_pool_accounts,
         stake_accounts,
         _,
-        lamports,
+        satomis,
         _,
         mut slot,
     ) = setup(num_validators).await;
@@ -373,7 +373,7 @@ async fn check_ignored_hijacked_validator_stake(
     let rent = context.banks_client.get_rent().await.unwrap();
     let stake_rent = rent.minimum_balance(std::mem::size_of::<StakeState>());
 
-    let pre_lamports = get_validator_list_sum(
+    let pre_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
@@ -390,7 +390,7 @@ async fn check_ignored_hijacked_validator_stake(
             &last_blockhash,
             &stake_account.stake_account,
             &stake_account.transient_stake_account,
-            lamports,
+            satomis,
             stake_account.transient_stake_seed,
         )
         .await;
@@ -432,7 +432,7 @@ async fn check_ignored_hijacked_validator_stake(
             system_instruction::transfer(
                 &context.payer.pubkey(),
                 &stake_account.stake_account,
-                stake_rent + MINIMUM_RESERVE_LAMPORTS,
+                stake_rent + MINIMUM_RESERVE_SATOMIS,
             ),
             stake::instruction::initialize(
                 &stake_account.stake_account,
@@ -466,7 +466,7 @@ async fn check_ignored_hijacked_validator_stake(
         .err();
     assert!(error.is_none());
 
-    println!("Update again normally, should be no change in the lamports");
+    println!("Update again normally, should be no change in the satomis");
     let last_blockhash = context
         .banks_client
         .get_new_latest_blockhash(&last_blockhash)
@@ -486,13 +486,13 @@ async fn check_ignored_hijacked_validator_stake(
         )
         .await;
 
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
 
     let stake_pool_info = get_account(
         &mut context.banks_client,
@@ -500,7 +500,7 @@ async fn check_ignored_hijacked_validator_stake(
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(pre_lamports, stake_pool.total_lamports);
+    assert_eq!(pre_satomis, stake_pool.total_satomis);
 
     println!("Fail adding validator back in with first seed");
     let error = stake_pool_accounts
@@ -550,13 +550,13 @@ async fn check_ignored_hijacked_validator_stake(
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(pre_lamports, stake_pool.total_lamports);
+    assert_eq!(pre_satomis, stake_pool.total_satomis);
 
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
 }

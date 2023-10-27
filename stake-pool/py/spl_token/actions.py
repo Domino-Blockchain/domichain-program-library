@@ -36,7 +36,7 @@ async def create_mint(client: AsyncClient, payer: Keypair, mint: Keypair, mint_a
             sys.CreateAccountParams(
                 from_pubkey=payer.public_key,
                 new_account_pubkey=mint.public_key,
-                lamports=mint_balance,
+                satomis=mint_balance,
                 space=MINT_LAYOUT.sizeof(),
                 program_id=TOKEN_PROGRAM_ID,
             )

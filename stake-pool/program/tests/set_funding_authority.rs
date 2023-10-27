@@ -21,7 +21,7 @@ use {
     spl_stake_pool::{
         error, find_deposit_authority_program_address, id,
         instruction::{self, FundingType},
-        state, MINIMUM_RESERVE_LAMPORTS,
+        state, MINIMUM_RESERVE_SATOMIS,
     },
 };
 
@@ -33,7 +33,7 @@ async fn setup() -> (BanksClient, Keypair, Hash, StakePoolAccounts, Keypair) {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

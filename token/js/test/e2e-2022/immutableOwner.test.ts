@@ -15,7 +15,7 @@ import {
     getAccountLen,
 } from '../../src';
 
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 const TEST_TOKEN_DECIMALS = 2;
 const EXTENSIONS = [ExtensionType.ImmutableOwner];
 describe('immutableOwner', () => {
@@ -26,7 +26,7 @@ describe('immutableOwner', () => {
     let mint: PublicKey;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
     });
     beforeEach(async () => {
         const mintAuthority = Keypair.generate();
@@ -43,7 +43,7 @@ describe('immutableOwner', () => {
         );
         owner = Keypair.generate();
         const accountLen = getAccountLen(EXTENSIONS);
-        const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+        const satomis = await connection.getMinimumBalanceForRentExemption(accountLen);
         const accountKeypair = Keypair.generate();
         account = accountKeypair.publicKey;
         const transaction = new Transaction().add(
@@ -51,7 +51,7 @@ describe('immutableOwner', () => {
                 fromPubkey: payer.publicKey,
                 newAccountPubkey: account,
                 space: accountLen,
-                lamports,
+                satomis,
                 programId: TEST_PROGRAM_ID,
             }),
             createInitializeImmutableOwnerInstruction(account, TEST_PROGRAM_ID),

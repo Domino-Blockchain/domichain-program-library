@@ -12,7 +12,7 @@ from stake.state import Authorized, Lockup, StakeAuthorize
 import stake.instructions as st
 
 
-async def create_stake(client: AsyncClient, payer: Keypair, stake: Keypair, authority: PublicKey, lamports: int):
+async def create_stake(client: AsyncClient, payer: Keypair, stake: Keypair, authority: PublicKey, satomis: int):
     print(f"Creating stake {stake.public_key}")
     resp = await client.get_minimum_balance_for_rent_exemption(STAKE_LEN)
     txn = Transaction()
@@ -21,7 +21,7 @@ async def create_stake(client: AsyncClient, payer: Keypair, stake: Keypair, auth
             sys.CreateAccountParams(
                 from_pubkey=payer.public_key,
                 new_account_pubkey=stake.public_key,
-                lamports=resp['result'] + lamports,
+                satomis=resp['result'] + satomis,
                 space=STAKE_LEN,
                 program_id=STAKE_PROGRAM_ID,
             )

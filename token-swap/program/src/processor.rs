@@ -2128,7 +2128,7 @@ mod tests {
                     if account_info.key == account_meta.0 {
                         let account = &mut account_meta.1;
                         account.owner = *account_info.owner;
-                        account.lamports = **account_info.lamports.borrow();
+                        account.satomis = **account_info.satomis.borrow();
                         account.data = account_info.data.borrow().to_vec();
                     }
                 }

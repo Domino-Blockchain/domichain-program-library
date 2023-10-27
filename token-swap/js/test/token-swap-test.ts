@@ -9,7 +9,7 @@ import {
 import {AccountLayout, Token, TOKEN_PROGRAM_ID} from '@solana/spl-token';
 
 import {TokenSwap, CurveType, TOKEN_SWAP_PROGRAM_ID} from '../src';
-import {newAccountWithLamports} from '../src/util/new-account-with-lamports';
+import {newAccountWithSatomis} from '../src/util/new-account-with-satomis';
 import {sleep} from '../src/util/sleep';
 import {Numberu64} from '../src';
 
@@ -91,8 +91,8 @@ export async function createTokenSwap(
   curveParameters?: Numberu64,
 ): Promise<void> {
   const connection = await getConnection();
-  const payer = await newAccountWithLamports(connection, 1000000000);
-  owner = await newAccountWithLamports(connection, 1000000000);
+  const payer = await newAccountWithSatomis(connection, 1000000000);
+  owner = await newAccountWithSatomis(connection, 1000000000);
   const tokenSwapAccount = new Account();
 
   [authority, bumpSeed] = await PublicKey.findProgramAddress(
@@ -146,7 +146,7 @@ export async function createTokenSwap(
   await mintB.mintTo(tokenAccountB, owner, [], currentSwapTokenB);
 
   console.log('creating token swap');
-  const swapPayer = await newAccountWithLamports(connection, 10000000000);
+  const swapPayer = await newAccountWithSatomis(connection, 10000000000);
   tokenSwap = await TokenSwap.createTokenSwap(
     connection,
     swapPayer,
@@ -375,7 +375,7 @@ export async function createAccountAndSwapAtomic(): Promise<void> {
     SystemProgram.createAccount({
       fromPubkey: owner.publicKey,
       newAccountPubkey: newAccount.publicKey,
-      lamports: balanceNeeded,
+      satomis: balanceNeeded,
       space: AccountLayout.span,
       programId: mintB.programId,
     }),

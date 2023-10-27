@@ -143,13 +143,13 @@ export async function getFilteredProgramAccounts(
     encoding: 'base64',
   });
   return resp.map(
-    ({ pubkey, account: { data, executable, owner, lamports } }) => ({
+    ({ pubkey, account: { data, executable, owner, satomis } }) => ({
       publicKey: pubkey,
       accountInfo: {
         data: data,
         executable,
         owner: owner,
-        lamports,
+        satomis,
       },
     })
   );

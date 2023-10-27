@@ -17,7 +17,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError, find_ephemeral_stake_program_address,
-        find_transient_stake_program_address, id, instruction, MINIMUM_RESERVE_LAMPORTS,
+        find_transient_stake_program_address, id, instruction, MINIMUM_RESERVE_SATOMIS,
     },
 };
 
@@ -48,7 +48,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS + current_minimum_delegation + stake_rent,
+            MINIMUM_RESERVE_SATOMIS + current_minimum_delegation + stake_rent,
         )
         .await
         .unwrap();
@@ -71,14 +71,14 @@ async fn setup(
     )
     .await;
 
-    let minimum_redelegate_lamports = current_minimum_delegation + stake_rent * 2;
+    let minimum_redelegate_satomis = current_minimum_delegation + stake_rent * 2;
     simple_deposit_stake(
         &mut context.banks_client,
         &context.payer,
         &context.last_blockhash,
         &stake_pool_accounts,
         &source_validator_stake,
-        minimum_redelegate_lamports,
+        minimum_redelegate_satomis,
     )
     .await
     .unwrap();
@@ -113,7 +113,7 @@ async fn setup(
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        minimum_redelegate_lamports,
+        minimum_redelegate_satomis,
         slot,
     )
 }
@@ -126,7 +126,7 @@ async fn success() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         mut slot,
     ) = setup(true).await;
 
@@ -170,7 +170,7 @@ async fn success() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -187,8 +187,8 @@ async fn success() {
     let validator_stake_state =
         deserialize::<stake::state::StakeState>(&validator_stake_account.data).unwrap();
     assert_eq!(
-        pre_validator_stake_account.lamports - redelegate_lamports,
-        validator_stake_account.lamports
+        pre_validator_stake_account.satomis - redelegate_satomis,
+        validator_stake_account.satomis
     );
     assert_eq!(
         validator_stake_state
@@ -209,10 +209,10 @@ async fn success() {
     .await;
     let transient_stake_state =
         deserialize::<stake::state::StakeState>(&source_transient_stake_account.data).unwrap();
-    assert_eq!(source_transient_stake_account.lamports, stake_rent);
+    assert_eq!(source_transient_stake_account.satomis, stake_rent);
     let transient_delegation = transient_stake_state.delegation().unwrap();
     assert_ne!(transient_delegation.deactivation_epoch, Epoch::MAX);
-    assert_eq!(transient_delegation.stake, redelegate_lamports - stake_rent);
+    assert_eq!(transient_delegation.stake, redelegate_satomis - stake_rent);
 
     // Check ephemeral account doesn't exist
     let maybe_account = context
@@ -231,15 +231,15 @@ async fn success() {
     let transient_stake_state =
         deserialize::<stake::state::StakeState>(&destination_transient_stake_account.data).unwrap();
     assert_eq!(
-        destination_transient_stake_account.lamports,
-        redelegate_lamports - stake_rent
+        destination_transient_stake_account.satomis,
+        redelegate_satomis - stake_rent
     );
     let transient_delegation = transient_stake_state.delegation().unwrap();
     assert_eq!(transient_delegation.deactivation_epoch, Epoch::MAX);
     assert_ne!(transient_delegation.activation_epoch, Epoch::MAX);
     assert_eq!(
         transient_delegation.stake,
-        redelegate_lamports - stake_rent * 2
+        redelegate_satomis - stake_rent * 2
     );
 
     // Check validator list
@@ -250,12 +250,12 @@ async fn success() {
         .find(&source_validator_stake.vote.pubkey())
         .unwrap();
     assert_eq!(
-        source_item.active_stake_lamports,
-        validator_stake_account.lamports
+        source_item.active_stake_satomis,
+        validator_stake_account.satomis
     );
     assert_eq!(
-        source_item.transient_stake_lamports,
-        source_transient_stake_account.lamports
+        source_item.transient_stake_satomis,
+        source_transient_stake_account.satomis
     );
     assert_eq!(
         source_item.transient_seed_suffix,
@@ -266,8 +266,8 @@ async fn success() {
         .find(&destination_validator_stake.vote.pubkey())
         .unwrap();
     assert_eq!(
-        destination_item.transient_stake_lamports,
-        destination_transient_stake_account.lamports
+        destination_item.transient_stake_satomis,
+        destination_transient_stake_account.satomis
     );
     assert_eq!(
         destination_item.transient_seed_suffix,
@@ -313,18 +313,18 @@ async fn success() {
         .find(&source_validator_stake.vote.pubkey())
         .unwrap();
     assert_eq!(
-        source_item.active_stake_lamports,
-        validator_stake_account.lamports
+        source_item.active_stake_satomis,
+        validator_stake_account.satomis
     );
-    assert_eq!(source_item.transient_stake_lamports, 0);
+    assert_eq!(source_item.transient_stake_satomis, 0);
 
     let destination_item = validator_list
         .find(&destination_validator_stake.vote.pubkey())
         .unwrap();
-    assert_eq!(destination_item.transient_stake_lamports, 0);
+    assert_eq!(destination_item.transient_stake_satomis, 0);
     assert_eq!(
-        destination_item.active_stake_lamports,
-        pre_destination_validator_stake_account.lamports + redelegate_lamports - stake_rent * 2
+        destination_item.active_stake_satomis,
+        pre_destination_validator_stake_account.satomis + redelegate_satomis - stake_rent * 2
     );
     let post_destination_validator_stake_account = get_account(
         &mut context.banks_client,
@@ -332,8 +332,8 @@ async fn success() {
     )
     .await;
     assert_eq!(
-        post_destination_validator_stake_account.lamports,
-        pre_destination_validator_stake_account.lamports + redelegate_lamports - stake_rent * 2
+        post_destination_validator_stake_account.satomis,
+        pre_destination_validator_stake_account.satomis + redelegate_satomis - stake_rent * 2
     );
 }
 
@@ -345,7 +345,7 @@ async fn success_with_increasing_stake() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         mut slot,
     ) = setup(true).await;
 
@@ -386,7 +386,7 @@ async fn success_with_increasing_stake() {
         .find(&destination_validator_stake.vote.pubkey())
         .unwrap();
     assert_eq!(
-        destination_item.transient_stake_lamports,
+        destination_item.transient_stake_satomis,
         current_minimum_delegation + stake_rent
     );
     let pre_transient_stake_account = get_account(
@@ -395,7 +395,7 @@ async fn success_with_increasing_stake() {
     )
     .await;
     assert_eq!(
-        pre_transient_stake_account.lamports,
+        pre_transient_stake_account.satomis,
         current_minimum_delegation + stake_rent
     );
 
@@ -428,7 +428,7 @@ async fn success_with_increasing_stake() {
             &wrong_transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             wrong_transient_stake_seed,
@@ -461,7 +461,7 @@ async fn success_with_increasing_stake() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -479,8 +479,8 @@ async fn success_with_increasing_stake() {
         deserialize::<stake::state::StakeState>(&destination_transient_stake_account.data).unwrap();
     // stake rent cancels out
     assert_eq!(
-        destination_transient_stake_account.lamports,
-        redelegate_lamports + current_minimum_delegation
+        destination_transient_stake_account.satomis,
+        redelegate_satomis + current_minimum_delegation
     );
 
     let transient_delegation = transient_stake_state.delegation().unwrap();
@@ -488,7 +488,7 @@ async fn success_with_increasing_stake() {
     assert_ne!(transient_delegation.activation_epoch, Epoch::MAX);
     assert_eq!(
         transient_delegation.stake,
-        redelegate_lamports + current_minimum_delegation - stake_rent
+        redelegate_satomis + current_minimum_delegation - stake_rent
     );
 
     // Check validator list
@@ -499,8 +499,8 @@ async fn success_with_increasing_stake() {
         .find(&destination_validator_stake.vote.pubkey())
         .unwrap();
     assert_eq!(
-        destination_item.transient_stake_lamports,
-        destination_transient_stake_account.lamports
+        destination_item.transient_stake_satomis,
+        destination_transient_stake_account.satomis
     );
     assert_eq!(
         destination_item.transient_seed_suffix,
@@ -539,12 +539,12 @@ async fn success_with_increasing_stake() {
     let destination_item = validator_list
         .find(&destination_validator_stake.vote.pubkey())
         .unwrap();
-    assert_eq!(destination_item.transient_stake_lamports, 0);
+    assert_eq!(destination_item.transient_stake_satomis, 0);
     // redelegate is smart enough to activate *everything*, so there's only one rent-exemption
     // worth of inactive stake!
     assert_eq!(
-        destination_item.active_stake_lamports,
-        pre_validator_stake_account.lamports + redelegate_lamports + current_minimum_delegation
+        destination_item.active_stake_satomis,
+        pre_validator_stake_account.satomis + redelegate_satomis + current_minimum_delegation
             - stake_rent
     );
     let post_validator_stake_account = get_account(
@@ -553,8 +553,8 @@ async fn success_with_increasing_stake() {
     )
     .await;
     assert_eq!(
-        post_validator_stake_account.lamports,
-        pre_validator_stake_account.lamports + redelegate_lamports + current_minimum_delegation
+        post_validator_stake_account.satomis,
+        pre_validator_stake_account.satomis + redelegate_satomis + current_minimum_delegation
             - stake_rent
     );
 }
@@ -567,7 +567,7 @@ async fn fail_with_decreasing_stake() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         mut slot,
     ) = setup(false).await;
 
@@ -579,7 +579,7 @@ async fn fail_with_decreasing_stake() {
     .await;
     let rent = context.banks_client.get_rent().await.unwrap();
     let stake_rent = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>());
-    let minimum_decrease_lamports = current_minimum_delegation + stake_rent;
+    let minimum_decrease_satomis = current_minimum_delegation + stake_rent;
 
     simple_deposit_stake(
         &mut context.banks_client,
@@ -587,7 +587,7 @@ async fn fail_with_decreasing_stake() {
         &last_blockhash,
         &stake_pool_accounts,
         &destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
     )
     .await
     .unwrap();
@@ -620,7 +620,7 @@ async fn fail_with_decreasing_stake() {
             &context.last_blockhash,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.transient_stake_account,
-            minimum_decrease_lamports,
+            minimum_decrease_satomis,
             destination_validator_stake.transient_stake_seed,
         )
         .await;
@@ -645,7 +645,7 @@ async fn fail_with_decreasing_stake() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -670,7 +670,7 @@ async fn fail_with_wrong_withdraw_authority() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         _,
     ) = setup(true).await;
 
@@ -696,7 +696,7 @@ async fn fail_with_wrong_withdraw_authority() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -730,7 +730,7 @@ async fn fail_with_wrong_validator_list() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         _,
     ) = setup(true).await;
 
@@ -756,7 +756,7 @@ async fn fail_with_wrong_validator_list() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -790,7 +790,7 @@ async fn fail_with_wrong_staker() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         _,
     ) = setup(true).await;
 
@@ -816,7 +816,7 @@ async fn fail_with_wrong_staker() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -850,7 +850,7 @@ async fn fail_with_unknown_validator() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         _,
     ) = setup(true).await;
 
@@ -859,7 +859,7 @@ async fn fail_with_unknown_validator() {
         &context.payer,
         &last_blockhash,
         &stake_pool_accounts.stake_pool.pubkey(),
-        redelegate_lamports,
+        redelegate_satomis,
     )
     .await;
 
@@ -881,7 +881,7 @@ async fn fail_with_unknown_validator() {
             &unknown_validator_stake.transient_stake_account,
             &unknown_validator_stake.stake_account,
             &unknown_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             unknown_validator_stake.transient_stake_seed,
@@ -908,7 +908,7 @@ async fn fail_with_unknown_validator() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             unknown_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -933,7 +933,7 @@ async fn fail_redelegate_twice() {
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         mut slot,
     ) = setup(false).await;
 
@@ -943,7 +943,7 @@ async fn fail_redelegate_twice() {
         &last_blockhash,
         &stake_pool_accounts,
         &source_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
     )
     .await
     .unwrap();
@@ -987,7 +987,7 @@ async fn fail_redelegate_twice() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -1012,7 +1012,7 @@ async fn fail_redelegate_twice() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports,
+            redelegate_satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -1030,14 +1030,14 @@ async fn fail_redelegate_twice() {
 }
 
 #[tokio::test]
-async fn fail_with_small_lamport_amount() {
+async fn fail_with_small_satomi_amount() {
     let (
         mut context,
         last_blockhash,
         stake_pool_accounts,
         source_validator_stake,
         destination_validator_stake,
-        redelegate_lamports,
+        redelegate_satomis,
         _,
     ) = setup(true).await;
 
@@ -1060,7 +1060,7 @@ async fn fail_with_small_lamport_amount() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            redelegate_lamports - 1,
+            redelegate_satomis - 1,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,
@@ -1114,7 +1114,7 @@ async fn fail_drain_source_account() {
             &destination_validator_stake.transient_stake_account,
             &destination_validator_stake.stake_account,
             &destination_validator_stake.vote.pubkey(),
-            validator_stake_account.lamports,
+            validator_stake_account.satomis,
             source_validator_stake.transient_stake_seed,
             ephemeral_stake_seed,
             destination_validator_stake.transient_stake_seed,

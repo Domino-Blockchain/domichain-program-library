@@ -2,9 +2,9 @@ import type { Signer } from '@solana/web3.js';
 import { PublicKey, Keypair, Connection } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../src';
 
-export async function newAccountWithLamports(connection: Connection, lamports = 1000000): Promise<Signer> {
+export async function newAccountWithSatomis(connection: Connection, satomis = 1000000): Promise<Signer> {
     const account = Keypair.generate();
-    const signature = await connection.requestAirdrop(account.publicKey, lamports);
+    const signature = await connection.requestAirdrop(account.publicKey, satomis);
     await connection.confirmTransaction(signature);
     return account;
 }

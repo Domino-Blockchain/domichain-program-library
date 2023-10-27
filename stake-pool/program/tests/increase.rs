@@ -15,7 +15,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError, find_ephemeral_stake_program_address,
-        find_transient_stake_program_address, id, instruction, MINIMUM_RESERVE_LAMPORTS,
+        find_transient_stake_program_address, id, instruction, MINIMUM_RESERVE_SATOMIS,
     },
     test_case::test_case,
 };
@@ -28,13 +28,13 @@ async fn setup() -> (
 ) {
     let mut context = program_test().start_with_context().await;
     let stake_pool_accounts = StakePoolAccounts::default();
-    let reserve_lamports = 100_000_000_000 + MINIMUM_RESERVE_LAMPORTS;
+    let reserve_satomis = 100_000_000_000 + MINIMUM_RESERVE_SATOMIS;
     stake_pool_accounts
         .initialize_stake_pool(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            reserve_lamports,
+            reserve_satomis,
         )
         .await
         .unwrap();
@@ -72,7 +72,7 @@ async fn setup() -> (
         context,
         stake_pool_accounts,
         validator_stake_account,
-        reserve_lamports,
+        reserve_satomis,
     )
 }
 
@@ -80,7 +80,7 @@ async fn setup() -> (
 #[test_case(false; "non-additional")]
 #[tokio::test]
 async fn success(use_additional_instruction: bool) {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     // Save reserve stake
     let pre_reserve_stake_account = get_account(
@@ -99,7 +99,7 @@ async fn success(use_additional_instruction: bool) {
 
     let rent = context.banks_client.get_rent().await.unwrap();
     let stake_rent = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>());
-    let increase_amount = reserve_lamports - stake_rent - MINIMUM_RESERVE_LAMPORTS;
+    let increase_amount = reserve_satomis - stake_rent - MINIMUM_RESERVE_SATOMIS;
     let error = stake_pool_accounts
         .increase_validator_stake_either(
             &mut context.banks_client,
@@ -124,8 +124,8 @@ async fn success(use_additional_instruction: bool) {
     let reserve_stake_state =
         deserialize::<stake::state::StakeState>(&reserve_stake_account.data).unwrap();
     assert_eq!(
-        pre_reserve_stake_account.lamports - increase_amount - stake_rent,
-        reserve_stake_account.lamports
+        pre_reserve_stake_account.satomis - increase_amount - stake_rent,
+        reserve_stake_account.satomis
     );
     assert!(reserve_stake_state.delegation().is_none());
 
@@ -138,7 +138,7 @@ async fn success(use_additional_instruction: bool) {
     let transient_stake_state =
         deserialize::<stake::state::StakeState>(&transient_stake_account.data).unwrap();
     assert_eq!(
-        transient_stake_account.lamports,
+        transient_stake_account.satomis,
         increase_amount + stake_rent
     );
     assert_ne!(
@@ -149,7 +149,7 @@ async fn success(use_additional_instruction: bool) {
 
 #[tokio::test]
 async fn fail_with_wrong_withdraw_authority() {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     let wrong_authority = Pubkey::new_unique();
 
@@ -164,7 +164,7 @@ async fn fail_with_wrong_withdraw_authority() {
             &validator_stake.transient_stake_account,
             &validator_stake.stake_account,
             &validator_stake.vote.pubkey(),
-            reserve_lamports / 2,
+            reserve_satomis / 2,
             validator_stake.transient_stake_seed,
         )],
         Some(&context.payer.pubkey()),
@@ -190,7 +190,7 @@ async fn fail_with_wrong_withdraw_authority() {
 
 #[tokio::test]
 async fn fail_with_wrong_validator_list() {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     let wrong_validator_list = Pubkey::new_unique();
 
@@ -205,7 +205,7 @@ async fn fail_with_wrong_validator_list() {
             &validator_stake.transient_stake_account,
             &validator_stake.stake_account,
             &validator_stake.vote.pubkey(),
-            reserve_lamports / 2,
+            reserve_satomis / 2,
             validator_stake.transient_stake_seed,
         )],
         Some(&context.payer.pubkey()),
@@ -231,7 +231,7 @@ async fn fail_with_wrong_validator_list() {
 
 #[tokio::test]
 async fn fail_with_unknown_validator() {
-    let (mut context, stake_pool_accounts, _validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, _validator_stake, reserve_satomis) = setup().await;
 
     let unknown_stake = create_unknown_validator_stake(
         &mut context.banks_client,
@@ -253,7 +253,7 @@ async fn fail_with_unknown_validator() {
             &unknown_stake.transient_stake_account,
             &unknown_stake.stake_account,
             &unknown_stake.vote.pubkey(),
-            reserve_lamports / 2,
+            reserve_satomis / 2,
             unknown_stake.transient_stake_seed,
         )],
         Some(&context.payer.pubkey()),
@@ -281,10 +281,10 @@ async fn fail_with_unknown_validator() {
 #[test_case(false; "non-additional")]
 #[tokio::test]
 async fn fail_twice_diff_seed(use_additional_instruction: bool) {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
-    let first_increase = reserve_lamports / 3;
-    let second_increase = reserve_lamports / 4;
+    let first_increase = reserve_satomis / 3;
+    let second_increase = reserve_satomis / 4;
     let error = stake_pool_accounts
         .increase_validator_stake_either(
             &mut context.banks_client,
@@ -346,7 +346,7 @@ async fn fail_twice_diff_seed(use_additional_instruction: bool) {
 #[test_case(false, false, false; "fail-no-additional")]
 #[tokio::test]
 async fn twice(success: bool, use_additional_first_time: bool, use_additional_second_time: bool) {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     let pre_reserve_stake_account = get_account(
         &mut context.banks_client,
@@ -354,8 +354,8 @@ async fn twice(success: bool, use_additional_first_time: bool, use_additional_se
     )
     .await;
 
-    let first_increase = reserve_lamports / 3;
-    let second_increase = reserve_lamports / 4;
+    let first_increase = reserve_satomis / 3;
+    let second_increase = reserve_satomis / 4;
     let total_increase = first_increase + second_increase;
     let error = stake_pool_accounts
         .increase_validator_stake_either(
@@ -412,8 +412,8 @@ async fn twice(success: bool, use_additional_first_time: bool, use_additional_se
         let reserve_stake_state =
             deserialize::<stake::state::StakeState>(&reserve_stake_account.data).unwrap();
         assert_eq!(
-            pre_reserve_stake_account.lamports - total_increase - stake_rent * 2,
-            reserve_stake_account.lamports
+            pre_reserve_stake_account.satomis - total_increase - stake_rent * 2,
+            reserve_stake_account.satomis
         );
         assert!(reserve_stake_state.delegation().is_none());
 
@@ -426,7 +426,7 @@ async fn twice(success: bool, use_additional_first_time: bool, use_additional_se
         let transient_stake_state =
             deserialize::<stake::state::StakeState>(&transient_stake_account.data).unwrap();
         assert_eq!(
-            transient_stake_account.lamports,
+            transient_stake_account.satomis,
             total_increase + stake_rent * 2
         );
         assert_ne!(
@@ -440,7 +440,7 @@ async fn twice(success: bool, use_additional_first_time: bool, use_additional_se
             .await;
         let entry = validator_list.find(&validator_stake.vote.pubkey()).unwrap();
         assert_eq!(
-            entry.transient_stake_lamports,
+            entry.transient_stake_satomis,
             total_increase + stake_rent * 2
         );
     } else {
@@ -458,8 +458,8 @@ async fn twice(success: bool, use_additional_first_time: bool, use_additional_se
 #[test_case(true; "additional")]
 #[test_case(false; "non-additional")]
 #[tokio::test]
-async fn fail_with_small_lamport_amount(use_additional_instruction: bool) {
-    let (mut context, stake_pool_accounts, validator_stake, _reserve_lamports) = setup().await;
+async fn fail_with_small_satomi_amount(use_additional_instruction: bool) {
+    let (mut context, stake_pool_accounts, validator_stake, _reserve_satomis) = setup().await;
 
     let current_minimum_delegation = stake_pool_get_minimum_delegation(
         &mut context.banks_client,
@@ -497,7 +497,7 @@ async fn fail_with_small_lamport_amount(use_additional_instruction: bool) {
 #[test_case(false; "non-additional")]
 #[tokio::test]
 async fn fail_overdraw_reserve(use_additional_instruction: bool) {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     let error = stake_pool_accounts
         .increase_validator_stake_either(
@@ -507,7 +507,7 @@ async fn fail_overdraw_reserve(use_additional_instruction: bool) {
             &validator_stake.transient_stake_account,
             &validator_stake.stake_account,
             &validator_stake.vote.pubkey(),
-            reserve_lamports,
+            reserve_satomis,
             validator_stake.transient_stake_seed,
             use_additional_instruction,
         )
@@ -523,7 +523,7 @@ async fn fail_overdraw_reserve(use_additional_instruction: bool) {
 
 #[tokio::test]
 async fn fail_additional_with_decreasing() {
-    let (mut context, stake_pool_accounts, validator_stake, reserve_lamports) = setup().await;
+    let (mut context, stake_pool_accounts, validator_stake, reserve_satomis) = setup().await;
 
     let current_minimum_delegation = stake_pool_get_minimum_delegation(
         &mut context.banks_client,
@@ -573,7 +573,7 @@ async fn fail_additional_with_decreasing() {
             &validator_stake.transient_stake_account,
             &validator_stake.stake_account,
             &validator_stake.vote.pubkey(),
-            reserve_lamports / 2,
+            reserve_satomis / 2,
             validator_stake.transient_stake_seed,
             true,
         )

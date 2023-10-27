@@ -2604,13 +2604,13 @@ impl GovernanceProgramTest {
         proposal_cookie: &mut ProposalCookie,
         token_owner_record_cookie: &TokenOwnerRecordCookie,
         to_wallet_cookie: &WalletCookie,
-        lamports: u64,
+        satomis: u64,
     ) -> Result<ProposalTransactionCookie, ProgramError> {
         let treasury_address =
             get_native_treasury_address(&self.program_id, &governance_cookie.address);
 
         let mut transfer_ix =
-            system_instruction::transfer(&treasury_address, &to_wallet_cookie.address, lamports);
+            system_instruction::transfer(&treasury_address, &to_wallet_cookie.address, satomis);
 
         self.with_proposal_transaction(
             proposal_cookie,

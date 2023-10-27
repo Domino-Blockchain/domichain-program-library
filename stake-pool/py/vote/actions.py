@@ -22,7 +22,7 @@ async def create_vote(
             sys.CreateAccountParams(
                 from_pubkey=payer.public_key,
                 new_account_pubkey=vote.public_key,
-                lamports=resp['result'],
+                satomis=resp['result'],
                 space=VOTE_STATE_LEN,
                 program_id=VOTE_PROGRAM_ID,
             )

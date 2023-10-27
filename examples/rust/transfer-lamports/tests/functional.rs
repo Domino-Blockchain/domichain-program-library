@@ -5,32 +5,32 @@ use {
     },
     domichain_program_test::*,
     solana_sdk::{account::Account, signature::Signer, transaction::Transaction},
-    spl_example_transfer_lamports::processor::process_instruction,
+    spl_example_transfer_satomis::processor::process_instruction,
     std::str::FromStr,
 };
 
 #[tokio::test]
-async fn test_lamport_transfer() {
-    let program_id = Pubkey::from_str("TransferLamports111111111111111111111111111").unwrap();
+async fn test_satomi_transfer() {
+    let program_id = Pubkey::from_str("TransferSatomis111111111111111111111111111").unwrap();
     let source_pubkey = Pubkey::new_unique();
     let destination_pubkey = Pubkey::new_unique();
     let mut program_test = ProgramTest::new(
-        "spl_example_transfer_lamports",
+        "spl_example_transfer_satomis",
         program_id,
         processor!(process_instruction),
     );
     program_test.add_account(
         source_pubkey,
         Account {
-            lamports: 5,
-            owner: program_id, // Can only withdraw lamports from accounts owned by the program
+            satomis: 5,
+            owner: program_id, // Can only withdraw satomis from accounts owned by the program
             ..Account::default()
         },
     );
     program_test.add_account(
         destination_pubkey,
         Account {
-            lamports: 890_875,
+            satomis: 890_875,
             ..Account::default()
         },
     );

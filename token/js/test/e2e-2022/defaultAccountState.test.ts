@@ -16,7 +16,7 @@ import {
     updateDefaultAccountState,
     ExtensionType,
 } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 const TEST_STATE = AccountState.Frozen;
 const TEST_TOKEN_DECIMALS = 2;
@@ -29,7 +29,7 @@ describe('defaultAccountState', () => {
     let freezeAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         mintAuthority = Keypair.generate();
         freezeAuthority = Keypair.generate();
     });
@@ -37,14 +37,14 @@ describe('defaultAccountState', () => {
         const mintKeypair = Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
-        const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+        const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
                 fromPubkey: payer.publicKey,
                 newAccountPubkey: mint,
                 space: mintLen,
-                lamports,
+                satomis,
                 programId: TEST_PROGRAM_ID,
             }),
             createInitializeDefaultAccountStateInstruction(mint, TEST_STATE, TEST_PROGRAM_ID),

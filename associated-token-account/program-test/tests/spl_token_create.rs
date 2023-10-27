@@ -60,7 +60,7 @@ async fn success_create() {
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len);
     assert_eq!(associated_account.owner, spl_token::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 }
 
 #[tokio::test]
@@ -109,5 +109,5 @@ async fn success_using_deprecated_instruction_creator() {
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len);
     assert_eq!(associated_account.owner, spl_token::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 }

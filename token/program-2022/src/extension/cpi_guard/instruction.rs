@@ -17,7 +17,7 @@ use {
 pub enum CpiGuardInstruction {
     /// Lock certain token operations from taking place within CPI for this Account, namely:
     /// * Transfer and Burn must go through a delegate.
-    /// * CloseAccount can only return lamports to owner.
+    /// * CloseAccount can only return satomis to owner.
     /// * SetAuthority can only be used to remove an existing close authority.
     /// * Approve is disallowed entirely.
     ///

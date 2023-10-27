@@ -13,7 +13,7 @@ use {
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
     },
-    spl_stake_pool::{error::StakePoolError, id, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error::StakePoolError, id, instruction, state, MINIMUM_RESERVE_SATOMIS},
 };
 
 async fn setup(
@@ -35,7 +35,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -59,7 +59,7 @@ async fn setup(
         withdrawer: user.pubkey(),
     };
 
-    let stake_lamports = create_independent_stake_account(
+    let stake_satomis = create_independent_stake_account(
         &mut context.banks_client,
         &context.payer,
         &context.last_blockhash,
@@ -114,7 +114,7 @@ async fn setup(
         user,
         deposit_stake.pubkey(),
         pool_token_account.pubkey(),
-        stake_lamports,
+        stake_satomis,
     )
 }
 
@@ -127,7 +127,7 @@ async fn success_with_preferred_deposit() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     stake_pool_accounts
@@ -163,7 +163,7 @@ async fn fail_with_wrong_preferred_deposit() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let preferred_validator = simple_add_validator_to_pool(
@@ -218,7 +218,7 @@ async fn success_with_referral_fee() {
         user,
         deposit_stake,
         pool_token_account,
-        stake_lamports,
+        stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let referrer = Keypair::new();
@@ -279,7 +279,7 @@ async fn success_with_referral_fee() {
         .calc_pool_tokens_sol_deposit_fee(stake_rent)
         .unwrap()
         + stake_pool
-            .calc_pool_tokens_stake_deposit_fee(stake_lamports - stake_rent)
+            .calc_pool_tokens_stake_deposit_fee(stake_satomis - stake_rent)
             .unwrap();
     let referral_fee = stake_pool_accounts.calculate_referral_fee(fee_tokens);
     assert!(referral_fee > 0);
@@ -295,7 +295,7 @@ async fn fail_with_invalid_referrer() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let invalid_token_account = Keypair::new();

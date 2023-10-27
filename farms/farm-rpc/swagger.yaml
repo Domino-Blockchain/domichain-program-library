@@ -1031,7 +1031,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: lamports
+        - name: satomis
           in: query
           schema:
             type: integer
@@ -1063,7 +1063,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: lamports
+        - name: satomis
           in: query
           schema:
             type: integer
@@ -2667,7 +2667,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: lamports
+        - name: satomis
           in: query
           schema:
             type: integer
@@ -2699,7 +2699,7 @@ paths:
           in: query
           schema:
             type: string
-        - name: lamports
+        - name: satomis
           in: query
           schema:
             type: integer

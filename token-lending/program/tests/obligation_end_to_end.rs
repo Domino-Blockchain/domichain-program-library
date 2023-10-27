@@ -37,8 +37,8 @@ async fn test_success() {
     const FEE_AMOUNT: u64 = 100;
     const HOST_FEE_AMOUNT: u64 = 20;
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 100 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 100 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     const USDC_RESERVE_LIQUIDITY_FRACTIONAL: u64 = 1_000 * FRACTIONAL_TO_USDC;
     const USDC_BORROW_AMOUNT_FRACTIONAL: u64 = USDC_RESERVE_LIQUIDITY_FRACTIONAL - FEE_AMOUNT;
@@ -65,8 +65,8 @@ async fn test_success() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             liquidity_mint_decimals: 9,
             config: reserve_config,
@@ -135,13 +135,13 @@ async fn test_success() {
                 &user_transfer_authority_pubkey,
                 &user_accounts_owner_pubkey,
                 &[],
-                SOL_DEPOSIT_AMOUNT_LAMPORTS,
+                SOL_DEPOSIT_AMOUNT_SATOMIS,
             )
             .unwrap(),
             // 4
             deposit_obligation_collateral(
                 spl_token_lending::id(),
-                SOL_DEPOSIT_AMOUNT_LAMPORTS,
+                SOL_DEPOSIT_AMOUNT_SATOMIS,
                 sol_test_reserve.user_collateral_pubkey,
                 sol_test_reserve.collateral_supply_pubkey,
                 sol_test_reserve.pubkey,
@@ -218,7 +218,7 @@ async fn test_success() {
             // 13
             withdraw_obligation_collateral(
                 spl_token_lending::id(),
-                SOL_DEPOSIT_AMOUNT_LAMPORTS,
+                SOL_DEPOSIT_AMOUNT_SATOMIS,
                 sol_test_reserve.collateral_supply_pubkey,
                 sol_test_reserve.user_collateral_pubkey,
                 sol_test_reserve.pubkey,

@@ -146,7 +146,7 @@ Signature: 3P4o4Fxnm4yvB9i6jQzyniqNUqnNLsaQZmCw5q5n5J8nwv9wxJ73ZRYH3XNFT4ferDbCX
 ```
 
 After the upgrade, the user may clean up the old token account to recover the
-rent-exempt lamports.
+rent-exempt satomis.
 
 ```sh
 $ spl-token close o1d5Jt8z8vszx4FJ2gNJ3FZH34cer9sbparg7GVt7qm

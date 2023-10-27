@@ -27,7 +27,7 @@ async fn test_success() {
     // limit to track compute unit increase
     test.set_compute_max_units(30_000);
 
-    const SOL_RESERVE_LIQUIDITY_LAMPORTS: u64 = 100 * LAMPORTS_TO_SOL;
+    const SOL_RESERVE_LIQUIDITY_SATOMIS: u64 = 100 * SATOMIS_TO_SOL;
     const USDC_RESERVE_LIQUIDITY_FRACTIONAL: u64 = 100 * FRACTIONAL_TO_USDC;
     const BORROW_AMOUNT: u64 = 100;
 
@@ -69,7 +69,7 @@ async fn test_success() {
         &user_accounts_owner,
         AddReserveArgs {
             borrow_amount: BORROW_AMOUNT,
-            liquidity_amount: SOL_RESERVE_LIQUIDITY_LAMPORTS,
+            liquidity_amount: SOL_RESERVE_LIQUIDITY_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: reserve_config,

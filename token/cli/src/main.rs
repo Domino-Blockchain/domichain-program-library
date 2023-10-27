@@ -305,8 +305,8 @@ pub(crate) async fn check_fee_payer_balance(
         Err(format!(
             "Fee payer, {}, has insufficient balance: {} required, {} available",
             config.fee_payer()?.pubkey(),
-            lamports_to_sol(required_balance),
-            lamports_to_sol(balance)
+            satomis_to_sol(required_balance),
+            satomis_to_sol(balance)
         )
         .into())
     } else {
@@ -324,8 +324,8 @@ async fn check_wallet_balance(
         Err(format!(
             "Wallet {}, has insufficient balance: {} required, {} available",
             wallet,
-            lamports_to_sol(required_balance),
-            lamports_to_sol(balance)
+            satomis_to_sol(required_balance),
+            satomis_to_sol(balance)
         )
         .into())
     } else {
@@ -1387,7 +1387,7 @@ async fn command_wrap(
     immutable_owner: bool,
     bulk_signers: BulkSigners,
 ) -> CommandResult {
-    let lamports = sol_to_lamports(sol);
+    let satomis = sol_to_satomis(sol);
     let token = native_token_client_from_config(config)?;
 
     let account =
@@ -1402,7 +1402,7 @@ async fn command_wrap(
             }
         }
 
-        check_wallet_balance(config, &wallet_address, lamports).await?;
+        check_wallet_balance(config, &wallet_address, satomis).await?;
     }
 
     let res = if immutable_owner {
@@ -1415,12 +1415,12 @@ async fn command_wrap(
         }
 
         token
-            .wrap(&account, &wallet_address, lamports, &bulk_signers)
+            .wrap(&account, &wallet_address, satomis, &bulk_signers)
             .await?
     } else {
         // this case is hit for a token22 ata, which is always immutable. but it does the right thing anyway
         token
-            .wrap_with_mutable_ownership(&account, &wallet_address, lamports, &bulk_signers)
+            .wrap_with_mutable_ownership(&account, &wallet_address, satomis, &bulk_signers)
             .await?
     };
 
@@ -1460,7 +1460,7 @@ async fn command_unwrap(
             }
         }
 
-        if account_data.lamports == 0 {
+        if account_data.satomis == 0 {
             if use_associated_account {
                 return Err("No wrapped SOL in associated account; did you mean to specify an auxiliary address?".to_string().into());
             } else {
@@ -1470,7 +1470,7 @@ async fn command_unwrap(
 
         println_display(
             config,
-            format!("  Amount: {} SOL", lamports_to_sol(account_data.lamports)),
+            format!("  Amount: {} SOL", satomis_to_sol(account_data.satomis)),
         );
     }
 
@@ -3336,7 +3336,7 @@ fn app<'a, 'b>(
         )
         .subcommand(
             SubCommand::with_name(CommandName::SyncNative.into())
-                .about("Sync a native SOL token account to its underlying lamports")
+                .about("Sync a native SOL token account to its underlying satomis")
                 .arg(
                     owner_address_arg()
                         .index(1)
@@ -5364,14 +5364,14 @@ mod tests {
                 .get_account(&create_auxiliary_account(&config, &payer, token).await)
                 .await
                 .unwrap()
-                .lamports;
+                .satomis;
 
             for recipient in [system_recipient, wsol_recipient] {
                 let base_balance = config
                     .rpc_client
                     .get_account(&recipient)
                     .await
-                    .map(|account| account.lamports)
+                    .map(|account| account.satomis)
                     .unwrap_or(0);
 
                 let source = create_auxiliary_account(&config, &payer, token).await;
@@ -5393,7 +5393,7 @@ mod tests {
 
                 let recipient_data = config.rpc_client.get_account(&recipient).await.unwrap();
 
-                assert_eq!(recipient_data.lamports, base_balance + token_rent_amount);
+                assert_eq!(recipient_data.satomis, base_balance + token_rent_amount);
                 if recipient == wsol_recipient {
                     let recipient_account =
                         StateWithExtensionsOwned::<Account>::unpack(recipient_data.data).unwrap();

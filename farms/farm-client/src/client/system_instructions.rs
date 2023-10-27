@@ -16,20 +16,20 @@ impl FarmClient {
         &self,
         wallet_address: &Pubkey,
         new_account_address: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         space: usize,
         owner: &Pubkey,
     ) -> Result<Instruction, FarmClientError> {
-        let lamports = if lamports == 0 {
+        let satomis = if satomis == 0 {
             self.rpc_client
                 .get_minimum_balance_for_rent_exemption(space)?
         } else {
-            lamports
+            satomis
         };
         Ok(system_instruction::create_account(
             wallet_address,
             new_account_address,
-            lamports,
+            satomis,
             space as u64,
             owner,
         ))
@@ -54,15 +54,15 @@ impl FarmClient {
         wallet_address: &Pubkey,
         base_address: &Pubkey,
         seed: &str,
-        lamports: u64,
+        satomis: u64,
         space: usize,
         owner: &Pubkey,
     ) -> Result<Instruction, FarmClientError> {
-        let lamports = if lamports == 0 {
+        let satomis = if satomis == 0 {
             self.rpc_client
                 .get_minimum_balance_for_rent_exemption(space)?
         } else {
-            lamports
+            satomis
         };
         let to_pubkey = Pubkey::create_with_seed(base_address, seed, owner)?;
         Ok(system_instruction::create_account_with_seed(
@@ -70,7 +70,7 @@ impl FarmClient {
             &to_pubkey,
             base_address,
             seed,
-            lamports,
+            satomis,
             space as u64,
             owner,
         ))

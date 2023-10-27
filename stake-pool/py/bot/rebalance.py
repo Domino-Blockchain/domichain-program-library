@@ -7,7 +7,7 @@ from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
 from solana.rpc.commitment import Confirmed
 
-from stake.constants import STAKE_LEN, LAMPORTS_PER_SOL
+from stake.constants import STAKE_LEN, SATOMIS_PER_SOL
 from stake_pool.actions import decrease_validator_stake, increase_validator_stake, update_stake_pool
 from stake_pool.constants import MINIMUM_ACTIVE_STAKE
 from stake_pool.state import StakePool, ValidatorList
@@ -46,55 +46,55 @@ async def rebalance(endpoint: str, stake_pool_address: PublicKey, staker: Keypai
 
     resp = await async_client.get_minimum_balance_for_rent_exemption(STAKE_LEN)
     stake_rent_exemption = resp['result']
-    retained_reserve_lamports = int(retained_reserve_amount * LAMPORTS_PER_SOL)
+    retained_reserve_satomis = int(retained_reserve_amount * SATOMIS_PER_SOL)
 
     resp = await async_client.get_account_info(stake_pool.validator_list, commitment=Confirmed)
     data = resp['result']['value']['data']
     validator_list = ValidatorList.decode(data[0], data[1])
 
     print('Stake pool stats:')
-    print(f'* {stake_pool.total_lamports} total lamports')
+    print(f'* {stake_pool.total_satomis} total satomis')
     num_validators = len(validator_list.validators)
     print(f'* {num_validators} validators')
-    print(f'* Retaining {retained_reserve_lamports} lamports in the reserve')
-    lamports_per_validator = (stake_pool.total_lamports - retained_reserve_lamports) // num_validators
+    print(f'* Retaining {retained_reserve_satomis} satomis in the reserve')
+    satomis_per_validator = (stake_pool.total_satomis - retained_reserve_satomis) // num_validators
     num_increases = sum([
         1 for validator in validator_list.validators
-        if validator.transient_stake_lamports == 0 and validator.active_stake_lamports < lamports_per_validator
+        if validator.transient_stake_satomis == 0 and validator.active_stake_satomis < satomis_per_validator
     ])
-    total_usable_lamports = stake_pool.total_lamports - retained_reserve_lamports - num_increases * stake_rent_exemption
-    lamports_per_validator = total_usable_lamports // num_validators
-    print(f'* {lamports_per_validator} lamports desired per validator')
+    total_usable_satomis = stake_pool.total_satomis - retained_reserve_satomis - num_increases * stake_rent_exemption
+    satomis_per_validator = total_usable_satomis // num_validators
+    print(f'* {satomis_per_validator} satomis desired per validator')
 
     futures = []
     for validator in validator_list.validators:
-        if validator.transient_stake_lamports != 0:
-            print(f'Skipping {validator.vote_account_address}: {validator.transient_stake_lamports} transient lamports')
+        if validator.transient_stake_satomis != 0:
+            print(f'Skipping {validator.vote_account_address}: {validator.transient_stake_satomis} transient satomis')
         else:
-            if validator.active_stake_lamports > lamports_per_validator:
-                lamports_to_decrease = validator.active_stake_lamports - lamports_per_validator
-                if lamports_to_decrease <= stake_rent_exemption:
+            if validator.active_stake_satomis > satomis_per_validator:
+                satomis_to_decrease = validator.active_stake_satomis - satomis_per_validator
+                if satomis_to_decrease <= stake_rent_exemption:
                     print(f'Skipping decrease on {validator.vote_account_address}, \
-currently at {validator.active_stake_lamports} lamports, \
-decrease of {lamports_to_decrease} below the rent exmption')
+currently at {validator.active_stake_satomis} satomis, \
+decrease of {satomis_to_decrease} below the rent exmption')
                 else:
                     futures.append(decrease_validator_stake(
                         async_client, staker, staker, stake_pool_address,
-                        validator.vote_account_address, lamports_to_decrease
+                        validator.vote_account_address, satomis_to_decrease
                     ))
-            elif validator.active_stake_lamports < lamports_per_validator:
-                lamports_to_increase = lamports_per_validator - validator.active_stake_lamports
-                if lamports_to_increase < MINIMUM_ACTIVE_STAKE:
+            elif validator.active_stake_satomis < satomis_per_validator:
+                satomis_to_increase = satomis_per_validator - validator.active_stake_satomis
+                if satomis_to_increase < MINIMUM_ACTIVE_STAKE:
                     print(f'Skipping increase on {validator.vote_account_address}, \
-currently at {validator.active_stake_lamports} lamports, \
-increase of {lamports_to_increase} less than the minimum of {MINIMUM_ACTIVE_STAKE}')
+currently at {validator.active_stake_satomis} satomis, \
+increase of {satomis_to_increase} less than the minimum of {MINIMUM_ACTIVE_STAKE}')
                 else:
                     futures.append(increase_validator_stake(
                         async_client, staker, staker, stake_pool_address,
-                        validator.vote_account_address, lamports_to_increase
+                        validator.vote_account_address, satomis_to_increase
                     ))
             else:
-                print(f'{validator.vote_account_address}: already at {lamports_per_validator}')
+                print(f'{validator.vote_account_address}: already at {satomis_per_validator}')
 
     print('Executing strategy')
     await asyncio.gather(*futures)

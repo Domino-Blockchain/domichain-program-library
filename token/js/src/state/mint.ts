@@ -116,12 +116,12 @@ export function unpackMint(address: PublicKey, info: AccountInfo<Buffer> | null,
     };
 }
 
-/** Get the minimum lamport balance for a mint to be rent exempt
+/** Get the minimum satomi balance for a mint to be rent exempt
  *
  * @param connection Connection to use
  * @param commitment Desired level of commitment for querying the state
  *
- * @return Amount of lamports required
+ * @return Amount of satomis required
  */
 export async function getMinimumBalanceForRentExemptMint(
     connection: Connection,
@@ -130,13 +130,13 @@ export async function getMinimumBalanceForRentExemptMint(
     return await getMinimumBalanceForRentExemptMintWithExtensions(connection, [], commitment);
 }
 
-/** Get the minimum lamport balance for a rent-exempt mint with extensions
+/** Get the minimum satomi balance for a rent-exempt mint with extensions
  *
  * @param connection Connection to use
  * @param extensions Extension types included in the mint
  * @param commitment Desired level of commitment for querying the state
  *
- * @return Amount of lamports required
+ * @return Amount of satomis required
  */
 export async function getMinimumBalanceForRentExemptMintWithExtensions(
     connection: Connection,

@@ -15,7 +15,7 @@ use {
         stake,
         transaction::TransactionError,
     },
-    spl_stake_pool::{error::StakePoolError, state::StakePool, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error::StakePoolError, state::StakePool, MINIMUM_RESERVE_SATOMIS},
     std::num::NonZeroU32,
 };
 
@@ -36,7 +36,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -150,7 +150,7 @@ async fn success() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(stake_pool.data.as_slice()).unwrap();
-    assert_eq!(pre_balance, stake_pool.total_lamports);
+    assert_eq!(pre_balance, stake_pool.total_satomis);
 
     let pre_token_supply = get_token_supply(
         &mut context.banks_client,
@@ -203,7 +203,7 @@ async fn success() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(stake_pool.data.as_slice()).unwrap();
-    assert_eq!(post_balance, stake_pool.total_lamports);
+    assert_eq!(post_balance, stake_pool.total_satomis);
 
     let post_fee = get_token_balance(
         &mut context.banks_client,
@@ -218,21 +218,21 @@ async fn success() {
     let actual_fee = post_fee - pre_fee;
     assert_eq!(pool_token_supply - pre_token_supply, actual_fee);
 
-    let expected_fee_lamports = (post_balance - pre_balance) * stake_pool.epoch_fee.numerator
+    let expected_fee_satomis = (post_balance - pre_balance) * stake_pool.epoch_fee.numerator
         / stake_pool.epoch_fee.denominator;
-    let actual_fee_lamports = stake_pool.calc_pool_tokens_for_deposit(actual_fee).unwrap();
-    assert_eq!(actual_fee_lamports, expected_fee_lamports);
+    let actual_fee_satomis = stake_pool.calc_pool_tokens_for_deposit(actual_fee).unwrap();
+    assert_eq!(actual_fee_satomis, expected_fee_satomis);
 
-    let expected_fee = expected_fee_lamports * pool_token_supply / post_balance;
+    let expected_fee = expected_fee_satomis * pool_token_supply / post_balance;
     assert_eq!(expected_fee, actual_fee);
 
     assert_eq!(pool_token_supply, stake_pool.pool_token_supply);
     assert_eq!(pre_token_supply, stake_pool.last_epoch_pool_token_supply);
-    assert_eq!(pre_balance, stake_pool.last_epoch_total_lamports);
+    assert_eq!(pre_balance, stake_pool.last_epoch_total_satomis);
 }
 
 #[tokio::test]
-async fn success_absorbing_extra_lamports() {
+async fn success_absorbing_extra_satomis() {
     let (mut context, mut last_blockhash, stake_pool_accounts, stake_accounts) =
         setup(NUM_VALIDATORS).await;
 
@@ -248,7 +248,7 @@ async fn success_absorbing_extra_lamports() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(stake_pool.data.as_slice()).unwrap();
-    assert_eq!(pre_balance, stake_pool.total_lamports);
+    assert_eq!(pre_balance, stake_pool.total_satomis);
 
     let pre_token_supply = get_token_supply(
         &mut context.banks_client,
@@ -275,8 +275,8 @@ async fn success_absorbing_extra_lamports() {
             .unwrap();
     }
 
-    let extra_lamports = EXTRA_STAKE_AMOUNT * stake_accounts.len() as u64;
-    let expected_fee = stake_pool.calc_epoch_fee_amount(extra_lamports).unwrap();
+    let extra_satomis = EXTRA_STAKE_AMOUNT * stake_accounts.len() as u64;
+    let expected_fee = stake_pool.calc_epoch_fee_amount(extra_satomis).unwrap();
 
     // Update epoch
     let slot = context.genesis_config().epoch_schedule.first_normal_slot;
@@ -303,14 +303,14 @@ async fn success_absorbing_extra_lamports() {
         .await;
     assert!(error.is_none());
 
-    // Check extra lamports are absorbed and fee'd as rewards
+    // Check extra satomis are absorbed and fee'd as rewards
     let post_balance = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(post_balance, pre_balance + extra_lamports);
+    assert_eq!(post_balance, pre_balance + extra_satomis);
     let pool_token_supply = get_token_supply(
         &mut context.banks_client,
         &stake_pool_accounts.pool_mint.pubkey(),
@@ -328,7 +328,7 @@ async fn fail_with_wrong_validator_list() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -362,7 +362,7 @@ async fn fail_with_wrong_pool_fee_account() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -396,7 +396,7 @@ async fn fail_with_wrong_reserve() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

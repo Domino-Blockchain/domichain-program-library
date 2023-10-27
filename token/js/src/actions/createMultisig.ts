@@ -26,14 +26,14 @@ export async function createMultisig(
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID
 ): Promise<PublicKey> {
-    const lamports = await getMinimumBalanceForRentExemptMultisig(connection);
+    const satomis = await getMinimumBalanceForRentExemptMultisig(connection);
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: keypair.publicKey,
             space: MULTISIG_SIZE,
-            lamports,
+            satomis,
             programId,
         }),
         createInitializeMultisigInstruction(keypair.publicKey, signers, m, programId)

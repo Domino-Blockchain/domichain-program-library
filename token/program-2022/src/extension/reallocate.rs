@@ -69,12 +69,12 @@ pub fn process_reallocate(
     );
     token_account_info.realloc(needed_account_len, false)?;
 
-    // if additional lamports needed to remain rent-exempt, transfer them
+    // if additional satomis needed to remain rent-exempt, transfer them
     let rent = Rent::get()?;
     let new_minimum_balance = rent.minimum_balance(needed_account_len);
-    let lamports_diff = new_minimum_balance.saturating_sub(token_account_info.lamports());
+    let satomis_diff = new_minimum_balance.saturating_sub(token_account_info.satomis());
     invoke(
-        &system_instruction::transfer(payer_info.key, token_account_info.key, lamports_diff),
+        &system_instruction::transfer(payer_info.key, token_account_info.key, satomis_diff),
         &[
             payer_info.clone(),
             token_account_info.clone(),

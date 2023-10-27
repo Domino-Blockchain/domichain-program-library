@@ -701,7 +701,7 @@ where
         let account = self.get_associated_token_address(owner);
         match self.get_account_info(&account).await {
             Ok(account) => Ok(account),
-            // AccountInvalidOwner is possible if account already received some lamports.
+            // AccountInvalidOwner is possible if account already received some satomis.
             Err(TokenError::AccountNotFound) | Err(TokenError::AccountInvalidOwner) => {
                 self.create_associated_token_account(owner).await?;
                 self.get_account_info(&account).await
@@ -1003,11 +1003,11 @@ where
         .await
     }
 
-    /// Close an empty account and reclaim its lamports
+    /// Close an empty account and reclaim its satomis
     pub async fn close_account<S: Signers>(
         &self,
         account: &Pubkey,
-        lamports_destination: &Pubkey,
+        satomis_destination: &Pubkey,
         authority: &Pubkey,
         signing_keypairs: &S,
     ) -> TokenResult<T::Output> {
@@ -1017,12 +1017,12 @@ where
         let mut instructions = vec![instruction::close_account(
             &self.program_id,
             account,
-            lamports_destination,
+            satomis_destination,
             authority,
             &multisig_signers,
         )?];
 
-        if let Ok(Some(destination_account)) = self.client.get_account(*lamports_destination).await
+        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await
         {
             if let Ok(destination_obj) =
                 StateWithExtensionsOwned::<Account>::unpack(destination_account.data)
@@ -1030,7 +1030,7 @@ where
                 if destination_obj.base.is_native() {
                     instructions.push(instruction::sync_native(
                         &self.program_id,
-                        lamports_destination,
+                        satomis_destination,
                     )?);
                 }
             }
@@ -1039,11 +1039,11 @@ where
         self.process_ixs(&instructions, signing_keypairs).await
     }
 
-    /// Close an account, reclaiming its lamports and tokens
+    /// Close an account, reclaiming its satomis and tokens
     pub async fn empty_and_close_account<S: Signers>(
         &self,
         account_to_close: &Pubkey,
-        lamports_destination: &Pubkey,
+        satomis_destination: &Pubkey,
         tokens_destination: &Pubkey,
         authority: &Pubkey,
         signing_keypairs: &S,
@@ -1085,12 +1085,12 @@ where
         instructions.push(instruction::close_account(
             &self.program_id,
             account_to_close,
-            lamports_destination,
+            satomis_destination,
             authority,
             &multisig_signers,
         )?);
 
-        if let Ok(Some(destination_account)) = self.client.get_account(*lamports_destination).await
+        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await
         {
             if let Ok(destination_obj) =
                 StateWithExtensionsOwned::<Account>::unpack(destination_account.data)
@@ -1098,7 +1098,7 @@ where
                 if destination_obj.base.is_native() {
                     instructions.push(instruction::sync_native(
                         &self.program_id,
-                        lamports_destination,
+                        satomis_destination,
                     )?);
                 }
             }
@@ -1153,30 +1153,30 @@ where
         .await
     }
 
-    /// Wrap lamports into native account
+    /// Wrap satomis into native account
     pub async fn wrap<S: Signers>(
         &self,
         account: &Pubkey,
         owner: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         signing_keypairs: &S,
     ) -> TokenResult<T::Output> {
         // mutable owner for Tokenkeg, immutable otherwise
         let immutable_owner = self.program_id != spl_token::id();
-        let instructions = self.wrap_ixs(account, owner, lamports, immutable_owner)?;
+        let instructions = self.wrap_ixs(account, owner, satomis, immutable_owner)?;
 
         self.process_ixs(&instructions, signing_keypairs).await
     }
 
-    /// Wrap lamports into a native account that can always have its ownership changed
+    /// Wrap satomis into a native account that can always have its ownership changed
     pub async fn wrap_with_mutable_ownership<S: Signers>(
         &self,
         account: &Pubkey,
         owner: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         signing_keypairs: &S,
     ) -> TokenResult<T::Output> {
-        let instructions = self.wrap_ixs(account, owner, lamports, false)?;
+        let instructions = self.wrap_ixs(account, owner, satomis, false)?;
 
         self.process_ixs(&instructions, signing_keypairs).await
     }
@@ -1185,7 +1185,7 @@ where
         &self,
         account: &Pubkey,
         owner: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         immutable_owner: bool,
     ) -> TokenResult<Vec<Instruction>> {
         if !self.is_native() {
@@ -1194,7 +1194,7 @@ where
 
         let mut instructions = vec![];
         if *account == self.get_associated_token_address(owner) {
-            instructions.push(system_instruction::transfer(owner, account, lamports));
+            instructions.push(system_instruction::transfer(owner, account, satomis));
             instructions.push(create_associated_token_account(
                 &self.payer.pubkey(),
                 owner,
@@ -1212,7 +1212,7 @@ where
             instructions.push(system_instruction::create_account(
                 &self.payer.pubkey(),
                 account,
-                lamports,
+                satomis,
                 space as u64,
                 &self.program_id,
             ));
@@ -1235,7 +1235,7 @@ where
         Ok(instructions)
     }
 
-    /// Sync native account lamports
+    /// Sync native account satomis
     pub async fn sync_native(&self, account: &Pubkey) -> TokenResult<T::Output> {
         self.process_ixs::<[&dyn Signer; 0]>(
             &[instruction::sync_native(&self.program_id, account)?],

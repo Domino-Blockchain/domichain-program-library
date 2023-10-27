@@ -20,7 +20,7 @@ from stake_pool.actions import deposit_sol, create_all, add_validator_to_pool
 from stake_pool.state import Fee
 
 NUM_SLOTS_PER_EPOCH: int = 32
-AIRDROP_LAMPORTS: int = 30_000_000_000
+AIRDROP_SATOMIS: int = 30_000_000_000
 
 
 @pytest.fixture(scope="session")
@@ -65,7 +65,7 @@ async def stake_pool_addresses(
     stake_pool = stake_pool_addresses[0]
     pool_mint = stake_pool_addresses[2]
     token_account = get_associated_token_address(payer.public_key, pool_mint)
-    await deposit_sol(async_client, payer, stake_pool, token_account, AIRDROP_LAMPORTS // 2)
+    await deposit_sol(async_client, payer, stake_pool, token_account, AIRDROP_SATOMIS // 2)
     for validator in validators:
         await add_validator_to_pool(async_client, payer, stake_pool, validator)
     return stake_pool_addresses
@@ -89,7 +89,7 @@ async def async_client(solana_test_validator) -> AsyncIterator[AsyncClient]:
 @pytest_asyncio.fixture
 async def payer(async_client) -> Keypair:
     payer = Keypair()
-    await airdrop(async_client, payer.public_key, AIRDROP_LAMPORTS)
+    await airdrop(async_client, payer.public_key, AIRDROP_SATOMIS)
     return payer
 
 

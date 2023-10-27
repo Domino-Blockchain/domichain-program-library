@@ -1728,7 +1728,7 @@ fn process_modify_reserve_config(
 }
 
 fn assert_rent_exempt(rent: &Rent, account_info: &AccountInfo) -> ProgramResult {
-    if !rent.is_exempt(account_info.lamports(), account_info.data_len()) {
+    if !rent.is_exempt(account_info.satomis(), account_info.data_len()) {
         msg!(&rent.minimum_balance(account_info.data_len()).to_string());
         Err(LendingError::NotRentExempt.into())
     } else {

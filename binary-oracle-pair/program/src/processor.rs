@@ -207,7 +207,7 @@ impl Processor {
         }
 
         // Check if pool account is rent-exempt
-        if !rent.is_exempt(pool_account_info.lamports(), pool_account_info.data_len()) {
+        if !rent.is_exempt(pool_account_info.satomis(), pool_account_info.data_len()) {
             return Err(PoolError::NotRentExempt.into());
         }
 

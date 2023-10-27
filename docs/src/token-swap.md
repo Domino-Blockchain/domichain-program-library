@@ -89,7 +89,7 @@ and "B" for simplicity, requires the following accounts:
 * token program
 
 The pool state account simply needs to be created using
-`system_instruction::create_account` with the correct size and enough lamports
+`system_instruction::create_account` with the correct size and enough satomis
 to be rent-free.
 
 The pool authority is a

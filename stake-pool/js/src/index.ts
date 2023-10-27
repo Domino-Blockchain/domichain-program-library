@@ -14,7 +14,7 @@ import {
   ValidatorAccount,
   addAssociatedTokenAccount,
   arrayChunk,
-  calcLamportsWithdrawAmount,
+  calcSatomisWithdrawAmount,
   findStakeProgramAddress,
   findTransientStakeProgramAddress,
   findWithdrawAuthorityProgramAddress,
@@ -22,8 +22,8 @@ import {
   getValidatorListAccount,
   newStakeAccount,
   prepareWithdrawAccounts,
-  lamportsToSol,
-  solToLamports,
+  satomisToSol,
+  solToSatomis,
   findEphemeralStakeProgramAddress,
 } from './utils';
 import { StakePoolInstruction } from './instructions';
@@ -76,7 +76,7 @@ interface RedelegateProps {
   sourceTransientStakeSeed: number | BN;
   destinationTransientStakeSeed: number | BN;
   ephemeralStakeSeed: number | BN;
-  lamports: number | BN;
+  satomis: number | BN;
 }
 
 /**
@@ -99,7 +99,7 @@ export async function getStakePoolAccount(
     account: {
       data: StakePoolLayout.decode(account.data),
       executable: account.executable,
-      lamports: account.lamports,
+      satomis: account.satomis,
       owner: account.owner,
     },
   };
@@ -167,7 +167,7 @@ export async function getStakePoolAccounts(
       account: {
         data: decodedData,
         executable: a.account.executable,
-        lamports: a.account.lamports,
+        satomis: a.account.satomis,
         owner: a.account.owner,
       },
     };
@@ -265,15 +265,15 @@ export async function depositSol(
   connection: Connection,
   stakePoolAddress: PublicKey,
   from: PublicKey,
-  lamports: number,
+  satomis: number,
   destinationTokenAccount?: PublicKey,
   referrerTokenAccount?: PublicKey,
   depositAuthority?: PublicKey,
 ) {
   const fromBalance = await connection.getBalance(from, 'confirmed');
-  if (fromBalance < lamports) {
+  if (fromBalance < satomis) {
     throw new Error(
-      `Not enough SOL to deposit into pool. Maximum deposit amount is ${lamportsToSol(
+      `Not enough SOL to deposit into pool. Maximum deposit amount is ${satomisToSol(
         fromBalance,
       )} SOL.`,
     );
@@ -294,7 +294,7 @@ export async function depositSol(
     SystemProgram.transfer({
       fromPubkey: from,
       toPubkey: userSolTransfer.publicKey,
-      lamports,
+      satomis,
     }),
   );
 
@@ -324,7 +324,7 @@ export async function depositSol(
       managerFeeAccount: stakePool.managerFeeAccount,
       referralPoolAccount: referrerTokenAccount ?? destinationTokenAccount,
       poolMint: stakePool.poolMint,
-      lamports,
+      satomis,
       withdrawAuthority,
       depositAuthority,
     }),
@@ -352,7 +352,7 @@ export async function withdrawStake(
   validatorComparator?: (_a: ValidatorAccount, _b: ValidatorAccount) => number,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
-  const poolAmount = solToLamports(amount);
+  const poolAmount = solToSatomis(amount);
 
   if (!poolTokenAccount) {
     poolTokenAccount = await Token.getAssociatedTokenAddress(
@@ -376,8 +376,8 @@ export async function withdrawStake(
   // Check withdrawFrom balance
   if (tokenAccount.amount.toNumber() < poolAmount) {
     throw new Error(
-      `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
-        Maximum withdraw amount is ${lamportsToSol(tokenAccount.amount.toNumber())} pool tokens.`,
+      `Not enough token balance to withdraw ${satomisToSol(poolAmount)} pool tokens.
+        Maximum withdraw amount is ${satomisToSol(tokenAccount.amount.toNumber())} pool tokens.`,
     );
   }
 
@@ -429,14 +429,14 @@ export async function withdrawStake(
         throw new Error(`Preferred withdraw valdator's stake account is invalid`);
       }
 
-      const availableForWithdrawal = calcLamportsWithdrawAmount(
+      const availableForWithdrawal = calcSatomisWithdrawAmount(
         stakePool.account.data,
-        stakeAccount.lamports - MINIMUM_ACTIVE_STAKE - stakeAccountRentExemption,
+        stakeAccount.satomis - MINIMUM_ACTIVE_STAKE - stakeAccountRentExemption,
       );
 
       if (availableForWithdrawal < poolAmount) {
         throw new Error(
-          `Not enough lamports available for withdrawal from ${stakeAccountAddress},
+          `Not enough satomis available for withdrawal from ${stakeAccountAddress},
             ${poolAmount} asked, ${availableForWithdrawal} available.`,
         );
       }
@@ -461,15 +461,15 @@ export async function withdrawStake(
       throw new Error('Invalid Stake Account');
     }
 
-    const availableForWithdrawal = calcLamportsWithdrawAmount(
+    const availableForWithdrawal = calcSatomisWithdrawAmount(
       stakePool.account.data,
-      stakeAccount.lamports - MINIMUM_ACTIVE_STAKE - stakeAccountRentExemption,
+      stakeAccount.satomis - MINIMUM_ACTIVE_STAKE - stakeAccountRentExemption,
     );
 
     if (availableForWithdrawal < poolAmount) {
       // noinspection ExceptionCaughtLocallyJS
       throw new Error(
-        `Not enough lamports available for withdrawal from ${stakeAccountAddress},
+        `Not enough satomis available for withdrawal from ${stakeAccountAddress},
           ${poolAmount} asked, ${availableForWithdrawal} available.`,
       );
     }
@@ -520,9 +520,9 @@ export async function withdrawStake(
     if (i > maxWithdrawAccounts) {
       break;
     }
-    // Convert pool tokens amount to lamports
+    // Convert pool tokens amount to satomis
     const solWithdrawAmount = Math.ceil(
-      calcLamportsWithdrawAmount(stakePool.account.data, withdrawAccount.poolAmount),
+      calcSatomisWithdrawAmount(stakePool.account.data, withdrawAccount.poolAmount),
     );
 
     let infoMsg = `Withdrawing ◎${solWithdrawAmount},
@@ -593,7 +593,7 @@ export async function withdrawSol(
   solWithdrawAuthority?: PublicKey,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
-  const poolAmount = solToLamports(amount);
+  const poolAmount = solToSatomis(amount);
 
   const poolTokenAccount = await Token.getAssociatedTokenAddress(
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -614,8 +614,8 @@ export async function withdrawSol(
   // Check withdrawFrom balance
   if (tokenAccount.amount.toNumber() < poolAmount) {
     throw new Error(
-      `Not enough token balance to withdraw ${lamportsToSol(poolAmount)} pool tokens.
-          Maximum withdraw amount is ${lamportsToSol(tokenAccount.amount.toNumber())} pool tokens.`,
+      `Not enough token balance to withdraw ${satomisToSol(poolAmount)} pool tokens.
+          Maximum withdraw amount is ${satomisToSol(tokenAccount.amount.toNumber())} pool tokens.`,
     );
   }
 
@@ -680,7 +680,7 @@ export async function increaseValidatorStake(
   connection: Connection,
   stakePoolAddress: PublicKey,
   validatorVote: PublicKey,
-  lamports: number,
+  satomis: number,
   ephemeralStakeSeed?: number,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
@@ -736,7 +736,7 @@ export async function increaseValidatorStake(
       transientStake,
       validatorStake,
       validatorVote,
-      lamports,
+      satomis,
       ephemeralStake,
       ephemeralStakeSeed,
     });
@@ -752,7 +752,7 @@ export async function increaseValidatorStake(
         transientStake,
         validatorStake,
         validatorVote,
-        lamports,
+        satomis,
       }),
     );
   }
@@ -769,7 +769,7 @@ export async function decreaseValidatorStake(
   connection: Connection,
   stakePoolAddress: PublicKey,
   validatorVote: PublicKey,
-  lamports: number,
+  satomis: number,
   ephemeralStakeSeed?: number,
 ) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
@@ -823,7 +823,7 @@ export async function decreaseValidatorStake(
         withdrawAuthority,
         validatorStake,
         transientStake,
-        lamports,
+        satomis,
         ephemeralStake,
         ephemeralStakeSeed,
       }),
@@ -838,7 +838,7 @@ export async function decreaseValidatorStake(
         withdrawAuthority,
         validatorStake,
         transientStake,
-        lamports,
+        satomis,
       }),
     );
   }
@@ -941,7 +941,7 @@ export async function updateStakePool(
 export async function stakePoolInfo(connection: Connection, stakePoolAddress: PublicKey) {
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
   const reserveAccountStakeAddress = stakePool.account.data.reserveStake;
-  const totalLamports = stakePool.account.data.totalLamports;
+  const totalSatomis = stakePool.account.data.totalSatomis;
   const lastUpdateEpoch = stakePool.account.data.lastUpdateEpoch;
 
   const validatorList = await getValidatorListAccount(
@@ -979,19 +979,19 @@ export async function stakePoolInfo(connection: Connection, stakePoolAddress: Pu
       return {
         voteAccountAddress: validator.voteAccountAddress.toBase58(),
         stakeAccountAddress: stakeAccountAddress.toBase58(),
-        validatorActiveStakeLamports: validator.activeStakeLamports.toString(),
+        validatorActiveStakeSatomis: validator.activeStakeSatomis.toString(),
         validatorLastUpdateEpoch: validator.lastUpdateEpoch.toString(),
-        validatorLamports: validator.activeStakeLamports
-          .add(validator.transientStakeLamports)
+        validatorSatomis: validator.activeStakeSatomis
+          .add(validator.transientStakeSatomis)
           .toString(),
         validatorTransientStakeAccountAddress: transientStakeAccountAddress.toBase58(),
-        validatorTransientStakeLamports: validator.transientStakeLamports.toString(),
+        validatorTransientStakeSatomis: validator.transientStakeSatomis.toString(),
         updateRequired,
       };
     }),
   );
 
-  const totalPoolTokens = lamportsToSol(stakePool.account.data.poolTokenSupply);
+  const totalPoolTokens = satomisToSol(stakePool.account.data.poolTokenSupply);
   const updateRequired = !lastUpdateEpoch.eqn(epochInfo.epoch);
 
   return {
@@ -1004,8 +1004,8 @@ export async function stakePoolInfo(connection: Connection, stakePoolAddress: Pu
     maxValidators: maxNumberOfValidators,
     validatorList: validatorList.account.data.validators.map((validator) => {
       return {
-        activeStakeLamports: validator.activeStakeLamports.toString(),
-        transientStakeLamports: validator.transientStakeLamports.toString(),
+        activeStakeSatomis: validator.activeStakeSatomis.toString(),
+        transientStakeSatomis: validator.transientStakeSatomis.toString(),
         lastUpdateEpoch: validator.lastUpdateEpoch.toString(),
         transientSeedSuffixStart: validator.transientSeedSuffixStart.toString(),
         transientSeedSuffixEnd: validator.transientSeedSuffixEnd.toString(),
@@ -1018,7 +1018,7 @@ export async function stakePoolInfo(connection: Connection, stakePoolAddress: Pu
     poolMint: stakePool.account.data.poolMint.toBase58(),
     managerFeeAccount: stakePool.account.data.managerFeeAccount.toBase58(),
     tokenProgramId: stakePool.account.data.tokenProgramId.toBase58(),
-    totalLamports: stakePool.account.data.totalLamports.toString(),
+    totalSatomis: stakePool.account.data.totalSatomis.toString(),
     poolTokenSupply: stakePool.account.data.poolTokenSupply.toString(),
     lastUpdateEpoch: stakePool.account.data.lastUpdateEpoch.toString(),
     lockup: stakePool.account.data.lockup, // pub lockup: CliStakePoolLockup
@@ -1040,13 +1040,13 @@ export async function stakePoolInfo(connection: Connection, stakePoolAddress: Pu
     solWithdrawalFee: stakePool.account.data.solWithdrawalFee,
     nextSolWithdrawalFee: stakePool.account.data.nextSolWithdrawalFee,
     lastEpochPoolTokenSupply: stakePool.account.data.lastEpochPoolTokenSupply.toString(),
-    lastEpochTotalLamports: stakePool.account.data.lastEpochTotalLamports.toString(),
+    lastEpochTotalSatomis: stakePool.account.data.lastEpochTotalSatomis.toString(),
     details: {
-      reserveStakeLamports: reserveStake?.lamports,
+      reserveStakeSatomis: reserveStake?.satomis,
       reserveAccountStakeAddress: reserveAccountStakeAddress.toBase58(),
       minimumReserveStakeBalance,
       stakeAccounts,
-      totalLamports,
+      totalSatomis,
       totalPoolTokens,
       currentNumberOfValidators,
       maxNumberOfValidators,
@@ -1067,7 +1067,7 @@ export async function redelegate(props: RedelegateProps) {
     destinationVoteAccount,
     destinationTransientStakeSeed,
     ephemeralStakeSeed,
-    lamports,
+    satomis,
   } = props;
   const stakePool = await getStakePoolAccount(connection, stakePoolAddress);
 
@@ -1125,7 +1125,7 @@ export async function redelegate(props: RedelegateProps) {
       destinationTransientStake,
       destinationTransientStakeSeed,
       validator: destinationVoteAccount,
-      lamports,
+      satomis,
     }),
   );
 

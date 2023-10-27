@@ -89,12 +89,12 @@ pub struct StakePool {
     /// Total stake under management.
     /// Note that if `last_update_epoch` does not match the current epoch then
     /// this field may not be accurate
-    pub total_lamports: u64,
+    pub total_satomis: u64,
 
     /// Total supply of pool tokens (should always match the supply in the Pool Mint)
     pub pool_token_supply: u64,
 
-    /// Last epoch the `total_lamports` field was updated
+    /// Last epoch the `total_satomis` field was updated
     pub last_update_epoch: u64,
 
     /// Lockup that all stakes in the pool must have
@@ -153,31 +153,31 @@ pub struct StakePool {
     /// Last epoch's total pool tokens, used only for APR estimation
     pub last_epoch_pool_token_supply: u64,
 
-    /// Last epoch's total lamports, used only for APR estimation
-    pub last_epoch_total_lamports: u64,
+    /// Last epoch's total satomis, used only for APR estimation
+    pub last_epoch_total_satomis: u64,
 }
 impl StakePool {
-    /// calculate the pool tokens that should be minted for a deposit of `stake_lamports`
+    /// calculate the pool tokens that should be minted for a deposit of `stake_satomis`
     #[inline]
-    pub fn calc_pool_tokens_for_deposit(&self, stake_lamports: u64) -> Option<u64> {
-        if self.total_lamports == 0 || self.pool_token_supply == 0 {
-            return Some(stake_lamports);
+    pub fn calc_pool_tokens_for_deposit(&self, stake_satomis: u64) -> Option<u64> {
+        if self.total_satomis == 0 || self.pool_token_supply == 0 {
+            return Some(stake_satomis);
         }
         u64::try_from(
-            (stake_lamports as u128)
+            (stake_satomis as u128)
                 .checked_mul(self.pool_token_supply as u128)?
-                .checked_div(self.total_lamports as u128)?,
+                .checked_div(self.total_satomis as u128)?,
         )
         .ok()
     }
 
-    /// calculate lamports amount on withdrawal
+    /// calculate satomis amount on withdrawal
     #[inline]
-    pub fn calc_lamports_withdraw_amount(&self, pool_tokens: u64) -> Option<u64> {
+    pub fn calc_satomis_withdraw_amount(&self, pool_tokens: u64) -> Option<u64> {
         // `checked_div` returns `None` for a 0 quotient result, but in this
         // case, a return of 0 is valid for small amounts of pool tokens. So
         // we check for that separately
-        let numerator = (pool_tokens as u128).checked_mul(self.total_lamports as u128)?;
+        let numerator = (pool_tokens as u128).checked_mul(self.total_satomis as u128)?;
         let denominator = self.pool_token_supply as u128;
         if numerator < denominator || denominator == 0 {
             Some(0)
@@ -234,22 +234,22 @@ impl StakePool {
 
     /// Calculate the fee in pool tokens that goes to the manager
     ///
-    /// This function assumes that `reward_lamports` has not already been added
-    /// to the stake pool's `total_lamports`
+    /// This function assumes that `reward_satomis` has not already been added
+    /// to the stake pool's `total_satomis`
     #[inline]
-    pub fn calc_epoch_fee_amount(&self, reward_lamports: u64) -> Option<u64> {
-        if reward_lamports == 0 {
+    pub fn calc_epoch_fee_amount(&self, reward_satomis: u64) -> Option<u64> {
+        if reward_satomis == 0 {
             return Some(0);
         }
-        let total_lamports = (self.total_lamports as u128).checked_add(reward_lamports as u128)?;
-        let fee_lamports = self.epoch_fee.apply(reward_lamports)?;
-        if total_lamports == fee_lamports || self.pool_token_supply == 0 {
-            Some(reward_lamports)
+        let total_satomis = (self.total_satomis as u128).checked_add(reward_satomis as u128)?;
+        let fee_satomis = self.epoch_fee.apply(reward_satomis)?;
+        if total_satomis == fee_satomis || self.pool_token_supply == 0 {
+            Some(reward_satomis)
         } else {
             u64::try_from(
                 (self.pool_token_supply as u128)
-                    .checked_mul(fee_lamports)?
-                    .checked_div(total_lamports.checked_sub(fee_lamports)?)?,
+                    .checked_mul(fee_satomis)?
+                    .checked_div(total_satomis.checked_sub(fee_satomis)?)?,
             )
             .ok()
         }
@@ -257,8 +257,8 @@ impl StakePool {
 
     /// Get the current value of pool tokens, rounded up
     #[inline]
-    pub fn get_lamports_per_pool_token(&self) -> Option<u64> {
-        self.total_lamports
+    pub fn get_satomis_per_pool_token(&self) -> Option<u64> {
+        self.total_satomis
             .checked_add(self.pool_token_supply)?
             .checked_sub(1)?
             .checked_div(self.pool_token_supply)
@@ -624,19 +624,19 @@ pub(crate) enum StakeWithdrawSource {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub struct ValidatorStakeInfo {
-    /// Amount of lamports on the validator stake account, including rent
+    /// Amount of satomis on the validator stake account, including rent
     ///
     /// Note that if `last_update_epoch` does not match the current epoch then
     /// this field may not be accurate
-    pub active_stake_lamports: u64,
+    pub active_stake_satomis: u64,
 
     /// Amount of transient stake delegated to this validator
     ///
     /// Note that if `last_update_epoch` does not match the current epoch then
     /// this field may not be accurate
-    pub transient_stake_lamports: u64,
+    pub transient_stake_satomis: u64,
 
-    /// Last epoch the active and transient stake lamports fields were updated
+    /// Last epoch the active and transient stake satomis fields were updated
     pub last_update_epoch: u64,
 
     /// Transient account seed suffix, used to derive the transient stake account address
@@ -656,10 +656,10 @@ pub struct ValidatorStakeInfo {
 }
 
 impl ValidatorStakeInfo {
-    /// Get the total lamports on this validator (active and transient)
-    pub fn stake_lamports(&self) -> Result<u64, StakePoolError> {
-        self.active_stake_lamports
-            .checked_add(self.transient_stake_lamports)
+    /// Get the total satomis on this validator (active and transient)
+    pub fn stake_satomis(&self) -> Result<u64, StakePoolError> {
+        self.active_stake_satomis
+            .checked_add(self.transient_stake_satomis)
             .ok_or(StakePoolError::CalculationFailure)
     }
 
@@ -674,17 +674,17 @@ impl ValidatorStakeInfo {
     }
 
     /// Performs a comparison, used to check if this validator stake
-    /// info has more active lamports than some limit
-    pub fn active_lamports_greater_than(data: &[u8], lamports: &u64) -> bool {
+    /// info has more active satomis than some limit
+    pub fn active_satomis_greater_than(data: &[u8], satomis: &u64) -> bool {
         // without this unwrap, compute usage goes up significantly
-        u64::try_from_slice(&data[0..8]).unwrap() > *lamports
+        u64::try_from_slice(&data[0..8]).unwrap() > *satomis
     }
 
     /// Performs a comparison, used to check if this validator stake
-    /// info has more transient lamports than some limit
-    pub fn transient_lamports_greater_than(data: &[u8], lamports: &u64) -> bool {
+    /// info has more transient satomis than some limit
+    pub fn transient_satomis_greater_than(data: &[u8], satomis: &u64) -> bool {
         // without this unwrap, compute usage goes up significantly
-        u64::try_from_slice(&data[8..16]).unwrap() > *lamports
+        u64::try_from_slice(&data[8..16]).unwrap() > *satomis
     }
 
     /// Check that the validator stake info is valid
@@ -751,7 +751,7 @@ impl ValidatorList {
 
     /// Check if the list has any active stake
     pub fn has_active_stake(&self) -> bool {
-        self.validators.iter().any(|x| x.active_stake_lamports > 0)
+        self.validators.iter().any(|x| x.active_stake_satomis > 0)
     }
 }
 
@@ -981,7 +981,7 @@ mod test {
         domichain_program::{
             borsh::{get_instance_packed_len, get_packed_len, try_from_slice_unchecked},
             clock::{DEFAULT_SLOTS_PER_EPOCH, DEFAULT_S_PER_SLOT, SECONDS_PER_DAY},
-            native_token::LAMPORTS_PER_SOL,
+            native_token::SATOMIS_PER_SOL,
         },
     };
 
@@ -1005,8 +1005,8 @@ mod test {
                 ValidatorStakeInfo {
                     status: StakeStatus::Active,
                     vote_account_address: Pubkey::new_from_array([1; 32]),
-                    active_stake_lamports: u64::from_le_bytes([255; 8]),
-                    transient_stake_lamports: u64::from_le_bytes([128; 8]),
+                    active_stake_satomis: u64::from_le_bytes([255; 8]),
+                    transient_stake_satomis: u64::from_le_bytes([128; 8]),
                     last_update_epoch: u64::from_le_bytes([64; 8]),
                     transient_seed_suffix: 0,
                     unused: 0,
@@ -1015,8 +1015,8 @@ mod test {
                 ValidatorStakeInfo {
                     status: StakeStatus::DeactivatingTransient,
                     vote_account_address: Pubkey::new_from_array([2; 32]),
-                    active_stake_lamports: 998877665544,
-                    transient_stake_lamports: 222222222,
+                    active_stake_satomis: 998877665544,
+                    transient_stake_satomis: 222222222,
                     last_update_epoch: 11223445566,
                     transient_seed_suffix: 0,
                     unused: 0,
@@ -1025,8 +1025,8 @@ mod test {
                 ValidatorStakeInfo {
                     status: StakeStatus::ReadyForRemoval,
                     vote_account_address: Pubkey::new_from_array([3; 32]),
-                    active_stake_lamports: 0,
-                    transient_stake_lamports: 0,
+                    active_stake_satomis: 0,
+                    transient_stake_satomis: 0,
                     last_update_epoch: 999999999999999,
                     transient_seed_suffix: 0,
                     unused: 0,
@@ -1076,7 +1076,7 @@ mod test {
         let mut validator_list = test_validator_list(max_validators);
         assert!(validator_list.has_active_stake());
         for validator in validator_list.validators.iter_mut() {
-            validator.active_stake_lamports = 0;
+            validator.active_stake_satomis = 0;
         }
         assert!(!validator_list.has_active_stake());
     }
@@ -1161,11 +1161,11 @@ mod test {
     }
 
     prop_compose! {
-        fn total_stake_and_rewards()(total_lamports in 1..u64::MAX)(
-            total_lamports in Just(total_lamports),
-            rewards in 0..=total_lamports,
+        fn total_stake_and_rewards()(total_satomis in 1..u64::MAX)(
+            total_satomis in Just(total_satomis),
+            rewards in 0..=total_satomis,
         ) -> (u64, u64) {
-            (total_lamports - rewards, rewards)
+            (total_satomis - rewards, rewards)
         }
     }
 
@@ -1177,21 +1177,21 @@ mod test {
             denominator: 10,
         };
         let mut stake_pool = StakePool {
-            total_lamports: 100 * LAMPORTS_PER_SOL,
-            pool_token_supply: 100 * LAMPORTS_PER_SOL,
+            total_satomis: 100 * SATOMIS_PER_SOL,
+            pool_token_supply: 100 * SATOMIS_PER_SOL,
             epoch_fee,
             ..StakePool::default()
         };
-        let reward_lamports = 10 * LAMPORTS_PER_SOL;
-        let pool_token_fee = stake_pool.calc_epoch_fee_amount(reward_lamports).unwrap();
+        let reward_satomis = 10 * SATOMIS_PER_SOL;
+        let pool_token_fee = stake_pool.calc_epoch_fee_amount(reward_satomis).unwrap();
 
-        stake_pool.total_lamports += reward_lamports;
+        stake_pool.total_satomis += reward_satomis;
         stake_pool.pool_token_supply += pool_token_fee;
 
-        let fee_lamports = stake_pool
-            .calc_lamports_withdraw_amount(pool_token_fee)
+        let fee_satomis = stake_pool
+            .calc_satomis_withdraw_amount(pool_token_fee)
             .unwrap();
-        assert_eq!(fee_lamports, LAMPORTS_PER_SOL - 1); // off-by-one due to truncation
+        assert_eq!(fee_satomis, SATOMIS_PER_SOL - 1); // off-by-one due to truncation
     }
 
     #[test]
@@ -1204,14 +1204,14 @@ mod test {
             epoch_fee,
             ..StakePool::default()
         };
-        let fee_lamports = stake_pool.calc_lamports_withdraw_amount(0).unwrap();
-        assert_eq!(fee_lamports, 0);
+        let fee_satomis = stake_pool.calc_satomis_withdraw_amount(0).unwrap();
+        assert_eq!(fee_satomis, 0);
     }
 
     #[test]
     fn divide_by_zero_fee() {
         let stake_pool = StakePool {
-            total_lamports: 0,
+            total_satomis: 0,
             epoch_fee: Fee {
                 numerator: 1,
                 denominator: 10,
@@ -1227,15 +1227,15 @@ mod test {
     fn approximate_apr_calculation() {
         // 8% / year means roughly .044% / epoch
         let stake_pool = StakePool {
-            last_epoch_total_lamports: 100_000,
+            last_epoch_total_satomis: 100_000,
             last_epoch_pool_token_supply: 100_000,
-            total_lamports: 100_044,
+            total_satomis: 100_044,
             pool_token_supply: 100_000,
             ..StakePool::default()
         };
         let pool_token_value =
-            stake_pool.total_lamports as f64 / stake_pool.pool_token_supply as f64;
-        let last_epoch_pool_token_value = stake_pool.last_epoch_total_lamports as f64
+            stake_pool.total_satomis as f64 / stake_pool.pool_token_supply as f64;
+        let last_epoch_pool_token_value = stake_pool.last_epoch_total_satomis as f64
             / stake_pool.last_epoch_pool_token_supply as f64;
         let epoch_rate = pool_token_value / last_epoch_pool_token_value - 1.0;
         const SECONDS_PER_EPOCH: f64 = DEFAULT_SLOTS_PER_EPOCH as f64 * DEFAULT_S_PER_SLOT;
@@ -1249,72 +1249,72 @@ mod test {
         #[test]
         fn fee_calculation(
             (numerator, denominator) in fee(),
-            (total_lamports, reward_lamports) in total_stake_and_rewards(),
+            (total_satomis, reward_satomis) in total_stake_and_rewards(),
         ) {
             let epoch_fee = Fee { denominator, numerator };
             let mut stake_pool = StakePool {
-                total_lamports,
-                pool_token_supply: total_lamports,
+                total_satomis,
+                pool_token_supply: total_satomis,
                 epoch_fee,
                 ..StakePool::default()
             };
-            let pool_token_fee = stake_pool.calc_epoch_fee_amount(reward_lamports).unwrap();
+            let pool_token_fee = stake_pool.calc_epoch_fee_amount(reward_satomis).unwrap();
 
-            stake_pool.total_lamports += reward_lamports;
+            stake_pool.total_satomis += reward_satomis;
             stake_pool.pool_token_supply += pool_token_fee;
 
-            let fee_lamports = stake_pool.calc_lamports_withdraw_amount(pool_token_fee).unwrap();
-            let max_fee_lamports = u64::try_from((reward_lamports as u128) * (epoch_fee.numerator as u128) / (epoch_fee.denominator as u128)).unwrap();
-            assert!(max_fee_lamports >= fee_lamports,
+            let fee_satomis = stake_pool.calc_satomis_withdraw_amount(pool_token_fee).unwrap();
+            let max_fee_satomis = u64::try_from((reward_satomis as u128) * (epoch_fee.numerator as u128) / (epoch_fee.denominator as u128)).unwrap();
+            assert!(max_fee_satomis >= fee_satomis,
                 "Max possible fee must always be greater than or equal to what is actually withdrawn, max {} actual {}",
-                max_fee_lamports,
-                fee_lamports);
+                max_fee_satomis,
+                fee_satomis);
 
             // since we do two "flooring" conversions, the max epsilon should be
-            // correct up to 2 lamports (one for each floor division), plus a
+            // correct up to 2 satomis (one for each floor division), plus a
             // correction for huge discrepancies between rewards and total stake
-            let epsilon = 2 + reward_lamports / total_lamports;
-            assert!(max_fee_lamports - fee_lamports <= epsilon,
-                "Max expected fee in lamports {}, actually receive {}, epsilon {}",
-                max_fee_lamports, fee_lamports, epsilon);
+            let epsilon = 2 + reward_satomis / total_satomis;
+            assert!(max_fee_satomis - fee_satomis <= epsilon,
+                "Max expected fee in satomis {}, actually receive {}, epsilon {}",
+                max_fee_satomis, fee_satomis, epsilon);
         }
     }
 
     prop_compose! {
-        fn total_tokens_and_deposit()(total_lamports in 1..u64::MAX)(
-            total_lamports in Just(total_lamports),
-            pool_token_supply in 1..=total_lamports,
-            deposit_lamports in 1..total_lamports,
+        fn total_tokens_and_deposit()(total_satomis in 1..u64::MAX)(
+            total_satomis in Just(total_satomis),
+            pool_token_supply in 1..=total_satomis,
+            deposit_satomis in 1..total_satomis,
         ) -> (u64, u64, u64) {
-            (total_lamports - deposit_lamports, pool_token_supply.saturating_sub(deposit_lamports).max(1), deposit_lamports)
+            (total_satomis - deposit_satomis, pool_token_supply.saturating_sub(deposit_satomis).max(1), deposit_satomis)
         }
     }
 
     proptest! {
         #[test]
         fn deposit_and_withdraw(
-            (total_lamports, pool_token_supply, deposit_stake) in total_tokens_and_deposit()
+            (total_satomis, pool_token_supply, deposit_stake) in total_tokens_and_deposit()
         ) {
             let mut stake_pool = StakePool {
-                total_lamports,
+                total_satomis,
                 pool_token_supply,
                 ..StakePool::default()
             };
             let deposit_result = stake_pool.calc_pool_tokens_for_deposit(deposit_stake).unwrap();
             prop_assume!(deposit_result > 0);
-            stake_pool.total_lamports += deposit_stake;
+            stake_pool.total_satomis += deposit_stake;
             stake_pool.pool_token_supply += deposit_result;
-            let withdraw_result = stake_pool.calc_lamports_withdraw_amount(deposit_result).unwrap();
+            let withdraw_result = stake_pool.calc_satomis_withdraw_amount(deposit_result).unwrap();
             assert!(withdraw_result <= deposit_stake);
 
             // also test splitting the withdrawal in two operations
             if deposit_result >= 2 {
                 let first_half_deposit = deposit_result / 2;
-                let first_withdraw_result = stake_pool.calc_lamports_withdraw_amount(first_half_deposit).unwrap();
-                stake_pool.total_lamports -= first_withdraw_result;
+                let first_withdraw_result = stake_pool.calc_satomis_withdraw_amount(first_half_deposit).unwrap();
+                stake_pool.total_satomis -= first_withdraw_result;
                 stake_pool.pool_token_supply -= first_half_deposit;
                 let second_half_deposit = deposit_result - first_half_deposit; // do the whole thing
-                let second_withdraw_result = stake_pool.calc_lamports_withdraw_amount(second_half_deposit).unwrap();
+                let second_withdraw_result = stake_pool.calc_satomis_withdraw_amount(second_half_deposit).unwrap();
                 assert!(first_withdraw_result + second_withdraw_result <= deposit_stake);
             }
         }
@@ -1322,11 +1322,11 @@ mod test {
 
     #[test]
     fn specific_split_withdrawal() {
-        let total_lamports = 1_100_000_000_000;
+        let total_satomis = 1_100_000_000_000;
         let pool_token_supply = 1_000_000_000_000;
         let deposit_stake = 3;
         let mut stake_pool = StakePool {
-            total_lamports,
+            total_satomis,
             pool_token_supply,
             ..StakePool::default()
         };
@@ -1334,52 +1334,52 @@ mod test {
             .calc_pool_tokens_for_deposit(deposit_stake)
             .unwrap();
         assert!(deposit_result > 0);
-        stake_pool.total_lamports += deposit_stake;
+        stake_pool.total_satomis += deposit_stake;
         stake_pool.pool_token_supply += deposit_result;
         let withdraw_result = stake_pool
-            .calc_lamports_withdraw_amount(deposit_result / 2)
+            .calc_satomis_withdraw_amount(deposit_result / 2)
             .unwrap();
         assert!(withdraw_result * 2 <= deposit_stake);
     }
 
     #[test]
     fn withdraw_all() {
-        let total_lamports = 1_100_000_000_000;
+        let total_satomis = 1_100_000_000_000;
         let pool_token_supply = 1_000_000_000_000;
         let mut stake_pool = StakePool {
-            total_lamports,
+            total_satomis,
             pool_token_supply,
             ..StakePool::default()
         };
         // take everything out at once
         let withdraw_result = stake_pool
-            .calc_lamports_withdraw_amount(pool_token_supply)
+            .calc_satomis_withdraw_amount(pool_token_supply)
             .unwrap();
-        assert_eq!(stake_pool.total_lamports, withdraw_result);
+        assert_eq!(stake_pool.total_satomis, withdraw_result);
 
         // take out 1, then the rest
-        let withdraw_result = stake_pool.calc_lamports_withdraw_amount(1).unwrap();
-        stake_pool.total_lamports -= withdraw_result;
+        let withdraw_result = stake_pool.calc_satomis_withdraw_amount(1).unwrap();
+        stake_pool.total_satomis -= withdraw_result;
         stake_pool.pool_token_supply -= 1;
         let withdraw_result = stake_pool
-            .calc_lamports_withdraw_amount(stake_pool.pool_token_supply)
+            .calc_satomis_withdraw_amount(stake_pool.pool_token_supply)
             .unwrap();
-        assert_eq!(stake_pool.total_lamports, withdraw_result);
+        assert_eq!(stake_pool.total_satomis, withdraw_result);
 
         // take out all except 1, then the rest
         let mut stake_pool = StakePool {
-            total_lamports,
+            total_satomis,
             pool_token_supply,
             ..StakePool::default()
         };
         let withdraw_result = stake_pool
-            .calc_lamports_withdraw_amount(pool_token_supply - 1)
+            .calc_satomis_withdraw_amount(pool_token_supply - 1)
             .unwrap();
-        stake_pool.total_lamports -= withdraw_result;
+        stake_pool.total_satomis -= withdraw_result;
         stake_pool.pool_token_supply = 1;
-        assert_ne!(stake_pool.total_lamports, 0);
+        assert_ne!(stake_pool.total_satomis, 0);
 
-        let withdraw_result = stake_pool.calc_lamports_withdraw_amount(1).unwrap();
-        assert_eq!(stake_pool.total_lamports, withdraw_result);
+        let withdraw_result = stake_pool.calc_satomis_withdraw_amount(1).unwrap();
+        assert_eq!(stake_pool.total_satomis, withdraw_result);
     }
 }

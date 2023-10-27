@@ -459,12 +459,12 @@ pub mod spl_account_compression {
         merkle_tree_apply_fn_mut!(header, id, tree_bytes, prove_tree_is_empty,)?;
 
         // Close merkle tree account
-        // 1. Move lamports
-        let dest_starting_lamports = ctx.accounts.recipient.lamports();
-        **ctx.accounts.recipient.lamports.borrow_mut() = dest_starting_lamports
-            .checked_add(ctx.accounts.merkle_tree.lamports())
+        // 1. Move satomis
+        let dest_starting_satomis = ctx.accounts.recipient.satomis();
+        **ctx.accounts.recipient.satomis.borrow_mut() = dest_starting_satomis
+            .checked_add(ctx.accounts.merkle_tree.satomis())
             .unwrap();
-        **ctx.accounts.merkle_tree.lamports.borrow_mut() = 0;
+        **ctx.accounts.merkle_tree.satomis.borrow_mut() = 0;
 
         // 2. Set all CMT account bytes to 0
         header_bytes.fill(0);

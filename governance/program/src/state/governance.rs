@@ -73,7 +73,7 @@ pub const DEFAULT_DEPOSIT_EXEMPT_PROPOSAL_COUNT: u8 = 10;
 
 /// Security deposit is paid when a Proposal is created and can be refunded after voting ends
 /// or the Proposals is cancelled
-pub const SECURITY_DEPOSIT_BASE_LAMPORTS: u64 = 100_000_000; // 0.1 SOL
+pub const SECURITY_DEPOSIT_BASE_SATOMIS: u64 = 100_000_000; // 0.1 SOL
 
 /// Governance Account
 #[derive(Clone, Debug, PartialEq, Eq, BorshDeserialize, BorshSerialize, BorshSchema)]
@@ -355,19 +355,19 @@ impl GovernanceV2 {
     /// where N equals to active_proposal_count - deposit_exempt_proposal_count  
     /// The deposit is not payed unless there are more active Proposal than the exempt amount
     ///
-    /// Note: The exact deposit payed for Nth Proposal is N*SECURITY_DEPOSIT_BASE_LAMPORTS + min_rent_for(ProposalDeposit)
+    /// Note: The exact deposit payed for Nth Proposal is N*SECURITY_DEPOSIT_BASE_SATOMIS + min_rent_for(ProposalDeposit)
     ///
     /// Note: Although the deposit amount payed for Nth proposal is linear the total deposit amount required to create N proposals is sum of arithmetic series
     /// Dn = N*r + d*N*(N+1)/2
     // where:
     // Dn - The total deposit amount required to create N proposals
     // N = active_proposal_count - deposit_exempt_proposal_count
-    // d = SECURITY_DEPOSIT_BASE_LAMPORTS
+    // d = SECURITY_DEPOSIT_BASE_SATOMIS
     // r = min rent amount for ProposalDeposit
     pub fn get_proposal_deposit_amount(&self) -> u64 {
         self.active_proposal_count
             .saturating_sub(self.config.deposit_exempt_proposal_count as u64)
-            .saturating_mul(SECURITY_DEPOSIT_BASE_LAMPORTS)
+            .saturating_mul(SECURITY_DEPOSIT_BASE_SATOMIS)
     }
 }
 
@@ -713,13 +713,13 @@ mod test {
         let program_id = Pubkey::new_unique();
 
         let info_key = Pubkey::new_unique();
-        let mut lamports = 10u64;
+        let mut satomis = 10u64;
 
         let governance_info = AccountInfo::new(
             &info_key,
             false,
             false,
-            &mut lamports,
+            &mut satomis,
             &mut account_data[..],
             &program_id,
             false,
@@ -792,13 +792,13 @@ mod test {
         let program_id = Pubkey::new_unique();
 
         let info_key = Pubkey::new_unique();
-        let mut lamports = 10u64;
+        let mut satomis = 10u64;
 
         let legacy_account_info = AccountInfo::new(
             &info_key,
             false,
             false,
-            &mut lamports,
+            &mut satomis,
             &mut legacy_data[..],
             &program_id,
             false,
@@ -924,7 +924,7 @@ mod test {
         let deposit_amount = governance_data.get_proposal_deposit_amount();
 
         // Assert
-        assert_eq!(deposit_amount, SECURITY_DEPOSIT_BASE_LAMPORTS * 90);
+        assert_eq!(deposit_amount, SECURITY_DEPOSIT_BASE_SATOMIS * 90);
     }
 
     #[test]
@@ -939,7 +939,7 @@ mod test {
         let deposit_amount = governance_data.get_proposal_deposit_amount();
 
         // Assert
-        assert_eq!(deposit_amount, SECURITY_DEPOSIT_BASE_LAMPORTS * 10);
+        assert_eq!(deposit_amount, SECURITY_DEPOSIT_BASE_SATOMIS * 10);
     }
 
     #[test]

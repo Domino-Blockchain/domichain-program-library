@@ -61,7 +61,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 
 (async () => {
@@ -75,19 +75,19 @@ import {
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const extensions = [ExtensionType.MintCloseAuthority];
     const mintLen = getMintLen(extensions);
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeMintCloseAuthorityInstruction(mint, closeAuthority.publicKey, TOKEN_2022_PROGRAM_ID),
@@ -109,7 +109,7 @@ import {
 #### Example: Closing a mint
 
 With the `MintCloseAuthority` extension on the mint and a valid authority, it's
-possible to close the mint account and reclaim the lamports on the mint account.
+possible to close the mint account and reclaim the satomis on the mint account.
 **Note**: The supply on the mint must be 0.
 
 <Tabs className="unique-tabs" groupId="language-selection">
@@ -185,7 +185,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 
 import {
@@ -223,16 +223,16 @@ import {
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const mintSatomis = await connection.getMinimumBalanceForRentExemption(mintLen);
     const mintTransaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports: mintLamports,
+            satomis: mintSatomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeTransferFeeConfigInstruction(
@@ -548,7 +548,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     AccountState,
@@ -574,18 +574,18 @@ import {
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const defaultState = AccountState.Frozen;
 
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeDefaultAccountStateInstruction(mint, defaultState, TOKEN_2022_PROGRAM_ID),
@@ -684,7 +684,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     createAccount,
@@ -700,7 +700,7 @@ import {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();
@@ -717,7 +717,7 @@ import {
     );
 
     const accountLen = getAccountLen([ExtensionType.ImmutableOwner]);
-    const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(accountLen);
 
     const owner = Keypair.generate();
     const accountKeypair = Keypair.generate();
@@ -727,7 +727,7 @@ import {
             fromPubkey: payer.publicKey,
             newAccountPubkey: account,
             space: accountLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeImmutableOwnerInstruction(account, TOKEN_2022_PROGRAM_ID),
@@ -820,7 +820,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     createInitializeNonTransferableMintInstruction,
@@ -834,7 +834,7 @@ import {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();
@@ -843,14 +843,14 @@ import {
     const mintKeypair = Keypair.generate();
     const mint = mintKeypair.publicKey;
     const mintLen = getMintLen([ExtensionType.NonTransferable]);
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeNonTransferableMintInstruction(mint, TOKEN_2022_PROGRAM_ID),
@@ -907,7 +907,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     createMint,
@@ -924,7 +924,7 @@ import {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();
@@ -941,7 +941,7 @@ import {
     );
 
     const accountLen = getAccountLen([ExtensionType.MemoTransfer]);
-    const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(accountLen);
 
     const owner = Keypair.generate();
     const destinationKeypair = Keypair.generate();
@@ -951,7 +951,7 @@ import {
             fromPubkey: payer.publicKey,
             newAccountPubkey: destination,
             space: accountLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeAccountInstruction(destination, mint, owner.publicKey, TOKEN_2022_PROGRAM_ID),
@@ -1035,7 +1035,7 @@ import {
     Connection,
     Keypair,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     createAccount,
@@ -1050,7 +1050,7 @@ import {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();
@@ -1135,14 +1135,14 @@ Signature: 5dSW5QUacEsaKYb3MwYp4ycqq4jpNJ1rpLhS5rotoe3CWv9XhhjrncUFpk14R1fRamS1x
   <TabItem value="jsx" label="JS">
 
 ```jsx
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 import { createInterestBearingMint, updateRateInterestBearingMint, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
 
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();

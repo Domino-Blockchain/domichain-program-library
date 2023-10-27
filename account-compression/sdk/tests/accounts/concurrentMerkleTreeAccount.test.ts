@@ -2,7 +2,7 @@ import {
   Keypair,
   Connection,
   PublicKey,
-  LAMPORTS_PER_SOL,
+  SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import { AnchorProvider } from '@project-serum/anchor';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';

@@ -18,7 +18,7 @@ use {
         error, find_transient_stake_program_address, id,
         instruction::{self, PreferredValidatorType},
         state::StakePool,
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
 };
 
@@ -36,7 +36,7 @@ async fn setup() -> (
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

@@ -1,5 +1,5 @@
 import { createMemoInstruction } from '../../src';
-import { Connection, Keypair, Transaction, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Connection, Keypair, Transaction, SATOMIS_PER_SOL, sendAndConfirmTransaction } from '@solana/web3.js';
 
 test('transaction: live', async () => {
     const url = 'http://localhost:8899';
@@ -7,7 +7,7 @@ test('transaction: live', async () => {
     await connection.getVersion();
     const signer = new Keypair(); // also fee-payer
 
-    const airdropSignature = await connection.requestAirdrop(signer.publicKey, LAMPORTS_PER_SOL / 10);
+    const airdropSignature = await connection.requestAirdrop(signer.publicKey, SATOMIS_PER_SOL / 10);
     await connection.confirmTransaction(airdropSignature, 'confirmed');
 
     const memoTx = new Transaction().add(createMemoInstruction('this is a test memo', [signer.publicKey]));

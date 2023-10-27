@@ -6,7 +6,7 @@ import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { burn, createMint, createAccount, getAccount, freezeAccount, thawAccount, mintTo } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 const TEST_TOKEN_DECIMALS = 2;
 describe('freezeThaw', () => {
@@ -21,7 +21,7 @@ describe('freezeThaw', () => {
     const burnAmount = BigInt(1);
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         mintAuthority = Keypair.generate();
         freezeAuthority = Keypair.generate();
         const mintKeypair = Keypair.generate();

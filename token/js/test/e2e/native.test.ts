@@ -14,7 +14,7 @@ import {
     createWrappedNativeAccount,
     syncNative,
 } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 describe('native', () => {
     let connection: Connection;
@@ -26,7 +26,7 @@ describe('native', () => {
     before(async () => {
         amount = 1_000_000_000;
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 100_000_000_000);
+        payer = await newAccountWithSatomis(connection, 100_000_000_000);
         if (TEST_PROGRAM_ID == TOKEN_PROGRAM_ID) {
             nativeMint = NATIVE_MINT;
         } else {
@@ -57,18 +57,18 @@ describe('native', () => {
         const preInfo = await connection.getAccountInfo(account);
         expect(preInfo).to.not.be.null;
         if (preInfo != null) {
-            balance = preInfo.lamports;
+            balance = preInfo.satomis;
         }
 
-        // transfer lamports into the native account
-        const additionalLamports = 100;
+        // transfer satomis into the native account
+        const additionalSatomis = 100;
         await sendAndConfirmTransaction(
             connection,
             new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: payer.publicKey,
                     toPubkey: account,
-                    lamports: additionalLamports,
+                    satomis: additionalSatomis,
                 })
             ),
             [payer]
@@ -79,25 +79,25 @@ describe('native', () => {
         expect(preAccountInfo.isNative).to.be.true;
         expect(preAccountInfo.amount).to.eql(BigInt(amount));
 
-        // but change in lamports
+        // but change in satomis
         const postInfo = await connection.getAccountInfo(account);
         expect(postInfo).to.not.be.null;
         if (postInfo !== null) {
-            expect(postInfo.lamports).to.eql(balance + additionalLamports);
+            expect(postInfo.satomis).to.eql(balance + additionalSatomis);
         }
 
         // sync, amount changes
         await syncNative(connection, payer, account, undefined, TEST_PROGRAM_ID);
         const postAccountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
         expect(postAccountInfo.isNative).to.be.true;
-        expect(postAccountInfo.amount).to.eql(BigInt(amount + additionalLamports));
+        expect(postAccountInfo.amount).to.eql(BigInt(amount + additionalSatomis));
     });
     it('closeAccount', async () => {
         let balance = 0;
         const preInfo = await connection.getAccountInfo(account);
         expect(preInfo).to.not.be.null;
         if (preInfo != null) {
-            balance = preInfo.lamports;
+            balance = preInfo.satomis;
         }
         const destination = Keypair.generate().publicKey;
         await closeAccount(connection, payer, account, destination, owner, [], undefined, TEST_PROGRAM_ID);
@@ -106,7 +106,7 @@ describe('native', () => {
         const destinationInfo = await connection.getAccountInfo(destination);
         expect(destinationInfo).to.not.be.null;
         if (destinationInfo != null) {
-            expect(destinationInfo.lamports).to.eql(balance);
+            expect(destinationInfo.satomis).to.eql(balance);
         }
     });
 });

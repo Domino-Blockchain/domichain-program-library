@@ -69,7 +69,7 @@ async fn success_account_exists() {
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len);
     assert_eq!(associated_account.owner, spl_token_2022::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 
     // Unchecked instruction fails
     let instruction = create_associated_token_account(
@@ -123,7 +123,7 @@ async fn success_account_exists() {
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len);
     assert_eq!(associated_account.owner, spl_token_2022::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 }
 
 #[tokio::test]

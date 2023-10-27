@@ -4,7 +4,7 @@ import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createSyncNativeInstruction } from '../instructions/syncNative.js';
 
 /**
- * Sync the balance of a native SPL token account to the underlying system account's lamports
+ * Sync the balance of a native SPL token account to the underlying system account's satomis
  *
  * @param connection     Connection to use
  * @param payer          Payer of the transaction fees

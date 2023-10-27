@@ -309,7 +309,7 @@ async fn close_account_success() {
         .unwrap()
         .unwrap();
     assert_eq!(
-        account.lamports,
+        account.satomis,
         1.max(Rent::default().minimum_balance(get_packed_len::<RecordData>()))
     );
 }

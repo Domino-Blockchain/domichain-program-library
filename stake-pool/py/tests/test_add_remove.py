@@ -20,8 +20,8 @@ async def test_add_remove_validators(async_client, validators, payer, stake_pool
     futures = []
     for validator_info in validator_list.validators:
         assert validator_info.vote_account_address in validators
-        assert validator_info.active_stake_lamports == stake_rent_exemption + MINIMUM_ACTIVE_STAKE
-        assert validator_info.transient_stake_lamports == 0
+        assert validator_info.active_stake_satomis == stake_rent_exemption + MINIMUM_ACTIVE_STAKE
+        assert validator_info.transient_stake_satomis == 0
         assert validator_info.status == StakeStatus.ACTIVE
         futures.append(
             remove_validator_from_pool(async_client, payer, stake_pool_address, validator_info.vote_account_address)

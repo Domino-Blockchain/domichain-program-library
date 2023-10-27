@@ -31,7 +31,7 @@ use {
         find_withdraw_authority_program_address, id, instruction, minimum_delegation,
         processor::Processor,
         state::{self, FeeType, FutureEpoch, StakePool, ValidatorList},
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
     spl_token_2022::{
         extension::{ExtensionType, StateWithExtensionsOwned},
@@ -314,14 +314,14 @@ pub async fn close_token_account(
     recent_blockhash: &Hash,
     program_id: &Pubkey,
     account: &Pubkey,
-    lamports_destination: &Pubkey,
+    satomis_destination: &Pubkey,
     manager: &Keypair,
 ) -> Result<(), TransportError> {
     let mut transaction = Transaction::new_with_payer(
         &[spl_token_2022::instruction::close_account(
             program_id,
             account,
-            lamports_destination,
+            satomis_destination,
             &manager.pubkey(),
             &[],
         )
@@ -630,7 +630,7 @@ pub async fn create_independent_stake_account(
     stake_amount: u64,
 ) -> u64 {
     let rent = banks_client.get_rent().await.unwrap();
-    let lamports =
+    let satomis =
         rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>()) + stake_amount;
 
     let transaction = Transaction::new_signed_with_payer(
@@ -639,7 +639,7 @@ pub async fn create_independent_stake_account(
             &stake.pubkey(),
             authorized,
             lockup,
-            lamports,
+            satomis,
         ),
         Some(&payer.pubkey()),
         &[payer, stake],
@@ -647,7 +647,7 @@ pub async fn create_independent_stake_account(
     );
     banks_client.process_transaction(transaction).await.unwrap();
 
-    lamports
+    satomis
 }
 
 pub async fn create_blank_stake_account(
@@ -657,13 +657,13 @@ pub async fn create_blank_stake_account(
     stake: &Keypair,
 ) -> u64 {
     let rent = banks_client.get_rent().await.unwrap();
-    let lamports = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>()) + 1;
+    let satomis = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>()) + 1;
 
     let transaction = Transaction::new_signed_with_payer(
         &[system_instruction::create_account(
             &payer.pubkey(),
             &stake.pubkey(),
-            lamports,
+            satomis,
             std::mem::size_of::<stake::state::StakeState>() as u64,
             &stake::program::id(),
         )],
@@ -673,7 +673,7 @@ pub async fn create_blank_stake_account(
     );
     banks_client.process_transaction(transaction).await.unwrap();
 
-    lamports
+    satomis
 }
 
 pub async fn delegate_stake_account(
@@ -757,7 +757,7 @@ pub async fn create_unknown_validator_stake(
     payer: &Keypair,
     recent_blockhash: &Hash,
     stake_pool: &Pubkey,
-    lamports: u64,
+    satomis: u64,
 ) -> ValidatorStakeAccount {
     let mut unknown_stake = ValidatorStakeAccount::new(stake_pool, NonZeroU32::new(1), 222);
     create_vote(
@@ -783,7 +783,7 @@ pub async fn create_unknown_validator_stake(
             withdrawer: user.pubkey(),
         },
         &stake::state::Lockup::default(),
-        current_minimum_delegation + lamports,
+        current_minimum_delegation + satomis,
     )
     .await;
     delegate_stake_account(
@@ -906,7 +906,7 @@ impl StakePoolAccounts {
         banks_client: &mut BanksClient,
         payer: &Keypair,
         recent_blockhash: &Hash,
-        reserve_lamports: u64,
+        reserve_satomis: u64,
     ) -> Result<(), TransportError> {
         create_mint(
             banks_client,
@@ -940,7 +940,7 @@ impl StakePoolAccounts {
                 withdrawer: self.withdraw_authority,
             },
             &stake::state::Lockup::default(),
-            reserve_lamports,
+            reserve_satomis,
         )
         .await;
         create_stake_pool(
@@ -1163,7 +1163,7 @@ impl StakePoolAccounts {
         payer: &Keypair,
         recent_blockhash: &Hash,
         pool_account: &Pubkey,
-        lamports_in: u64,
+        satomis_in: u64,
         minimum_pool_tokens_out: u64,
     ) -> Option<TransportError> {
         let mut instructions = vec![instruction::deposit_sol_with_slippage(
@@ -1177,7 +1177,7 @@ impl StakePoolAccounts {
             &self.pool_fee_account.pubkey(),
             &self.pool_mint.pubkey(),
             &self.token_program_id,
-            lamports_in,
+            satomis_in,
             minimum_pool_tokens_out,
         )];
         self.maybe_add_compute_budget_instruction(&mut instructions);
@@ -1206,7 +1206,7 @@ impl StakePoolAccounts {
         validator_stake_account: &Pubkey,
         recipient_new_authority: &Pubkey,
         pool_tokens_in: u64,
-        minimum_lamports_out: u64,
+        minimum_satomis_out: u64,
     ) -> Option<TransportError> {
         let mut instructions = vec![instruction::withdraw_stake_with_slippage(
             &id(),
@@ -1222,7 +1222,7 @@ impl StakePoolAccounts {
             &self.pool_mint.pubkey(),
             &self.token_program_id,
             pool_tokens_in,
-            minimum_lamports_out,
+            minimum_satomis_out,
         )];
         self.maybe_add_compute_budget_instruction(&mut instructions);
         let transaction = Transaction::new_signed_with_payer(
@@ -1289,7 +1289,7 @@ impl StakePoolAccounts {
         user: &Keypair,
         pool_account: &Pubkey,
         amount_in: u64,
-        minimum_lamports_out: u64,
+        minimum_satomis_out: u64,
     ) -> Option<TransportError> {
         let mut instructions = vec![instruction::withdraw_sol_with_slippage(
             &id(),
@@ -1303,7 +1303,7 @@ impl StakePoolAccounts {
             &self.pool_mint.pubkey(),
             &self.token_program_id,
             amount_in,
-            minimum_lamports_out,
+            minimum_satomis_out,
         )];
         self.maybe_add_compute_budget_instruction(&mut instructions);
         let transaction = Transaction::new_signed_with_payer(
@@ -1601,7 +1601,7 @@ impl StakePoolAccounts {
         recent_blockhash: &Hash,
         validator_stake: &Pubkey,
         transient_stake: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
     ) -> Option<TransportError> {
         let mut instructions = vec![instruction::decrease_validator_stake(
@@ -1612,7 +1612,7 @@ impl StakePoolAccounts {
             &self.validator_list.pubkey(),
             validator_stake,
             transient_stake,
-            lamports,
+            satomis,
             transient_stake_seed,
         )];
         self.maybe_add_compute_budget_instruction(&mut instructions);
@@ -1638,7 +1638,7 @@ impl StakePoolAccounts {
         validator_stake: &Pubkey,
         ephemeral_stake: &Pubkey,
         transient_stake: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         ephemeral_stake_seed: u64,
     ) -> Option<TransportError> {
@@ -1651,7 +1651,7 @@ impl StakePoolAccounts {
             validator_stake,
             ephemeral_stake,
             transient_stake,
-            lamports,
+            satomis,
             transient_stake_seed,
             ephemeral_stake_seed,
         )];
@@ -1677,7 +1677,7 @@ impl StakePoolAccounts {
         recent_blockhash: &Hash,
         validator_stake: &Pubkey,
         transient_stake: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         use_additional_instruction: bool,
     ) -> Option<TransportError> {
@@ -1696,7 +1696,7 @@ impl StakePoolAccounts {
                 validator_stake,
                 &ephemeral_stake,
                 transient_stake,
-                lamports,
+                satomis,
                 transient_stake_seed,
                 ephemeral_stake_seed,
             )
@@ -1708,7 +1708,7 @@ impl StakePoolAccounts {
                 recent_blockhash,
                 validator_stake,
                 transient_stake,
-                lamports,
+                satomis,
                 transient_stake_seed,
             )
             .await
@@ -1724,7 +1724,7 @@ impl StakePoolAccounts {
         transient_stake: &Pubkey,
         validator_stake: &Pubkey,
         validator: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
     ) -> Option<TransportError> {
         let mut instructions = vec![instruction::increase_validator_stake(
@@ -1737,7 +1737,7 @@ impl StakePoolAccounts {
             transient_stake,
             validator_stake,
             validator,
-            lamports,
+            satomis,
             transient_stake_seed,
         )];
         self.maybe_add_compute_budget_instruction(&mut instructions);
@@ -1764,7 +1764,7 @@ impl StakePoolAccounts {
         transient_stake: &Pubkey,
         validator_stake: &Pubkey,
         validator: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         ephemeral_stake_seed: u64,
     ) -> Option<TransportError> {
@@ -1779,7 +1779,7 @@ impl StakePoolAccounts {
             transient_stake,
             validator_stake,
             validator,
-            lamports,
+            satomis,
             transient_stake_seed,
             ephemeral_stake_seed,
         )];
@@ -1806,7 +1806,7 @@ impl StakePoolAccounts {
         transient_stake: &Pubkey,
         validator_stake: &Pubkey,
         validator: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         use_additional_instruction: bool,
     ) -> Option<TransportError> {
@@ -1826,7 +1826,7 @@ impl StakePoolAccounts {
                 transient_stake,
                 validator_stake,
                 validator,
-                lamports,
+                satomis,
                 transient_stake_seed,
                 ephemeral_stake_seed,
             )
@@ -1839,7 +1839,7 @@ impl StakePoolAccounts {
                 transient_stake,
                 validator_stake,
                 validator,
-                lamports,
+                satomis,
                 transient_stake_seed,
             )
             .await
@@ -1858,7 +1858,7 @@ impl StakePoolAccounts {
         destination_transient_stake: &Pubkey,
         destination_validator_stake: &Pubkey,
         validator: &Pubkey,
-        lamports: u64,
+        satomis: u64,
         source_transient_stake_seed: u64,
         ephemeral_stake_seed: u64,
         destination_transient_stake_seed: u64,
@@ -1876,7 +1876,7 @@ impl StakePoolAccounts {
                 destination_transient_stake,
                 destination_validator_stake,
                 validator,
-                lamports,
+                satomis,
                 source_transient_stake_seed,
                 ephemeral_stake_seed,
                 destination_transient_stake_seed,
@@ -1937,7 +1937,7 @@ impl StakePoolAccounts {
             pool_mint: self.pool_mint.pubkey(),
             manager_fee_account: self.pool_fee_account.pubkey(),
             token_program_id: self.token_program_id,
-            total_lamports: 0,
+            total_satomis: 0,
             pool_token_supply: 0,
             last_update_epoch: 0,
             lockup: stake::state::Lockup::default(),
@@ -1956,7 +1956,7 @@ impl StakePoolAccounts {
             sol_withdrawal_fee: state::Fee::default(),
             next_sol_withdrawal_fee: FutureEpoch::None,
             last_epoch_pool_token_supply: 0,
-            last_epoch_total_lamports: 0,
+            last_epoch_total_satomis: 0,
         };
         let mut validator_list = ValidatorList::new(self.max_validators);
         validator_list.validators = vec![];
@@ -2096,7 +2096,7 @@ pub struct DepositStakeAccount {
     pub authority: Keypair,
     pub stake: Keypair,
     pub pool_account: Keypair,
-    pub stake_lamports: u64,
+    pub stake_satomis: u64,
     pub pool_tokens: u64,
     pub vote_account: Pubkey,
     pub validator_stake_account: Pubkey,
@@ -2106,7 +2106,7 @@ impl DepositStakeAccount {
     pub fn new_with_vote(
         vote_account: Pubkey,
         validator_stake_account: Pubkey,
-        stake_lamports: u64,
+        stake_satomis: u64,
     ) -> Self {
         let authority = Keypair::new();
         let stake = Keypair::new();
@@ -2117,7 +2117,7 @@ impl DepositStakeAccount {
             pool_account,
             vote_account,
             validator_stake_account,
-            stake_lamports,
+            stake_satomis,
             pool_tokens: 0,
         }
     }
@@ -2140,7 +2140,7 @@ impl DepositStakeAccount {
             &self.stake,
             &authorized,
             &lockup,
-            self.stake_lamports,
+            self.stake_satomis,
         )
         .await;
         delegate_stake_account(
@@ -2197,7 +2197,7 @@ pub async fn simple_deposit_stake(
     recent_blockhash: &Hash,
     stake_pool_accounts: &StakePoolAccounts,
     validator_stake_account: &ValidatorStakeAccount,
-    stake_lamports: u64,
+    stake_satomis: u64,
 ) -> Option<DepositStakeAccount> {
     let authority = Keypair::new();
     // make stake account
@@ -2214,7 +2214,7 @@ pub async fn simple_deposit_stake(
         &stake,
         &authorized,
         &lockup,
-        stake_lamports,
+        stake_satomis,
     )
     .await;
     let vote_account = validator_stake_account.vote.pubkey();
@@ -2265,7 +2265,7 @@ pub async fn simple_deposit_stake(
         authority,
         stake,
         pool_account,
-        stake_lamports,
+        stake_satomis,
         pool_tokens,
         vote_account,
         validator_stake_account,
@@ -2293,11 +2293,11 @@ pub async fn get_validator_list_sum(
     let validator_sum: u64 = validator_list
         .validators
         .iter()
-        .map(|info| info.stake_lamports().unwrap())
+        .map(|info| info.stake_satomis().unwrap())
         .sum();
     let rent = banks_client.get_rent().await.unwrap();
     let rent = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>());
-    validator_sum + reserve_stake.lamports - rent - MINIMUM_RESERVE_LAMPORTS
+    validator_sum + reserve_stake.satomis - rent - MINIMUM_RESERVE_SATOMIS
 }
 
 pub fn add_vote_account(program_test: &mut ProgramTest) -> Pubkey {
@@ -2381,21 +2381,21 @@ pub fn add_validator_stake_account(
     );
     program_test.add_account(stake_address, stake_account);
 
-    let active_stake_lamports = stake_amount + STAKE_ACCOUNT_RENT_EXEMPTION;
+    let active_stake_satomis = stake_amount + STAKE_ACCOUNT_RENT_EXEMPTION;
 
     validator_list.validators.push(state::ValidatorStakeInfo {
         status,
         vote_account_address: *voter_pubkey,
-        active_stake_lamports,
-        transient_stake_lamports: 0,
+        active_stake_satomis,
+        transient_stake_satomis: 0,
         last_update_epoch: FIRST_NORMAL_EPOCH,
         transient_seed_suffix: 0,
         unused: 0,
         validator_seed_suffix: raw_suffix,
     });
 
-    stake_pool.total_lamports += active_stake_lamports;
-    stake_pool.pool_token_supply += active_stake_lamports;
+    stake_pool.total_satomis += active_stake_satomis;
+    stake_pool.pool_token_supply += active_stake_satomis;
 }
 
 pub fn add_reserve_stake_account(
@@ -2539,7 +2539,7 @@ pub async fn setup_for_withdraw(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

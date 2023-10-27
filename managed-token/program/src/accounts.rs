@@ -51,7 +51,7 @@ impl<'a, 'info> InitializeMint<'a, 'info> {
         assert_with_msg(
             ctx.payer.is_writable,
             ProgramError::InvalidInstructionData,
-            "Payer account must be writable (lamport balance will change)",
+            "Payer account must be writable (satomi balance will change)",
         )?;
         assert_with_msg(
             ctx.payer.is_signer,
@@ -126,7 +126,7 @@ impl<'a, 'info> InitializeAccount<'a, 'info> {
         assert_with_msg(
             ctx.payer.is_writable,
             ProgramError::InvalidInstructionData,
-            "Payer account must be writable (lamport balance will change)",
+            "Payer account must be writable (satomi balance will change)",
         )?;
         assert_with_msg(
             ctx.payer.is_signer,

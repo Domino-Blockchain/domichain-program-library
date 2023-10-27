@@ -4,7 +4,7 @@ import {
     Connection,
     Keypair,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     createAccount,
@@ -19,7 +19,7 @@ import {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();

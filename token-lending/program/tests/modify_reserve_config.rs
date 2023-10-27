@@ -35,8 +35,8 @@ async fn modify_reserve_config_success() {
     let lending_market = add_lending_market(&mut test);
     let sol_oracle = add_sol_oracle(&mut test);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 10 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 10 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     let sol_test_reserve = add_reserve(
         &mut test,
@@ -44,8 +44,8 @@ async fn modify_reserve_config_success() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: TEST_RESERVE_CONFIG,
@@ -112,8 +112,8 @@ async fn wrong_signer_of_lending_market_cannot_change_reserve_config() {
     let lending_market = add_lending_market(&mut test);
     let sol_oracle = add_sol_oracle(&mut test);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 10 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 10 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     let sol_test_reserve = add_reserve(
         &mut test,
@@ -121,8 +121,8 @@ async fn wrong_signer_of_lending_market_cannot_change_reserve_config() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: TEST_RESERVE_CONFIG,
@@ -197,8 +197,8 @@ async fn owner_of_different_lending_market_cannot_change_reserve_config() {
     let lending_market = add_lending_market(&mut test);
     let sol_oracle = add_sol_oracle(&mut test);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 10 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 10 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     let sol_test_reserve = add_reserve(
         &mut test,
@@ -206,8 +206,8 @@ async fn owner_of_different_lending_market_cannot_change_reserve_config() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: TEST_RESERVE_CONFIG,
@@ -317,8 +317,8 @@ async fn correct_owner_providing_wrong_lending_market_fails() {
     let lending_market = add_lending_market(&mut test);
     let sol_oracle = add_sol_oracle(&mut test);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 10 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 10 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     let sol_test_reserve = add_reserve(
         &mut test,
@@ -326,8 +326,8 @@ async fn correct_owner_providing_wrong_lending_market_fails() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: TEST_RESERVE_CONFIG,

@@ -10,7 +10,7 @@ import {
     getMint,
     updateRateInterestBearingMint,
 } from '../../src';
-import { getConnection, newAccountWithLamports, TEST_PROGRAM_ID } from '../common';
+import { getConnection, newAccountWithSatomis, TEST_PROGRAM_ID } from '../common';
 
 const TEST_TOKEN_DECIMALS = 2;
 const TEST_RATE = 10;
@@ -27,7 +27,7 @@ describe('interestBearingMint', () => {
 
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         rateAuthority = Keypair.generate();
         mintAuthority = Keypair.generate();
         freezeAuthority = Keypair.generate();

@@ -1,11 +1,11 @@
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 import { createInterestBearingMint, updateRateInterestBearingMint, TOKEN_2022_PROGRAM_ID } from '../src';
 
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     const payer = Keypair.generate();
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const mintAuthority = Keypair.generate();

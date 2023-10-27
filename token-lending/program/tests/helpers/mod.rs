@@ -35,7 +35,7 @@ use std::{convert::TryInto, str::FromStr};
 pub const QUOTE_CURRENCY: [u8; 32] =
     *b"USD\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
-pub const LAMPORTS_TO_SOL: u64 = 1_000_000_000;
+pub const SATOMIS_TO_SOL: u64 = 1_000_000_000;
 pub const FRACTIONAL_TO_USDC: u64 = 1_000_000;
 
 pub const TEST_RESERVE_CONFIG: ReserveConfig = ReserveConfig {
@@ -1129,7 +1129,7 @@ pub fn add_oracle(
     test.add_account(
         price_pubkey,
         Account {
-            lamports: u32::MAX as u64,
+            satomis: u32::MAX as u64,
             data: pyth_price_data,
             owner: oracle_program_id.pubkey(),
             executable: false,
@@ -1191,13 +1191,13 @@ pub async fn create_token_account(
     let authority_pubkey = authority.unwrap_or_else(|| payer.pubkey());
 
     let rent = banks_client.get_rent().await.unwrap();
-    let lamports = rent.minimum_balance(Token::LEN) + native_amount.unwrap_or_default();
+    let satomis = rent.minimum_balance(Token::LEN) + native_amount.unwrap_or_default();
     let mut transaction = Transaction::new_with_payer(
         &[
             create_account(
                 &payer.pubkey(),
                 &token_pubkey,
-                lamports,
+                satomis,
                 Token::LEN as u64,
                 &spl_token::id(),
             ),

@@ -24,15 +24,15 @@ pub fn create_pda_account<'a>(
     new_pda_account: &AccountInfo<'a>,
     new_pda_signer_seeds: &[&[u8]],
 ) -> ProgramResult {
-    if new_pda_account.lamports() > 0 {
-        let required_lamports = rent
+    if new_pda_account.satomis() > 0 {
+        let required_satomis = rent
             .minimum_balance(space)
             .max(1)
-            .saturating_sub(new_pda_account.lamports());
+            .saturating_sub(new_pda_account.satomis());
 
-        if required_lamports > 0 {
+        if required_satomis > 0 {
             invoke(
-                &system_instruction::transfer(payer.key, new_pda_account.key, required_lamports),
+                &system_instruction::transfer(payer.key, new_pda_account.key, required_satomis),
                 &[
                     payer.clone(),
                     new_pda_account.clone(),

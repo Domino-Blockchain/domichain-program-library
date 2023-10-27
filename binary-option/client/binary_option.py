@@ -435,15 +435,15 @@ class BinaryOption():
             try:
                 if amount is None:
                     min_rent_reseponse = client.get_minimum_balance_for_rent_exemption(ACCOUNT_LAYOUT.sizeof())
-                    lamports = min_rent_reseponse["result"]
+                    satomis = min_rent_reseponse["result"]
                 else:
-                    lamports = int(amount)
-                msg += f" | Fetched lamports: {lamports * 1e-9} SOL"
+                    satomis = int(amount)
+                msg += f" | Fetched satomis: {satomis * 1e-9} SOL"
             except Exception as e:
-                msg += " | ERROR: couldn't process lamports" 
+                msg += " | ERROR: couldn't process satomis" 
                 raise(e)
             # Generate transaction
-            transfer_ix = transfer(TransferParams(from_pubkey=sender_account.public_key(), to_pubkey=dest_account, lamports=lamports))
+            transfer_ix = transfer(TransferParams(from_pubkey=sender_account.public_key(), to_pubkey=dest_account, satomis=satomis))
             tx = tx.add(transfer_ix)
             msg += f" | Transferring funds"
             # Send request
@@ -452,7 +452,7 @@ class BinaryOption():
                 return json.dumps(
                     {
                         'status': HTTPStatus.OK,
-                        'msg': f"Successfully sent {lamports * 1e-9} SOL to {to}",
+                        'msg': f"Successfully sent {satomis * 1e-9} SOL to {to}",
                         'tx': response.get('result') if skip_confirmation else response['result']['transaction']['signatures'],
                     }
                 )

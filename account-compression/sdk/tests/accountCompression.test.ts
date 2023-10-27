@@ -327,8 +327,8 @@ describe('Account Compression', () => {
       let payerInfo = await provider.connection.getAccountInfo(payer, 'confirmed')!;
       let treeInfo = await provider.connection.getAccountInfo(cmt, 'confirmed')!;
 
-      let payerLamports = payerInfo!.lamports;
-      let treeLamports = treeInfo!.lamports;
+      let payerSatomis = payerInfo!.satomis;
+      let treeSatomis = treeInfo!.satomis;
 
       const ix = createCloseEmptyTreeInstruction({
         merkleTree: cmt,
@@ -341,10 +341,10 @@ describe('Account Compression', () => {
         payer,
         'confirmed'
       )!;
-      const finalLamports = payerInfo!.lamports;
+      const finalSatomis = payerInfo!.satomis;
       assert(
-        finalLamports === payerLamports + treeLamports - 5000,
-        'Expected payer to have received the lamports from the closed tree account'
+        finalSatomis === payerSatomis + treeSatomis - 5000,
+        'Expected payer to have received the satomis from the closed tree account'
       );
 
       treeInfo = await provider.connection.getAccountInfo(

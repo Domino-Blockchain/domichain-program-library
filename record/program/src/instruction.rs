@@ -40,13 +40,13 @@ pub enum RecordInstruction {
     /// 2. `[]` New record authority
     SetAuthority,
 
-    /// Close the provided record account, draining lamports to recipient account
+    /// Close the provided record account, draining satomis to recipient account
     ///
     /// Accounts expected by this instruction:
     ///
     /// 0. `[writable]` Record account, must be previously initialized
     /// 1. `[signer]` Record authority
-    /// 2. `[]` Receiver of account lamports
+    /// 2. `[]` Receiver of account satomis
     CloseAccount,
 }
 

@@ -5,7 +5,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import {
     AccountState,
@@ -31,18 +31,18 @@ import {
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
     const defaultState = AccountState.Frozen;
 
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports,
+            satomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeDefaultAccountStateInstruction(mint, defaultState, TOKEN_2022_PROGRAM_ID),

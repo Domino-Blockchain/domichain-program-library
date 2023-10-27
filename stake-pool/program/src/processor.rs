@@ -5,7 +5,7 @@ use {
         error::StakePoolError,
         find_deposit_authority_program_address,
         instruction::{FundingType, PreferredValidatorType, StakePoolInstruction},
-        minimum_delegation, minimum_reserve_lamports, minimum_stake_lamports,
+        minimum_delegation, minimum_reserve_satomis, minimum_stake_satomis,
         state::{
             is_extension_supported_for_mint, AccountType, Fee, FeeType, FutureEpoch, StakePool,
             StakeStatus, StakeWithdrawSource, ValidatorList, ValidatorListHeader,
@@ -335,7 +335,7 @@ fn check_transient_stake_account(
     Ok(())
 }
 
-/// Create a stake account on a PDA without transferring lamports
+/// Create a stake account on a PDA without transferring satomis
 fn create_stake_account<'a>(
     stake_account_info: AccountInfo<'a>,
     stake_account_signer_seeds: &[&[u8]],
@@ -556,7 +556,7 @@ impl Processor {
         )
     }
 
-    /// Issue stake::instruction::withdraw instruction to move additional lamports
+    /// Issue stake::instruction::withdraw instruction to move additional satomis
     #[allow(clippy::too_many_arguments)]
     fn stake_withdraw<'a>(
         stake_pool: &Pubkey,
@@ -568,7 +568,7 @@ impl Processor {
         clock: AccountInfo<'a>,
         stake_history: AccountInfo<'a>,
         stake_program_info: AccountInfo<'a>,
-        lamports: u64,
+        satomis: u64,
     ) -> Result<(), ProgramError> {
         let authority_signature_seeds = [stake_pool.as_ref(), authority_type, &[bump_seed]];
         let signers = &[&authority_signature_seeds[..]];
@@ -578,7 +578,7 @@ impl Processor {
             source_account.key,
             authority.key,
             destination_account.key,
-            lamports,
+            satomis,
             custodian_pubkey,
         );
 
@@ -776,13 +776,13 @@ impl Processor {
         validator_list.header.max_validators = max_validators;
         validator_list.validators.clear();
 
-        if !rent.is_exempt(stake_pool_info.lamports(), stake_pool_info.data_len()) {
+        if !rent.is_exempt(stake_pool_info.satomis(), stake_pool_info.data_len()) {
             msg!("Stake pool not rent-exempt");
             return Err(ProgramError::AccountNotRentExempt);
         }
 
         if !rent.is_exempt(
-            validator_list_info.lamports(),
+            validator_list_info.satomis(),
             validator_list_info.data_len(),
         ) {
             msg!("Validator stake list not rent-exempt");
@@ -866,7 +866,7 @@ impl Processor {
         let stake_state = try_from_slice_unchecked::<stake::state::StakeState>(
             &reserve_stake_info.data.borrow(),
         )?;
-        let total_lamports = if let stake::state::StakeState::Initialized(meta) = stake_state {
+        let total_satomis = if let stake::state::StakeState::Initialized(meta) = stake_state {
             if meta.lockup != stake::state::Lockup::default() {
                 msg!("Reserve stake account has some lockup");
                 return Err(StakePoolError::WrongStakeState.into());
@@ -890,15 +890,15 @@ impl Processor {
                 return Err(StakePoolError::WrongStakeState.into());
             }
             reserve_stake_info
-                .lamports()
-                .checked_sub(minimum_reserve_lamports(&meta))
+                .satomis()
+                .checked_sub(minimum_reserve_satomis(&meta))
                 .ok_or(StakePoolError::CalculationFailure)?
         } else {
             msg!("Reserve stake account not in intialized state");
             return Err(StakePoolError::WrongStakeState.into());
         };
 
-        if total_lamports > 0 {
+        if total_satomis > 0 {
             Self::token_mint_to(
                 stake_pool_info.key,
                 token_program_info.clone(),
@@ -907,7 +907,7 @@ impl Processor {
                 withdraw_authority_info.clone(),
                 AUTHORITY_WITHDRAW,
                 stake_withdraw_bump_seed,
-                total_lamports,
+                total_satomis,
             )?;
         }
 
@@ -921,8 +921,8 @@ impl Processor {
         stake_pool.validator_list = *validator_list_info.key;
         stake_pool.reserve_stake = *reserve_stake_info.key;
         stake_pool.manager_fee_account = *manager_fee_info.key;
-        stake_pool.total_lamports = total_lamports;
-        stake_pool.pool_token_supply = total_lamports;
+        stake_pool.total_satomis = total_satomis;
+        stake_pool.pool_token_supply = total_satomis;
         stake_pool.last_update_epoch = Clock::get()?.epoch;
         stake_pool.lockup = stake::state::Lockup::default();
         stake_pool.epoch_fee = epoch_fee;
@@ -940,7 +940,7 @@ impl Processor {
         stake_pool.sol_withdrawal_fee = withdrawal_fee;
         stake_pool.next_sol_withdrawal_fee = FutureEpoch::None;
         stake_pool.last_epoch_pool_token_supply = 0;
-        stake_pool.last_epoch_total_lamports = 0;
+        stake_pool.last_epoch_total_satomis = 0;
 
         stake_pool
             .serialize(&mut *stake_pool_info.data.borrow_mut())
@@ -1036,7 +1036,7 @@ impl Processor {
         // Fund the stake account with the minimum + rent-exempt balance
         let stake_space = std::mem::size_of::<stake::state::StakeState>();
         let stake_minimum_delegation = stake::tools::get_minimum_delegation()?;
-        let required_lamports = minimum_delegation(stake_minimum_delegation)
+        let required_satomis = minimum_delegation(stake_minimum_delegation)
             .saturating_add(rent.minimum_balance(stake_space));
 
         // Check that we're not draining the reserve totally
@@ -1046,13 +1046,13 @@ impl Processor {
         let reserve_meta = reserve_stake
             .meta()
             .ok_or(StakePoolError::WrongStakeState)?;
-        let minimum_lamports = minimum_reserve_lamports(&reserve_meta);
-        let reserve_lamports = reserve_stake_info.lamports();
-        if reserve_lamports.saturating_sub(required_lamports) < minimum_lamports {
+        let minimum_satomis = minimum_reserve_satomis(&reserve_meta);
+        let reserve_satomis = reserve_stake_info.satomis();
+        if reserve_satomis.saturating_sub(required_satomis) < minimum_satomis {
             msg!(
-                "Need to add {} lamports for the reserve stake to be rent-exempt after adding a validator, reserve currently has {} lamports",
-                required_lamports.saturating_add(minimum_lamports).saturating_sub(reserve_lamports),
-                reserve_lamports
+                "Need to add {} satomis for the reserve stake to be rent-exempt after adding a validator, reserve currently has {} satomis",
+                required_satomis.saturating_add(minimum_satomis).saturating_sub(reserve_satomis),
+                reserve_satomis
             );
             return Err(ProgramError::InsufficientFunds);
         }
@@ -1071,7 +1071,7 @@ impl Processor {
             withdraw_authority_info.clone(),
             AUTHORITY_WITHDRAW,
             stake_pool.stake_withdraw_bump_seed,
-            required_lamports,
+            required_satomis,
             stake_info.clone(),
         )?;
 
@@ -1090,8 +1090,8 @@ impl Processor {
         validator_list.push(ValidatorStakeInfo {
             status: StakeStatus::Active,
             vote_account_address: *validator_vote_info.key,
-            active_stake_lamports: required_lamports,
-            transient_stake_lamports: 0,
+            active_stake_satomis: required_satomis,
+            transient_stake_satomis: 0,
             last_update_epoch: clock.epoch,
             transient_seed_suffix: 0,
             unused: 0,
@@ -1178,7 +1178,7 @@ impl Processor {
             return Err(StakePoolError::ValidatorNotFound.into());
         }
 
-        let new_status = if validator_stake_info.transient_stake_lamports > 0 {
+        let new_status = if validator_stake_info.transient_stake_satomis > 0 {
             check_transient_stake_address(
                 program_id,
                 stake_pool_info.key,
@@ -1241,7 +1241,7 @@ impl Processor {
     fn process_decrease_validator_stake(
         program_id: &Pubkey,
         accounts: &[AccountInfo],
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         maybe_ephemeral_stake_seed: Option<u64>,
     ) -> ProgramResult {
@@ -1322,7 +1322,7 @@ impl Processor {
             &vote_account_address,
             NonZeroU32::new(validator_stake_info.validator_seed_suffix),
         )?;
-        if validator_stake_info.transient_stake_lamports > 0 {
+        if validator_stake_info.transient_stake_satomis > 0 {
             if maybe_ephemeral_stake_seed.is_none() {
                 msg!("Attempting to decrease stake on a validator with pending transient stake, use DecreaseAdditionalValidatorStake with the existing seed");
                 return Err(StakePoolError::TransientAccountInUse.into());
@@ -1344,27 +1344,27 @@ impl Processor {
         let stake_space = std::mem::size_of::<stake::state::StakeState>();
         let stake_minimum_delegation = stake::tools::get_minimum_delegation()?;
         let stake_rent = rent.minimum_balance(stake_space);
-        let current_minimum_lamports =
+        let current_minimum_satomis =
             stake_rent.saturating_add(minimum_delegation(stake_minimum_delegation));
-        if lamports < current_minimum_lamports {
+        if satomis < current_minimum_satomis {
             msg!(
-                "Need at least {} lamports for transient stake to meet minimum delegation and rent-exempt requirements, {} provided",
-                current_minimum_lamports,
-                lamports
+                "Need at least {} satomis for transient stake to meet minimum delegation and rent-exempt requirements, {} provided",
+                current_minimum_satomis,
+                satomis
             );
             return Err(ProgramError::AccountNotRentExempt);
         }
 
-        let remaining_lamports = validator_stake_account_info
-            .lamports()
-            .checked_sub(lamports)
+        let remaining_satomis = validator_stake_account_info
+            .satomis()
+            .checked_sub(satomis)
             .ok_or(ProgramError::InsufficientFunds)?;
-        let required_lamports = minimum_stake_lamports(&meta, stake_minimum_delegation);
-        if remaining_lamports < required_lamports {
-            msg!("Need at least {} lamports in the stake account after decrease, {} requested, {} is the current possible maximum",
-                required_lamports,
-                lamports,
-                validator_stake_account_info.lamports().checked_sub(required_lamports).ok_or(StakePoolError::CalculationFailure)?
+        let required_satomis = minimum_stake_satomis(&meta, stake_minimum_delegation);
+        if remaining_satomis < required_satomis {
+            msg!("Need at least {} satomis in the stake account after decrease, {} requested, {} is the current possible maximum",
+                required_satomis,
+                satomis,
+                validator_stake_account_info.satomis().checked_sub(required_satomis).ok_or(StakePoolError::CalculationFailure)?
             );
             return Err(ProgramError::InsufficientFunds);
         }
@@ -1399,7 +1399,7 @@ impl Processor {
                     withdraw_authority_info.clone(),
                     AUTHORITY_WITHDRAW,
                     stake_pool.stake_withdraw_bump_seed,
-                    lamports,
+                    satomis,
                     ephemeral_stake_account_info.clone(),
                 )?;
 
@@ -1427,7 +1427,7 @@ impl Processor {
             transient_stake_seed,
         )?;
 
-        if validator_stake_info.transient_stake_lamports > 0 {
+        if validator_stake_info.transient_stake_satomis > 0 {
             let stake_history_info = maybe_stake_history_info.unwrap();
             // transient stake exists, try to merge from the source account,
             // which is always an ephemeral account
@@ -1465,7 +1465,7 @@ impl Processor {
                 withdraw_authority_info.clone(),
                 AUTHORITY_WITHDRAW,
                 stake_pool.stake_withdraw_bump_seed,
-                lamports,
+                satomis,
                 transient_stake_account_info.clone(),
             )?;
 
@@ -1483,13 +1483,13 @@ impl Processor {
             }
         }
 
-        validator_stake_info.active_stake_lamports = validator_stake_info
-            .active_stake_lamports
-            .checked_sub(lamports)
+        validator_stake_info.active_stake_satomis = validator_stake_info
+            .active_stake_satomis
+            .checked_sub(satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
-        validator_stake_info.transient_stake_lamports = validator_stake_info
-            .transient_stake_lamports
-            .checked_add(lamports)
+        validator_stake_info.transient_stake_satomis = validator_stake_info
+            .transient_stake_satomis
+            .checked_add(satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         validator_stake_info.transient_seed_suffix = transient_stake_seed;
 
@@ -1501,7 +1501,7 @@ impl Processor {
     fn process_increase_validator_stake(
         program_id: &Pubkey,
         accounts: &[AccountInfo],
-        lamports: u64,
+        satomis: u64,
         transient_stake_seed: u64,
         maybe_ephemeral_stake_seed: Option<u64>,
     ) -> ProgramResult {
@@ -1577,7 +1577,7 @@ impl Processor {
             return Err(StakePoolError::ValidatorNotFound.into());
         }
         let mut validator_stake_info = maybe_validator_stake_info.unwrap();
-        if validator_stake_info.transient_stake_lamports > 0 {
+        if validator_stake_info.transient_stake_satomis > 0 {
             if maybe_ephemeral_stake_seed.is_none() {
                 msg!("Attempting to increase stake on a validator with pending transient stake, use IncreaseAdditionalValidatorStake with the existing seed");
                 return Err(StakePoolError::TransientAccountInUse.into());
@@ -1615,11 +1615,11 @@ impl Processor {
         let stake_rent = rent.minimum_balance(stake_space);
         let stake_minimum_delegation = stake::tools::get_minimum_delegation()?;
         let current_minimum_delegation = minimum_delegation(stake_minimum_delegation);
-        if lamports < current_minimum_delegation {
+        if satomis < current_minimum_delegation {
             msg!(
-                "Need more than {} lamports for transient stake to meet minimum delegation requirement, {} provided",
+                "Need more than {} satomis for transient stake to meet minimum delegation requirement, {} provided",
                 current_minimum_delegation,
-                lamports
+                satomis
             );
             return Err(ProgramError::Custom(
                 stake::instruction::StakeError::InsufficientDelegation as u32,
@@ -1627,22 +1627,22 @@ impl Processor {
         }
 
         // the stake account rent exemption is withdrawn after the merge, so
-        // to add `lamports` to a validator, we need to create a stake account
-        // with `lamports + stake_rent`
-        let total_lamports = lamports.saturating_add(stake_rent);
+        // to add `satomis` to a validator, we need to create a stake account
+        // with `satomis + stake_rent`
+        let total_satomis = satomis.saturating_add(stake_rent);
 
         if reserve_stake_account_info
-            .lamports()
-            .saturating_sub(total_lamports)
+            .satomis()
+            .saturating_sub(total_satomis)
             <= stake_rent
         {
             let max_split_amount = reserve_stake_account_info
-                .lamports()
+                .satomis()
                 .saturating_sub(stake_rent.saturating_mul(2));
             msg!(
-                "Reserve stake does not have enough lamports for increase, must be less than {}, {} requested",
+                "Reserve stake does not have enough satomis for increase, must be less than {}, {} requested",
                 max_split_amount,
-                lamports
+                satomis
             );
             return Err(ProgramError::InsufficientFunds);
         }
@@ -1677,7 +1677,7 @@ impl Processor {
                     withdraw_authority_info.clone(),
                     AUTHORITY_WITHDRAW,
                     stake_pool.stake_withdraw_bump_seed,
-                    total_lamports,
+                    total_satomis,
                     ephemeral_stake_account_info.clone(),
                 )?;
 
@@ -1708,7 +1708,7 @@ impl Processor {
             transient_stake_seed,
         )?;
 
-        if validator_stake_info.transient_stake_lamports > 0 {
+        if validator_stake_info.transient_stake_satomis > 0 {
             // transient stake exists, try to merge from the source account,
             // which is always an ephemeral account
             Self::stake_merge(
@@ -1746,7 +1746,7 @@ impl Processor {
                 withdraw_authority_info.clone(),
                 AUTHORITY_WITHDRAW,
                 stake_pool.stake_withdraw_bump_seed,
-                total_lamports,
+                total_satomis,
                 transient_stake_account_info.clone(),
             )?;
 
@@ -1775,9 +1775,9 @@ impl Processor {
             }
         }
 
-        validator_stake_info.transient_stake_lamports = validator_stake_info
-            .transient_stake_lamports
-            .checked_add(total_lamports)
+        validator_stake_info.transient_stake_satomis = validator_stake_info
+            .transient_stake_satomis
+            .checked_add(total_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         validator_stake_info.transient_seed_suffix = transient_stake_seed;
 
@@ -1789,7 +1789,7 @@ impl Processor {
     fn process_redelegate(
         program_id: &Pubkey,
         accounts: &[AccountInfo],
-        lamports: u64,
+        satomis: u64,
         source_transient_stake_seed: u64,
         ephemeral_stake_seed: u64,
         destination_transient_stake_seed: u64,
@@ -1850,16 +1850,16 @@ impl Processor {
         let current_minimum_delegation = minimum_delegation(stake_minimum_delegation);
 
         // check that we're redelegating enough
-        let destination_transient_lamports = {
+        let destination_transient_satomis = {
             // redelegation requires that the source account maintains rent exemption and that
             // the destination account has rent-exemption and minimum delegation
-            let minimum_redelegation_lamports =
+            let minimum_redelegation_satomis =
                 current_minimum_delegation.saturating_add(stake_rent.saturating_mul(2));
-            if lamports < minimum_redelegation_lamports {
+            if satomis < minimum_redelegation_satomis {
                 msg!(
-                    "Need more than {} lamports for redelegated stake and transient stake to meet minimum delegation requirement, {} provided",
-                    minimum_redelegation_lamports,
-                    lamports
+                    "Need more than {} satomis for redelegated stake and transient stake to meet minimum delegation requirement, {} provided",
+                    minimum_redelegation_satomis,
+                    satomis
                 );
                 return Err(ProgramError::Custom(
                     stake::instruction::StakeError::InsufficientDelegation as u32,
@@ -1867,23 +1867,23 @@ impl Processor {
             }
 
             // check that we're not draining the source account
-            let current_minimum_lamports = stake_rent.saturating_add(current_minimum_delegation);
+            let current_minimum_satomis = stake_rent.saturating_add(current_minimum_delegation);
             if source_validator_stake_account_info
-                .lamports()
-                .saturating_sub(lamports)
-                < current_minimum_lamports
+                .satomis()
+                .saturating_sub(satomis)
+                < current_minimum_satomis
             {
                 let max_split_amount = source_validator_stake_account_info
-                    .lamports()
-                    .saturating_sub(current_minimum_lamports);
+                    .satomis()
+                    .saturating_sub(current_minimum_satomis);
                 msg!(
-                    "Source stake does not have {} lamports for redelegation, must be {} at most",
-                    lamports,
+                    "Source stake does not have {} satomis for redelegation, must be {} at most",
+                    satomis,
                     max_split_amount,
                 );
                 return Err(ProgramError::InsufficientFunds);
             }
-            lamports
+            satomis
                 .checked_sub(stake_rent)
                 .ok_or(StakePoolError::CalculationFailure)?
         };
@@ -1911,18 +1911,18 @@ impl Processor {
                 &vote_account_address,
                 NonZeroU32::new(validator_stake_info.validator_seed_suffix),
             )?;
-            if validator_stake_info.transient_stake_lamports > 0 {
+            if validator_stake_info.transient_stake_satomis > 0 {
                 return Err(StakePoolError::TransientAccountInUse.into());
             }
             if validator_stake_info.status != StakeStatus::Active {
                 msg!("Validator is marked for removal and no longer allows redelegation");
                 return Err(StakePoolError::ValidatorNotFound.into());
             }
-            validator_stake_info.active_stake_lamports = validator_stake_info
-                .active_stake_lamports
-                .checked_sub(lamports)
+            validator_stake_info.active_stake_satomis = validator_stake_info
+                .active_stake_satomis
+                .checked_sub(satomis)
                 .ok_or(StakePoolError::CalculationFailure)?;
-            validator_stake_info.transient_stake_lamports = stake_rent;
+            validator_stake_info.transient_stake_satomis = stake_rent;
             validator_stake_info.transient_seed_suffix = source_transient_stake_seed;
         }
 
@@ -1957,7 +1957,7 @@ impl Processor {
                 withdraw_authority_info.clone(),
                 AUTHORITY_WITHDRAW,
                 stake_pool.stake_withdraw_bump_seed,
-                lamports,
+                satomis,
                 source_transient_stake_account_info.clone(),
             )?;
         }
@@ -2024,10 +2024,10 @@ impl Processor {
                 );
                 return Err(StakePoolError::ValidatorNotFound.into());
             }
-            let transient_account_exists = validator_stake_info.transient_stake_lamports > 0;
-            validator_stake_info.transient_stake_lamports = validator_stake_info
-                .transient_stake_lamports
-                .checked_add(destination_transient_lamports)
+            let transient_account_exists = validator_stake_info.transient_stake_satomis > 0;
+            validator_stake_info.transient_stake_satomis = validator_stake_info
+                .transient_stake_satomis
+                .checked_add(destination_transient_satomis)
                 .ok_or(StakePoolError::CalculationFailure)?;
 
             if transient_account_exists {
@@ -2093,7 +2093,7 @@ impl Processor {
                     withdraw_authority_info.clone(),
                     AUTHORITY_WITHDRAW,
                     stake_pool.stake_withdraw_bump_seed,
-                    destination_transient_lamports,
+                    destination_transient_satomis,
                     destination_transient_stake_account_info.clone(),
                 )?;
                 validator_stake_info.transient_seed_suffix = destination_transient_stake_seed;
@@ -2255,8 +2255,8 @@ impl Processor {
                 continue;
             };
 
-            let mut active_stake_lamports = 0;
-            let mut transient_stake_lamports = 0;
+            let mut active_stake_satomis = 0;
+            let mut transient_stake_satomis = 0;
             let validator_stake_state = try_from_slice_unchecked::<stake::state::StakeState>(
                 &validator_stake_info.data.borrow(),
             )
@@ -2268,8 +2268,8 @@ impl Processor {
 
             // Possible merge situations for transient stake
             //  * active -> merge into validator stake
-            //  * activating -> nothing, just account its lamports
-            //  * deactivating -> nothing, just account its lamports
+            //  * activating -> nothing, just account its satomis
+            //  * deactivating -> nothing, just account its satomis
             //  * inactive -> merge into reserve stake
             //  * not a stake -> ignore
             match transient_stake_state {
@@ -2280,7 +2280,7 @@ impl Processor {
                         &stake_pool.lockup,
                     ) {
                         if no_merge {
-                            transient_stake_lamports = transient_stake_info.lamports();
+                            transient_stake_satomis = transient_stake_info.satomis();
                         } else {
                             // merge into reserve
                             Self::stake_merge(
@@ -2305,7 +2305,7 @@ impl Processor {
                         &stake_pool.lockup,
                     ) {
                         if no_merge {
-                            transient_stake_lamports = transient_stake_info.lamports();
+                            transient_stake_satomis = transient_stake_info.satomis();
                         } else if stake_is_inactive_without_history(&stake, clock.epoch) {
                             // deactivated, merge into reserve
                             Self::stake_merge(
@@ -2338,15 +2338,15 @@ impl Processor {
                                     )?;
                                 } else {
                                     msg!("Stake activating or just active, not ready to merge");
-                                    transient_stake_lamports = transient_stake_info.lamports();
+                                    transient_stake_satomis = transient_stake_info.satomis();
                                 }
                             } else {
                                 msg!("Transient stake is activating or active, but validator stake is not, need to add the validator stake account on {} back into the stake pool", stake.delegation.voter_pubkey);
-                                transient_stake_lamports = transient_stake_info.lamports();
+                                transient_stake_satomis = transient_stake_info.satomis();
                             }
                         } else {
                             msg!("Transient stake not ready to be merged anywhere");
-                            transient_stake_lamports = transient_stake_info.lamports();
+                            transient_stake_satomis = transient_stake_info.satomis();
                         }
                     }
                 }
@@ -2364,12 +2364,12 @@ impl Processor {
             .ok();
             match validator_stake_state {
                 Some(stake::state::StakeState::Stake(meta, stake)) => {
-                    let additional_lamports = validator_stake_info
-                        .lamports()
+                    let additional_satomis = validator_stake_info
+                        .satomis()
                         .saturating_sub(stake.delegation.stake)
                         .saturating_sub(meta.rent_exempt_reserve);
-                    // withdraw any extra lamports back to the reserve
-                    if additional_lamports > 0
+                    // withdraw any extra satomis back to the reserve
+                    if additional_satomis > 0
                         && stake_is_usable_by_pool(
                             &meta,
                             withdraw_authority_info.key,
@@ -2386,16 +2386,16 @@ impl Processor {
                             clock_info.clone(),
                             stake_history_info.clone(),
                             stake_program_info.clone(),
-                            additional_lamports,
+                            additional_satomis,
                         )?;
                     }
                     match validator_stake_record.status {
                         StakeStatus::Active => {
-                            active_stake_lamports = validator_stake_info.lamports();
+                            active_stake_satomis = validator_stake_info.satomis();
                         }
                         StakeStatus::DeactivatingValidator | StakeStatus::DeactivatingAll => {
                             if no_merge {
-                                active_stake_lamports = validator_stake_info.lamports();
+                                active_stake_satomis = validator_stake_info.satomis();
                             } else if stake_is_usable_by_pool(
                                 &meta,
                                 withdraw_authority_info.key,
@@ -2403,7 +2403,7 @@ impl Processor {
                             ) && stake_is_inactive_without_history(&stake, clock.epoch)
                             {
                                 // Validator was removed through normal means.
-                                // Absorb the lamports into the reserve.
+                                // Absorb the satomis into the reserve.
                                 Self::stake_merge(
                                     stake_pool_info.key,
                                     validator_stake_info.clone(),
@@ -2432,7 +2432,7 @@ impl Processor {
                 {
                     // If a validator stake is `Initialized`, the validator could
                     // have been destaked during a cluster restart or removed through
-                    // normal means. Either way, absorb those lamports into the reserve.
+                    // normal means. Either way, absorb those satomis into the reserve.
                     // The transient stake was likely absorbed into the reserve earlier.
                     Self::stake_merge(
                         stake_pool_info.key,
@@ -2456,8 +2456,8 @@ impl Processor {
             }
 
             validator_stake_record.last_update_epoch = clock.epoch;
-            validator_stake_record.active_stake_lamports = active_stake_lamports;
-            validator_stake_record.transient_stake_lamports = transient_stake_lamports;
+            validator_stake_record.active_stake_satomis = active_stake_satomis;
+            validator_stake_record.transient_stake_satomis = transient_stake_satomis;
         }
 
         Ok(())
@@ -2506,16 +2506,16 @@ impl Processor {
             return Err(StakePoolError::InvalidState.into());
         }
 
-        let previous_lamports = stake_pool.total_lamports;
+        let previous_satomis = stake_pool.total_satomis;
         let previous_pool_token_supply = stake_pool.pool_token_supply;
         let reserve_stake = try_from_slice_unchecked::<stake::state::StakeState>(
             &reserve_stake_info.data.borrow(),
         )?;
-        let mut total_lamports = if let stake::state::StakeState::Initialized(meta) = reserve_stake
+        let mut total_satomis = if let stake::state::StakeState::Initialized(meta) = reserve_stake
         {
             reserve_stake_info
-                .lamports()
-                .checked_sub(minimum_reserve_lamports(&meta))
+                .satomis()
+                .checked_sub(minimum_reserve_satomis(&meta))
                 .ok_or(StakePoolError::CalculationFailure)?
         } else {
             msg!("Reserve stake account in unknown state, aborting");
@@ -2525,17 +2525,17 @@ impl Processor {
             if validator_stake_record.last_update_epoch < clock.epoch {
                 return Err(StakePoolError::StakeListOutOfDate.into());
             }
-            total_lamports = total_lamports
-                .checked_add(validator_stake_record.stake_lamports()?)
+            total_satomis = total_satomis
+                .checked_add(validator_stake_record.stake_satomis()?)
                 .ok_or(StakePoolError::CalculationFailure)?;
         }
 
-        let reward_lamports = total_lamports.saturating_sub(previous_lamports);
+        let reward_satomis = total_satomis.saturating_sub(previous_satomis);
 
         // If the manager fee info is invalid, they don't deserve to receive the fee.
         let fee = if stake_pool.check_manager_fee_info(manager_fee_info).is_ok() {
             stake_pool
-                .calc_epoch_fee_amount(reward_lamports)
+                .calc_epoch_fee_amount(reward_satomis)
                 .ok_or(StakePoolError::CalculationFailure)?
         } else {
             0
@@ -2571,10 +2571,10 @@ impl Processor {
             stake_pool.next_sol_withdrawal_fee.update_epoch();
 
             stake_pool.last_update_epoch = clock.epoch;
-            stake_pool.last_epoch_total_lamports = previous_lamports;
+            stake_pool.last_epoch_total_satomis = previous_satomis;
             stake_pool.last_epoch_pool_token_supply = previous_pool_token_supply;
         }
-        stake_pool.total_lamports = total_lamports;
+        stake_pool.total_satomis = total_satomis;
 
         let pool_mint_data = pool_mint_info.try_borrow_data()?;
         let pool_mint = StateWithExtensions::<Mint>::unpack(&pool_mint_data)?;
@@ -2682,7 +2682,7 @@ impl Processor {
         }
 
         let (_, validator_stake) = get_stake_state(validator_stake_account_info)?;
-        let pre_all_validator_lamports = validator_stake_account_info.lamports();
+        let pre_all_validator_satomis = validator_stake_account_info.satomis();
         let vote_account_address = validator_stake.delegation.voter_pubkey;
         if let Some(preferred_deposit) = stake_pool.preferred_deposit_validator_vote_address {
             if preferred_deposit != vote_account_address {
@@ -2751,26 +2751,26 @@ impl Processor {
         )?;
 
         let (_, post_validator_stake) = get_stake_state(validator_stake_account_info)?;
-        let post_all_validator_lamports = validator_stake_account_info.lamports();
+        let post_all_validator_satomis = validator_stake_account_info.satomis();
         msg!("Stake post merge {}", post_validator_stake.delegation.stake);
 
-        let total_deposit_lamports = post_all_validator_lamports
-            .checked_sub(pre_all_validator_lamports)
+        let total_deposit_satomis = post_all_validator_satomis
+            .checked_sub(pre_all_validator_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
-        let stake_deposit_lamports = post_validator_stake
+        let stake_deposit_satomis = post_validator_stake
             .delegation
             .stake
             .checked_sub(validator_stake.delegation.stake)
             .ok_or(StakePoolError::CalculationFailure)?;
-        let sol_deposit_lamports = total_deposit_lamports
-            .checked_sub(stake_deposit_lamports)
+        let sol_deposit_satomis = total_deposit_satomis
+            .checked_sub(stake_deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
 
         let new_pool_tokens = stake_pool
-            .calc_pool_tokens_for_deposit(total_deposit_lamports)
+            .calc_pool_tokens_for_deposit(total_deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         let new_pool_tokens_from_stake = stake_pool
-            .calc_pool_tokens_for_deposit(stake_deposit_lamports)
+            .calc_pool_tokens_for_deposit(stake_deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         let new_pool_tokens_from_sol = new_pool_tokens
             .checked_sub(new_pool_tokens_from_stake)
@@ -2851,8 +2851,8 @@ impl Processor {
             )?;
         }
 
-        // withdraw additional lamports to the reserve
-        if sol_deposit_lamports > 0 {
+        // withdraw additional satomis to the reserve
+        if sol_deposit_satomis > 0 {
             Self::stake_withdraw(
                 stake_pool_info.key,
                 validator_stake_account_info.clone(),
@@ -2863,7 +2863,7 @@ impl Processor {
                 clock_info.clone(),
                 stake_history_info.clone(),
                 stake_program_info.clone(),
-                sol_deposit_lamports,
+                sol_deposit_satomis,
             )?;
         }
 
@@ -2871,15 +2871,15 @@ impl Processor {
             .pool_token_supply
             .checked_add(new_pool_tokens)
             .ok_or(StakePoolError::CalculationFailure)?;
-        // We treat the extra lamports as though they were
+        // We treat the extra satomis as though they were
         // transferred directly to the reserve stake account.
-        stake_pool.total_lamports = stake_pool
-            .total_lamports
-            .checked_add(total_deposit_lamports)
+        stake_pool.total_satomis = stake_pool
+            .total_satomis
+            .checked_add(total_deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
 
-        validator_stake_info.active_stake_lamports = validator_stake_account_info.lamports();
+        validator_stake_info.active_stake_satomis = validator_stake_account_info.satomis();
 
         Ok(())
     }
@@ -2889,14 +2889,14 @@ impl Processor {
     fn process_deposit_sol(
         program_id: &Pubkey,
         accounts: &[AccountInfo],
-        deposit_lamports: u64,
+        deposit_satomis: u64,
         minimum_pool_tokens_out: Option<u64>,
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
         let stake_pool_info = next_account_info(account_info_iter)?;
         let withdraw_authority_info = next_account_info(account_info_iter)?;
         let reserve_stake_account_info = next_account_info(account_info_iter)?;
-        let from_user_lamports_info = next_account_info(account_info_iter)?;
+        let from_user_satomis_info = next_account_info(account_info_iter)?;
         let dest_user_pool_info = next_account_info(account_info_iter)?;
         let manager_fee_info = next_account_info(account_info_iter)?;
         let referrer_fee_info = next_account_info(account_info_iter)?;
@@ -2941,7 +2941,7 @@ impl Processor {
         }
 
         let new_pool_tokens = stake_pool
-            .calc_pool_tokens_for_deposit(deposit_lamports)
+            .calc_pool_tokens_for_deposit(deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
 
         let pool_tokens_sol_deposit_fee = stake_pool
@@ -2977,10 +2977,10 @@ impl Processor {
         }
 
         Self::sol_transfer(
-            from_user_lamports_info.clone(),
+            from_user_satomis_info.clone(),
             reserve_stake_account_info.clone(),
             system_program_info.clone(),
-            deposit_lamports,
+            deposit_satomis,
         )?;
 
         Self::token_mint_to(
@@ -3024,9 +3024,9 @@ impl Processor {
             .pool_token_supply
             .checked_add(new_pool_tokens)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.total_lamports = stake_pool
-            .total_lamports
-            .checked_add(deposit_lamports)
+        stake_pool.total_satomis = stake_pool
+            .total_satomis
+            .checked_add(deposit_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
 
@@ -3039,7 +3039,7 @@ impl Processor {
         program_id: &Pubkey,
         accounts: &[AccountInfo],
         pool_tokens: u64,
-        minimum_lamports_out: Option<u64>,
+        minimum_satomis_out: Option<u64>,
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
         let stake_pool_info = next_account_info(account_info_iter)?;
@@ -3106,16 +3106,16 @@ impl Processor {
             .checked_sub(pool_tokens_fee)
             .ok_or(StakePoolError::CalculationFailure)?;
 
-        let mut withdraw_lamports = stake_pool
-            .calc_lamports_withdraw_amount(pool_tokens_burnt)
+        let mut withdraw_satomis = stake_pool
+            .calc_satomis_withdraw_amount(pool_tokens_burnt)
             .ok_or(StakePoolError::CalculationFailure)?;
 
-        if withdraw_lamports == 0 {
+        if withdraw_satomis == 0 {
             return Err(StakePoolError::WithdrawalTooSmall.into());
         }
 
-        if let Some(minimum_lamports_out) = minimum_lamports_out {
-            if withdraw_lamports < minimum_lamports_out {
+        if let Some(minimum_satomis_out) = minimum_satomis_out {
+            if withdraw_satomis < minimum_satomis_out {
                 return Err(StakePoolError::ExceededSlippage.into());
             }
         }
@@ -3124,27 +3124,27 @@ impl Processor {
         let stake_state =
             try_from_slice_unchecked::<stake::state::StakeState>(&stake_split_from.data.borrow())?;
         let meta = stake_state.meta().ok_or(StakePoolError::WrongStakeState)?;
-        let required_lamports = minimum_stake_lamports(&meta, stake_minimum_delegation);
+        let required_satomis = minimum_stake_satomis(&meta, stake_minimum_delegation);
 
-        let lamports_per_pool_token = stake_pool
-            .get_lamports_per_pool_token()
+        let satomis_per_pool_token = stake_pool
+            .get_satomis_per_pool_token()
             .ok_or(StakePoolError::CalculationFailure)?;
-        let minimum_lamports_with_tolerance =
-            required_lamports.saturating_add(lamports_per_pool_token);
+        let minimum_satomis_with_tolerance =
+            required_satomis.saturating_add(satomis_per_pool_token);
 
         let has_active_stake = validator_list
             .find::<ValidatorStakeInfo, _>(|x| {
-                ValidatorStakeInfo::active_lamports_greater_than(
+                ValidatorStakeInfo::active_satomis_greater_than(
                     x,
-                    &minimum_lamports_with_tolerance,
+                    &minimum_satomis_with_tolerance,
                 )
             })
             .is_some();
         let has_transient_stake = validator_list
             .find::<ValidatorStakeInfo, _>(|x| {
-                ValidatorStakeInfo::transient_lamports_greater_than(
+                ValidatorStakeInfo::transient_satomis_greater_than(
                     x,
-                    &minimum_lamports_with_tolerance,
+                    &minimum_satomis_with_tolerance,
                 )
             })
             .is_some();
@@ -3152,15 +3152,15 @@ impl Processor {
         let validator_list_item_info = if *stake_split_from.key == stake_pool.reserve_stake {
             // check that the validator stake accounts have no withdrawable stake
             if has_transient_stake || has_active_stake {
-                msg!("Error withdrawing from reserve: validator stake accounts have lamports available, please use those first.");
-                return Err(StakePoolError::StakeLamportsNotEqualToMinimum.into());
+                msg!("Error withdrawing from reserve: validator stake accounts have satomis available, please use those first.");
+                return Err(StakePoolError::StakeSatomisNotEqualToMinimum.into());
             }
 
             // check that reserve has enough (should never fail, but who knows?)
             stake_split_from
-                .lamports()
-                .checked_sub(minimum_reserve_lamports(&meta))
-                .ok_or(StakePoolError::StakeLamportsNotEqualToMinimum)?;
+                .satomis()
+                .checked_sub(minimum_reserve_satomis(&meta))
+                .ok_or(StakePoolError::StakeSatomisNotEqualToMinimum)?;
             None
         } else {
             let delegation = stake_state
@@ -3176,11 +3176,11 @@ impl Processor {
                         ValidatorStakeInfo::memcmp_pubkey(x, &preferred_withdraw_validator)
                     })
                     .ok_or(StakePoolError::ValidatorNotFound)?;
-                let available_lamports = preferred_validator_info
-                    .active_stake_lamports
-                    .saturating_sub(minimum_lamports_with_tolerance);
-                if preferred_withdraw_validator != vote_account_address && available_lamports > 0 {
-                    msg!("Validator vote address {} is preferred for withdrawals, it currently has {} lamports available. Please withdraw those before using other validator stake accounts.", preferred_withdraw_validator, preferred_validator_info.active_stake_lamports);
+                let available_satomis = preferred_validator_info
+                    .active_stake_satomis
+                    .saturating_sub(minimum_satomis_with_tolerance);
+                if preferred_withdraw_validator != vote_account_address && available_satomis > 0 {
+                    msg!("Validator vote address {} is preferred for withdrawals, it currently has {} satomis available. Please withdraw those before using other validator stake accounts.", preferred_withdraw_validator, preferred_validator_info.active_stake_satomis);
                     return Err(StakePoolError::IncorrectWithdrawVoteAddress.into());
                 }
             }
@@ -3231,30 +3231,30 @@ impl Processor {
 
             match withdraw_source {
                 StakeWithdrawSource::Active | StakeWithdrawSource::Transient => {
-                    let remaining_lamports = stake_split_from
-                        .lamports()
-                        .saturating_sub(withdraw_lamports);
-                    if remaining_lamports < required_lamports {
-                        msg!("Attempting to withdraw {} lamports from validator account with {} stake lamports, {} must remain", withdraw_lamports, stake_split_from.lamports(), required_lamports);
-                        return Err(StakePoolError::StakeLamportsNotEqualToMinimum.into());
+                    let remaining_satomis = stake_split_from
+                        .satomis()
+                        .saturating_sub(withdraw_satomis);
+                    if remaining_satomis < required_satomis {
+                        msg!("Attempting to withdraw {} satomis from validator account with {} stake satomis, {} must remain", withdraw_satomis, stake_split_from.satomis(), required_satomis);
+                        return Err(StakePoolError::StakeSatomisNotEqualToMinimum.into());
                     }
                 }
                 StakeWithdrawSource::ValidatorRemoval => {
-                    let split_from_lamports = stake_split_from.lamports();
-                    let upper_bound = split_from_lamports.saturating_add(lamports_per_pool_token);
-                    if withdraw_lamports < split_from_lamports || withdraw_lamports > upper_bound {
+                    let split_from_satomis = stake_split_from.satomis();
+                    let upper_bound = split_from_satomis.saturating_add(satomis_per_pool_token);
+                    if withdraw_satomis < split_from_satomis || withdraw_satomis > upper_bound {
                         msg!(
-                            "Cannot withdraw a whole account worth {} lamports, \
-                              must withdraw at least {} lamports worth of pool tokens \
-                              with a margin of {} lamports",
-                            withdraw_lamports,
-                            split_from_lamports,
-                            lamports_per_pool_token
+                            "Cannot withdraw a whole account worth {} satomis, \
+                              must withdraw at least {} satomis worth of pool tokens \
+                              with a margin of {} satomis",
+                            withdraw_satomis,
+                            split_from_satomis,
+                            satomis_per_pool_token
                         );
-                        return Err(StakePoolError::StakeLamportsNotEqualToMinimum.into());
+                        return Err(StakePoolError::StakeSatomisNotEqualToMinimum.into());
                     }
-                    // truncate the lamports down to the amount in the account
-                    withdraw_lamports = split_from_lamports;
+                    // truncate the satomis down to the amount in the account
+                    withdraw_satomis = split_from_satomis;
                 }
             }
             Some((validator_stake_info, withdraw_source))
@@ -3274,7 +3274,7 @@ impl Processor {
             withdraw_authority_info.clone(),
             AUTHORITY_WITHDRAW,
             stake_pool.stake_withdraw_bump_seed,
-            withdraw_lamports,
+            withdraw_satomis,
             stake_split_to.clone(),
         )?;
 
@@ -3305,34 +3305,34 @@ impl Processor {
             .pool_token_supply
             .checked_sub(pool_tokens_burnt)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.total_lamports = stake_pool
-            .total_lamports
-            .checked_sub(withdraw_lamports)
+        stake_pool.total_satomis = stake_pool
+            .total_satomis
+            .checked_sub(withdraw_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
 
         if let Some((validator_list_item, withdraw_source)) = validator_list_item_info {
             match withdraw_source {
                 StakeWithdrawSource::Active => {
-                    validator_list_item.active_stake_lamports = validator_list_item
-                        .active_stake_lamports
-                        .checked_sub(withdraw_lamports)
+                    validator_list_item.active_stake_satomis = validator_list_item
+                        .active_stake_satomis
+                        .checked_sub(withdraw_satomis)
                         .ok_or(StakePoolError::CalculationFailure)?
                 }
                 StakeWithdrawSource::Transient => {
-                    validator_list_item.transient_stake_lamports = validator_list_item
-                        .transient_stake_lamports
-                        .checked_sub(withdraw_lamports)
+                    validator_list_item.transient_stake_satomis = validator_list_item
+                        .transient_stake_satomis
+                        .checked_sub(withdraw_satomis)
                         .ok_or(StakePoolError::CalculationFailure)?
                 }
                 StakeWithdrawSource::ValidatorRemoval => {
-                    validator_list_item.active_stake_lamports = validator_list_item
-                        .active_stake_lamports
-                        .checked_sub(withdraw_lamports)
+                    validator_list_item.active_stake_satomis = validator_list_item
+                        .active_stake_satomis
+                        .checked_sub(withdraw_satomis)
                         .ok_or(StakePoolError::CalculationFailure)?;
-                    if validator_list_item.active_stake_lamports != 0 {
-                        msg!("Attempting to remove a validator from the pool, but withdrawal leaves {} lamports, update the pool to merge any unaccounted lamports",
-                            validator_list_item.active_stake_lamports);
+                    if validator_list_item.active_stake_satomis != 0 {
+                        msg!("Attempting to remove a validator from the pool, but withdrawal leaves {} satomis, update the pool to merge any unaccounted satomis",
+                            validator_list_item.active_stake_satomis);
                         return Err(StakePoolError::StakeListAndPoolOutOfDate.into());
                     }
                     // since we already checked that there's no transient stake,
@@ -3351,7 +3351,7 @@ impl Processor {
         program_id: &Pubkey,
         accounts: &[AccountInfo],
         pool_tokens: u64,
-        minimum_lamports_out: Option<u64>,
+        minimum_satomis_out: Option<u64>,
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
         let stake_pool_info = next_account_info(account_info_iter)?;
@@ -3359,7 +3359,7 @@ impl Processor {
         let user_transfer_authority_info = next_account_info(account_info_iter)?;
         let burn_from_pool_info = next_account_info(account_info_iter)?;
         let reserve_stake_info = next_account_info(account_info_iter)?;
-        let destination_lamports_info = next_account_info(account_info_iter)?;
+        let destination_satomis_info = next_account_info(account_info_iter)?;
         let manager_fee_info = next_account_info(account_info_iter)?;
         let pool_mint_info = next_account_info(account_info_iter)?;
         let clock_info = next_account_info(account_info_iter)?;
@@ -3413,32 +3413,32 @@ impl Processor {
             .checked_sub(pool_tokens_fee)
             .ok_or(StakePoolError::CalculationFailure)?;
 
-        let withdraw_lamports = stake_pool
-            .calc_lamports_withdraw_amount(pool_tokens_burnt)
+        let withdraw_satomis = stake_pool
+            .calc_satomis_withdraw_amount(pool_tokens_burnt)
             .ok_or(StakePoolError::CalculationFailure)?;
 
-        if withdraw_lamports == 0 {
+        if withdraw_satomis == 0 {
             return Err(StakePoolError::WithdrawalTooSmall.into());
         }
 
-        if let Some(minimum_lamports_out) = minimum_lamports_out {
-            if withdraw_lamports < minimum_lamports_out {
+        if let Some(minimum_satomis_out) = minimum_satomis_out {
+            if withdraw_satomis < minimum_satomis_out {
                 return Err(StakePoolError::ExceededSlippage.into());
             }
         }
 
-        let new_reserve_lamports = reserve_stake_info
-            .lamports()
-            .saturating_sub(withdraw_lamports);
+        let new_reserve_satomis = reserve_stake_info
+            .satomis()
+            .saturating_sub(withdraw_satomis);
         let stake_state = try_from_slice_unchecked::<stake::state::StakeState>(
             &reserve_stake_info.data.borrow(),
         )?;
         if let stake::state::StakeState::Initialized(meta) = stake_state {
-            let minimum_reserve_lamports = minimum_reserve_lamports(&meta);
-            if new_reserve_lamports < minimum_reserve_lamports {
-                msg!("Attempting to withdraw {} lamports, maximum possible SOL withdrawal is {} lamports",
-                    withdraw_lamports,
-                    reserve_stake_info.lamports().saturating_sub(minimum_reserve_lamports)
+            let minimum_reserve_satomis = minimum_reserve_satomis(&meta);
+            if new_reserve_satomis < minimum_reserve_satomis {
+                msg!("Attempting to withdraw {} satomis, maximum possible SOL withdrawal is {} satomis",
+                    withdraw_satomis,
+                    reserve_stake_info.satomis().saturating_sub(minimum_reserve_satomis)
                 );
                 return Err(StakePoolError::SolWithdrawalTooLarge.into());
             }
@@ -3473,20 +3473,20 @@ impl Processor {
             withdraw_authority_info.clone(),
             AUTHORITY_WITHDRAW,
             stake_pool.stake_withdraw_bump_seed,
-            destination_lamports_info.clone(),
+            destination_satomis_info.clone(),
             clock_info.clone(),
             stake_history_info.clone(),
             stake_program_info.clone(),
-            withdraw_lamports,
+            withdraw_satomis,
         )?;
 
         stake_pool.pool_token_supply = stake_pool
             .pool_token_supply
             .checked_sub(pool_tokens_burnt)
             .ok_or(StakePoolError::CalculationFailure)?;
-        stake_pool.total_lamports = stake_pool
-            .total_lamports
-            .checked_sub(withdraw_lamports)
+        stake_pool.total_satomis = stake_pool
+            .total_satomis
+            .checked_sub(withdraw_satomis)
             .ok_or(StakePoolError::CalculationFailure)?;
         stake_pool.serialize(&mut *stake_pool_info.data.borrow_mut())?;
 
@@ -3807,20 +3807,20 @@ impl Processor {
                 Self::process_remove_validator_from_pool(program_id, accounts)
             }
             StakePoolInstruction::DecreaseValidatorStake {
-                lamports,
+                satomis,
                 transient_stake_seed,
             } => {
                 msg!("Instruction: DecreaseValidatorStake");
                 Self::process_decrease_validator_stake(
                     program_id,
                     accounts,
-                    lamports,
+                    satomis,
                     transient_stake_seed,
                     None,
                 )
             }
             StakePoolInstruction::DecreaseAdditionalValidatorStake {
-                lamports,
+                satomis,
                 transient_stake_seed,
                 ephemeral_stake_seed,
             } => {
@@ -3828,26 +3828,26 @@ impl Processor {
                 Self::process_decrease_validator_stake(
                     program_id,
                     accounts,
-                    lamports,
+                    satomis,
                     transient_stake_seed,
                     Some(ephemeral_stake_seed),
                 )
             }
             StakePoolInstruction::IncreaseValidatorStake {
-                lamports,
+                satomis,
                 transient_stake_seed,
             } => {
                 msg!("Instruction: IncreaseValidatorStake");
                 Self::process_increase_validator_stake(
                     program_id,
                     accounts,
-                    lamports,
+                    satomis,
                     transient_stake_seed,
                     None,
                 )
             }
             StakePoolInstruction::IncreaseAdditionalValidatorStake {
-                lamports,
+                satomis,
                 transient_stake_seed,
                 ephemeral_stake_seed,
             } => {
@@ -3855,7 +3855,7 @@ impl Processor {
                 Self::process_increase_validator_stake(
                     program_id,
                     accounts,
-                    lamports,
+                    satomis,
                     transient_stake_seed,
                     Some(ephemeral_stake_seed),
                 )
@@ -3916,9 +3916,9 @@ impl Processor {
                 msg!("Instruction: SetFundingAuthority");
                 Self::process_set_funding_authority(program_id, accounts, funding_type)
             }
-            StakePoolInstruction::DepositSol(lamports) => {
+            StakePoolInstruction::DepositSol(satomis) => {
                 msg!("Instruction: DepositSol");
-                Self::process_deposit_sol(program_id, accounts, lamports, None)
+                Self::process_deposit_sol(program_id, accounts, satomis, None)
             }
             StakePoolInstruction::WithdrawSol(pool_tokens) => {
                 msg!("Instruction: WithdrawSol");
@@ -3933,7 +3933,7 @@ impl Processor {
                 Self::process_update_pool_token_metadata(program_id, accounts, name, symbol, uri)
             }
             StakePoolInstruction::Redelegate {
-                lamports,
+                satomis,
                 source_transient_stake_seed,
                 ephemeral_stake_seed,
                 destination_transient_stake_seed,
@@ -3942,7 +3942,7 @@ impl Processor {
                 Self::process_redelegate(
                     program_id,
                     accounts,
-                    lamports,
+                    satomis,
                     source_transient_stake_seed,
                     ephemeral_stake_seed,
                     destination_transient_stake_seed,
@@ -3956,38 +3956,38 @@ impl Processor {
             }
             StakePoolInstruction::WithdrawStakeWithSlippage {
                 pool_tokens_in,
-                minimum_lamports_out,
+                minimum_satomis_out,
             } => {
                 msg!("Instruction: WithdrawStakeWithSlippage");
                 Self::process_withdraw_stake(
                     program_id,
                     accounts,
                     pool_tokens_in,
-                    Some(minimum_lamports_out),
+                    Some(minimum_satomis_out),
                 )
             }
             StakePoolInstruction::DepositSolWithSlippage {
-                lamports_in,
+                satomis_in,
                 minimum_pool_tokens_out,
             } => {
                 msg!("Instruction: DepositSolWithSlippage");
                 Self::process_deposit_sol(
                     program_id,
                     accounts,
-                    lamports_in,
+                    satomis_in,
                     Some(minimum_pool_tokens_out),
                 )
             }
             StakePoolInstruction::WithdrawSolWithSlippage {
                 pool_tokens_in,
-                minimum_lamports_out,
+                minimum_satomis_out,
             } => {
                 msg!("Instruction: WithdrawSolWithSlippage");
                 Self::process_withdraw_sol(
                     program_id,
                     accounts,
                     pool_tokens_in,
-                    Some(minimum_lamports_out),
+                    Some(minimum_satomis_out),
                 )
             }
         }
@@ -4025,13 +4025,13 @@ impl PrintProgramError for StakePoolError {
             StakePoolError::UnexpectedValidatorListAccountSize=> msg!("Error: The size of the given validator stake list does match the expected amount"),
             StakePoolError::WrongStaker=> msg!("Error: Wrong pool staker account"),
             StakePoolError::NonZeroPoolTokenSupply => msg!("Error: Pool token supply is not zero on initialization"),
-            StakePoolError::StakeLamportsNotEqualToMinimum => msg!("Error: The lamports in the validator stake account is not equal to the minimum"),
+            StakePoolError::StakeSatomisNotEqualToMinimum => msg!("Error: The satomis in the validator stake account is not equal to the minimum"),
             StakePoolError::IncorrectDepositVoteAddress => msg!("Error: The provided deposit stake account is not delegated to the preferred deposit vote account"),
             StakePoolError::IncorrectWithdrawVoteAddress => msg!("Error: The provided withdraw stake account is not the preferred deposit vote account"),
             StakePoolError::InvalidMintFreezeAuthority => msg!("Error: The mint has an invalid freeze authority"),
             StakePoolError::FeeIncreaseTooHigh => msg!("Error: The fee cannot increase by a factor exceeding the stipulated ratio"),
-            StakePoolError::WithdrawalTooSmall => msg!("Error: Not enough pool tokens provided to withdraw 1-lamport stake"),
-            StakePoolError::DepositTooSmall => msg!("Error: Not enough lamports provided for deposit to result in one pool token"),
+            StakePoolError::WithdrawalTooSmall => msg!("Error: Not enough pool tokens provided to withdraw 1-satomi stake"),
+            StakePoolError::DepositTooSmall => msg!("Error: Not enough satomis provided for deposit to result in one pool token"),
             StakePoolError::InvalidStakeDepositAuthority => msg!("Error: Provided stake deposit authority does not match the program's"),
             StakePoolError::InvalidSolDepositAuthority => msg!("Error: Provided sol deposit authority does not match the program's"),
             StakePoolError::InvalidPreferredValidator => msg!("Error: Provided preferred validator is invalid"),

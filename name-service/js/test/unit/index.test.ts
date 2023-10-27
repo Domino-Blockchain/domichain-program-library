@@ -1,6 +1,6 @@
 import {
   Keypair,
-  LAMPORTS_PER_SOL,
+  SATOMIS_PER_SOL,
   PublicKey,
   SystemProgram,
 } from '@solana/web3.js';
@@ -38,7 +38,7 @@ describe('SplNameService Instructions', () => {
       nameOwnerKey,
       payerKey,
       name,
-      new Numberu64(LAMPORTS_PER_SOL),
+      new Numberu64(SATOMIS_PER_SOL),
       new Numberu64(10)
     );
 
@@ -59,7 +59,7 @@ describe('SplNameService Instructions', () => {
       nameOwnerKey,
       payerKey,
       name,
-      new Numberu64(LAMPORTS_PER_SOL),
+      new Numberu64(SATOMIS_PER_SOL),
       new Numberu64(10),
       nameClassKey,
       nameParent,

@@ -9,7 +9,7 @@ use {
     domichain_program::{borsh::try_from_slice_unchecked, pubkey::Pubkey, stake},
     domichain_program_test::*,
     solana_sdk::signature::{Keypair, Signer},
-    spl_stake_pool::{minimum_stake_lamports, state},
+    spl_stake_pool::{minimum_stake_satomis, state},
 };
 
 #[tokio::test]
@@ -181,8 +181,8 @@ async fn success_empty_out_stake_with_fee() {
     let stake_minimum_delegation =
         stake_get_minimum_delegation(&mut context.banks_client, &context.payer, &last_blockhash)
             .await;
-    let lamports_to_withdraw =
-        validator_stake_account.lamports - minimum_stake_lamports(&meta, stake_minimum_delegation);
+    let satomis_to_withdraw =
+        validator_stake_account.satomis - minimum_stake_satomis(&meta, stake_minimum_delegation);
     let stake_pool_account = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.stake_pool.pubkey(),
@@ -196,7 +196,7 @@ async fn success_empty_out_stake_with_fee() {
         denominator: fee.denominator,
     };
     let pool_tokens_to_withdraw =
-        lamports_to_withdraw * inverse_fee.denominator / inverse_fee.numerator;
+        satomis_to_withdraw * inverse_fee.denominator / inverse_fee.numerator;
 
     let last_blockhash = context
         .banks_client
@@ -229,7 +229,7 @@ async fn success_empty_out_stake_with_fee() {
         deserialize::<stake::state::StakeState>(&validator_stake_account.data).unwrap();
     let meta = stake_state.meta().unwrap();
     assert_eq!(
-        validator_stake_account.lamports,
-        minimum_stake_lamports(&meta, stake_minimum_delegation)
+        validator_stake_account.satomis,
+        minimum_stake_satomis(&meta, stake_minimum_delegation)
     );
 }

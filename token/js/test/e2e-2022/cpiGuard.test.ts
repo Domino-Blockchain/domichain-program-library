@@ -17,7 +17,7 @@ import {
     getAccountLen,
     ExtensionType,
 } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 const TEST_TOKEN_DECIMALS = 2;
 const TRANSFER_AMOUNT = 1_000;
@@ -30,7 +30,7 @@ describe('cpiGuard', () => {
 
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         owner = Keypair.generate();
     });
 
@@ -40,7 +40,7 @@ describe('cpiGuard', () => {
         const accountKeypair = Keypair.generate();
         account = accountKeypair.publicKey;
         const accountLen = getAccountLen(EXTENSIONS);
-        const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+        const satomis = await connection.getMinimumBalanceForRentExemption(accountLen);
 
         const mint = await createMint(
             connection,
@@ -58,7 +58,7 @@ describe('cpiGuard', () => {
                 fromPubkey: payer.publicKey,
                 newAccountPubkey: account,
                 space: accountLen,
-                lamports,
+                satomis,
                 programId: TEST_PROGRAM_ID,
             }),
             createInitializeAccountInstruction(account, mint, owner.publicKey, TEST_PROGRAM_ID)

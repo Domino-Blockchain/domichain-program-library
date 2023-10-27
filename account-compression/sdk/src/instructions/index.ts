@@ -192,7 +192,7 @@ export async function createAllocTreeIx(
   return SystemProgram.createAccount({
     fromPubkey: payer,
     newAccountPubkey: merkleTree,
-    lamports: await connection.getMinimumBalanceForRentExemption(requiredSpace),
+    satomis: await connection.getMinimumBalanceForRentExemption(requiredSpace),
     space: requiredSpace,
     programId: PROGRAM_ID,
   });

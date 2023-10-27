@@ -27,7 +27,7 @@ async fn test_cross_program_invocation() {
     program_test.add_account(
         allocated_pubkey,
         Account {
-            lamports: Rent::default().minimum_balance(SIZE),
+            satomis: Rent::default().minimum_balance(SIZE),
             ..Account::default()
         },
     );

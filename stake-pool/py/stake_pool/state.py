@@ -49,7 +49,7 @@ class StakePool(NamedTuple):
     pool_mint: PublicKey
     manager_fee_account: PublicKey
     token_program_id: PublicKey
-    total_lamports: int
+    total_satomis: int
     pool_token_supply: int
     last_update_epoch: int
     lockup: Lockup
@@ -68,7 +68,7 @@ class StakePool(NamedTuple):
     sol_withdrawal_fee: Fee
     next_sol_withdrawal_fee: Optional[Fee]
     last_epoch_pool_token_supply: int
-    last_epoch_total_lamports: int
+    last_epoch_total_satomis: int
 
     @classmethod
     def decode(cls, data: str, encoding: str):
@@ -84,7 +84,7 @@ class StakePool(NamedTuple):
             pool_mint=PublicKey(parsed['pool_mint']),
             manager_fee_account=PublicKey(parsed['manager_fee_account']),
             token_program_id=PublicKey(parsed['token_program_id']),
-            total_lamports=parsed['total_lamports'],
+            total_satomis=parsed['total_satomis'],
             pool_token_supply=parsed['pool_token_supply'],
             last_update_epoch=parsed['last_update_epoch'],
             lockup=Lockup.decode_container(parsed['lockup']),
@@ -103,7 +103,7 @@ class StakePool(NamedTuple):
             sol_withdrawal_fee=Fee.decode_container(parsed['sol_withdrawal_fee']),
             next_sol_withdrawal_fee=Fee.decode_optional_container(parsed['next_sol_withdrawal_fee']),
             last_epoch_pool_token_supply=parsed['last_epoch_pool_token_supply'],
-            last_epoch_total_lamports=parsed['last_epoch_total_lamports'],
+            last_epoch_total_satomis=parsed['last_epoch_total_satomis'],
         )
 
 
@@ -123,14 +123,14 @@ class StakeStatus(IntEnum):
 
 
 class ValidatorStakeInfo(NamedTuple):
-    active_stake_lamports: int
+    active_stake_satomis: int
     """Amount of active stake delegated to this validator."""
 
-    transient_stake_lamports: int
+    transient_stake_satomis: int
     """Amount of transient stake delegated to this validator."""
 
     last_update_epoch: int
-    """Last epoch the active and transient stake lamports fields were updated."""
+    """Last epoch the active and transient stake satomis fields were updated."""
 
     transient_seed_suffix: int
     """Transient account seed suffix."""
@@ -150,8 +150,8 @@ class ValidatorStakeInfo(NamedTuple):
     @classmethod
     def decode_container(cls, container: Container):
         return ValidatorStakeInfo(
-            active_stake_lamports=container['active_stake_lamports'],
-            transient_stake_lamports=container['transient_stake_lamports'],
+            active_stake_satomis=container['active_stake_satomis'],
+            transient_stake_satomis=container['transient_stake_satomis'],
             last_update_epoch=container['last_update_epoch'],
             transient_seed_suffix=container['transient_seed_suffix'],
             unused=container['unused'],
@@ -202,7 +202,7 @@ STAKE_POOL_LAYOUT = Struct(
     "pool_mint" / PUBLIC_KEY_LAYOUT,
     "manager_fee_account" / PUBLIC_KEY_LAYOUT,
     "token_program_id" / PUBLIC_KEY_LAYOUT,
-    "total_lamports" / Int64ul,
+    "total_satomis" / Int64ul,
     "pool_token_supply" / Int64ul,
     "last_update_epoch" / Int64ul,
     "lockup" / LOCKUP_LAYOUT,
@@ -228,7 +228,7 @@ STAKE_POOL_LAYOUT = Struct(
     "next_sol_withdrawal_fee_option" / Int8ul,
     "next_sol_withdrawal_fee" / FEE_LAYOUT,
     "last_epoch_pool_token_supply" / Int64ul,
-    "last_epoch_total_lamports" / Int64ul,
+    "last_epoch_total_satomis" / Int64ul,
 )
 
 DECODE_STAKE_POOL_LAYOUT = Struct(
@@ -242,7 +242,7 @@ DECODE_STAKE_POOL_LAYOUT = Struct(
     "pool_mint" / PUBLIC_KEY_LAYOUT,
     "manager_fee_account" / PUBLIC_KEY_LAYOUT,
     "token_program_id" / PUBLIC_KEY_LAYOUT,
-    "total_lamports" / Int64ul,
+    "total_satomis" / Int64ul,
     "pool_token_supply" / Int64ul,
     "last_update_epoch" / Int64ul,
     "lockup" / LOCKUP_LAYOUT,
@@ -303,12 +303,12 @@ DECODE_STAKE_POOL_LAYOUT = Struct(
             1: FEE_LAYOUT,
         }),
     "last_epoch_pool_token_supply" / Int64ul,
-    "last_epoch_total_lamports" / Int64ul,
+    "last_epoch_total_satomis" / Int64ul,
 )
 
 VALIDATOR_INFO_LAYOUT = Struct(
-    "active_stake_lamports" / Int64ul,
-    "transient_stake_lamports" / Int64ul,
+    "active_stake_satomis" / Int64ul,
+    "transient_stake_satomis" / Int64ul,
     "last_update_epoch" / Int64ul,
     "transient_seed_suffix" / Int64ul,
     "unused" / Int32ul,

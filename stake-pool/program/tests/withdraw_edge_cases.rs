@@ -11,7 +11,7 @@ use {
     },
     domichain_program_test::*,
     solana_sdk::{signature::Signer, transaction::TransactionError},
-    spl_stake_pool::{error::StakePoolError, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error::StakePoolError, instruction, state, MINIMUM_RESERVE_SATOMIS},
     test_case::test_case,
 };
 
@@ -35,7 +35,7 @@ async fn fail_remove_validator() {
             &context.last_blockhash,
             &validator_stake.stake_account,
             &validator_stake.transient_stake_account,
-            deposit_info.stake_lamports / 2,
+            deposit_info.stake_satomis / 2,
             validator_stake.transient_stake_seed,
         )
         .await;
@@ -62,7 +62,7 @@ async fn fail_remove_validator() {
     // Withdraw entire account, fail because some stake left
     let validator_stake_account =
         get_account(&mut context.banks_client, &validator_stake.stake_account).await;
-    let remaining_lamports = validator_stake_account.lamports;
+    let remaining_satomis = validator_stake_account.satomis;
     let new_user_authority = Pubkey::new_unique();
     let error = stake_pool_accounts
         .withdraw_stake(
@@ -74,7 +74,7 @@ async fn fail_remove_validator() {
             &deposit_info.pool_account.pubkey(),
             &validator_stake.stake_account,
             &new_user_authority,
-            remaining_lamports,
+            remaining_satomis,
         )
         .await
         .unwrap()
@@ -83,7 +83,7 @@ async fn fail_remove_validator() {
         error,
         TransactionError::InstructionError(
             0,
-            InstructionError::Custom(StakePoolError::StakeLamportsNotEqualToMinimum as u32)
+            InstructionError::Custom(StakePoolError::StakeSatomisNotEqualToMinimum as u32)
         )
     );
 }
@@ -110,7 +110,7 @@ async fn success_remove_validator(multiple: u64) {
         &context.payer,
         &context.last_blockhash,
         &stake_pool_accounts.reserve_stake.pubkey(),
-        deposit_info.stake_lamports * multiple, // each pool token is worth more than one lamport
+        deposit_info.stake_satomis * multiple, // each pool token is worth more than one satomi
     )
     .await;
     stake_pool_accounts
@@ -128,9 +128,9 @@ async fn success_remove_validator(multiple: u64) {
     let stake_pool = stake_pool_accounts
         .get_stake_pool(&mut context.banks_client)
         .await;
-    let lamports_per_pool_token = stake_pool.get_lamports_per_pool_token().unwrap();
+    let satomis_per_pool_token = stake_pool.get_satomis_per_pool_token().unwrap();
 
-    // decrease all of stake except for lamports_per_pool_token lamports, must be withdrawable
+    // decrease all of stake except for satomis_per_pool_token satomis, must be withdrawable
     let error = stake_pool_accounts
         .decrease_validator_stake(
             &mut context.banks_client,
@@ -138,7 +138,7 @@ async fn success_remove_validator(multiple: u64) {
             &context.last_blockhash,
             &validator_stake.stake_account,
             &validator_stake.transient_stake_account,
-            deposit_info.stake_lamports + stake_rent - lamports_per_pool_token,
+            deposit_info.stake_satomis + stake_rent - satomis_per_pool_token,
             validator_stake.transient_stake_seed,
         )
         .await;
@@ -170,17 +170,17 @@ async fn success_remove_validator(multiple: u64) {
 
     let validator_stake_account =
         get_account(&mut context.banks_client, &validator_stake.stake_account).await;
-    let remaining_lamports = validator_stake_account.lamports;
+    let remaining_satomis = validator_stake_account.satomis;
     let stake_minimum_delegation =
         stake_get_minimum_delegation(&mut context.banks_client, &context.payer, &last_blockhash)
             .await;
     // make sure it's actually more than the minimum
-    assert!(remaining_lamports > stake_rent + stake_minimum_delegation);
+    assert!(remaining_satomis > stake_rent + stake_minimum_delegation);
 
     // round up to force one more pool token if needed
     let pool_tokens_post_fee =
-        (remaining_lamports * stake_pool.pool_token_supply + stake_pool.total_lamports - 1)
-            / stake_pool.total_lamports;
+        (remaining_satomis * stake_pool.pool_token_supply + stake_pool.total_satomis - 1)
+            / stake_pool.total_satomis;
     let new_user_authority = Pubkey::new_unique();
     let pool_tokens = stake_pool_accounts.calculate_inverse_withdrawal_fee(pool_tokens_post_fee);
     let error = stake_pool_accounts
@@ -210,8 +210,8 @@ async fn success_remove_validator(multiple: u64) {
     let user_stake_recipient_account =
         get_account(&mut context.banks_client, &user_stake_recipient.pubkey()).await;
     assert_eq!(
-        user_stake_recipient_account.lamports,
-        remaining_lamports + stake_rent + 1
+        user_stake_recipient_account.satomis,
+        remaining_satomis + stake_rent + 1
     );
 
     // Check that cleanup happens correctly
@@ -254,7 +254,7 @@ async fn fail_with_reserve() {
             &context.last_blockhash,
             &validator_stake.stake_account,
             &validator_stake.transient_stake_account,
-            deposit_info.stake_lamports / 2,
+            deposit_info.stake_satomis / 2,
             validator_stake.transient_stake_seed,
         )
         .await;
@@ -299,7 +299,7 @@ async fn fail_with_reserve() {
         error,
         TransactionError::InstructionError(
             0,
-            InstructionError::Custom(StakePoolError::StakeLamportsNotEqualToMinimum as u32)
+            InstructionError::Custom(StakePoolError::StakeSatomisNotEqualToMinimum as u32)
         )
     );
 }
@@ -327,7 +327,7 @@ async fn success_with_reserve() {
             &context.last_blockhash,
             &validator_stake.stake_account,
             &validator_stake.transient_stake_account,
-            deposit_info.stake_lamports + stake_rent,
+            deposit_info.stake_satomis + stake_rent,
             validator_stake.transient_stake_seed,
         )
         .await;
@@ -368,7 +368,7 @@ async fn success_with_reserve() {
         .await;
     assert!(error.is_none());
 
-    // first and only deposit, lamports:pool 1:1
+    // first and only deposit, satomis:pool 1:1
     let stake_pool = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.stake_pool.pubkey(),
@@ -379,13 +379,13 @@ async fn success_with_reserve() {
     // the entire deposit is actually stake since it isn't activated, so only
     // the stake deposit fee is charged
     let deposit_fee = stake_pool
-        .calc_pool_tokens_stake_deposit_fee(stake_rent + deposit_info.stake_lamports)
+        .calc_pool_tokens_stake_deposit_fee(stake_rent + deposit_info.stake_satomis)
         .unwrap();
     assert_eq!(
-        deposit_info.stake_lamports + stake_rent - deposit_fee,
+        deposit_info.stake_satomis + stake_rent - deposit_fee,
         deposit_info.pool_tokens,
         "stake {} rent {} deposit fee {} pool tokens {}",
-        deposit_info.stake_lamports,
+        deposit_info.stake_satomis,
         stake_rent,
         deposit_fee,
         deposit_info.pool_tokens
@@ -410,16 +410,16 @@ async fn success_with_reserve() {
     let stake_state = deserialize::<stake::state::StakeState>(&reserve_stake_account.data).unwrap();
     let meta = stake_state.meta().unwrap();
     assert_eq!(
-        MINIMUM_RESERVE_LAMPORTS + meta.rent_exempt_reserve + withdrawal_fee + deposit_fee,
-        reserve_stake_account.lamports
+        MINIMUM_RESERVE_SATOMIS + meta.rent_exempt_reserve + withdrawal_fee + deposit_fee,
+        reserve_stake_account.satomis
     );
 
     // Check user recipient stake account balance
     let user_stake_recipient_account =
         get_account(&mut context.banks_client, &user_stake_recipient.pubkey()).await;
     assert_eq!(
-        user_stake_recipient_account.lamports,
-        MINIMUM_RESERVE_LAMPORTS + deposit_info.stake_lamports + stake_rent * 2
+        user_stake_recipient_account.satomis,
+        MINIMUM_RESERVE_SATOMIS + deposit_info.stake_satomis + stake_rent * 2
             - withdrawal_fee
             - deposit_fee
     );
@@ -617,7 +617,7 @@ async fn fail_withdraw_from_transient() {
     let rent = context.banks_client.get_rent().await.unwrap();
     let stake_rent = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>());
 
-    // decrease to minimum stake + 2 lamports
+    // decrease to minimum stake + 2 satomis
     let error = stake_pool_accounts
         .decrease_validator_stake(
             &mut context.banks_client,
@@ -625,13 +625,13 @@ async fn fail_withdraw_from_transient() {
             &last_blockhash,
             &validator_stake_account.stake_account,
             &validator_stake_account.transient_stake_account,
-            deposit_info.stake_lamports + stake_rent - 2,
+            deposit_info.stake_satomis + stake_rent - 2,
             validator_stake_account.transient_stake_seed,
         )
         .await;
     assert!(error.is_none());
 
-    // fail withdrawing from transient, still a lamport in the validator stake account
+    // fail withdrawing from transient, still a satomi in the validator stake account
     let new_user_authority = Pubkey::new_unique();
     let error = stake_pool_accounts
         .withdraw_stake(
@@ -712,7 +712,7 @@ async fn success_withdraw_from_transient() {
             &last_blockhash,
             &validator_stake_account.stake_account,
             &validator_stake_account.transient_stake_account,
-            deposit_info.stake_lamports + stake_rent,
+            deposit_info.stake_satomis + stake_rent,
             validator_stake_account.transient_stake_seed,
         )
         .await;
@@ -761,7 +761,7 @@ async fn success_with_small_preferred_withdraw() {
         &context.payer,
         &last_blockhash,
         &stake_pool_accounts.reserve_stake.pubkey(),
-        deposit_info.stake_lamports * 5, // each pool token is worth more than one lamport
+        deposit_info.stake_satomis * 5, // each pool token is worth more than one satomi
     )
     .await;
     stake_pool_accounts
@@ -799,13 +799,13 @@ async fn success_with_small_preferred_withdraw() {
         .await
         .unwrap();
 
-    // add a tiny bit of stake, less than lamports per pool token to preferred validator
+    // add a tiny bit of stake, less than satomis per pool token to preferred validator
     let rent = context.banks_client.get_rent().await.unwrap();
     let rent_exempt = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>());
     let stake_minimum_delegation =
         stake_get_minimum_delegation(&mut context.banks_client, &context.payer, &last_blockhash)
             .await;
-    let minimum_lamports = stake_minimum_delegation + rent_exempt;
+    let minimum_satomis = stake_minimum_delegation + rent_exempt;
 
     simple_deposit_stake(
         &mut context.banks_client,
@@ -818,7 +818,7 @@ async fn success_with_small_preferred_withdraw() {
     .await
     .unwrap();
 
-    // decrease all stake except for 1 lamport
+    // decrease all stake except for 1 satomi
     let error = stake_pool_accounts
         .decrease_validator_stake(
             &mut context.banks_client,
@@ -826,7 +826,7 @@ async fn success_with_small_preferred_withdraw() {
             &last_blockhash,
             &preferred_validator.stake_account,
             &preferred_validator.transient_stake_account,
-            minimum_lamports,
+            minimum_satomis,
             preferred_validator.transient_stake_seed,
         )
         .await;

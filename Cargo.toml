@@ -8,7 +8,7 @@ members = [
   "examples/rust/custom-heap",
   "examples/rust/logging",
   "examples/rust/sysvar",
-  "examples/rust/transfer-lamports",
+  "examples/rust/transfer-satomis",
   "examples/rust/transfer-tokens",
   "feature-proposal/program",
   "feature-proposal/cli",

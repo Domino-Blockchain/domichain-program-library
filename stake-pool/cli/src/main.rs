@@ -48,7 +48,7 @@ use {
         instruction::{FundingType, PreferredValidatorType},
         minimum_delegation,
         state::{Fee, FeeType, StakePool, ValidatorList},
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     },
     std::cmp::Ordering,
     std::{num::NonZeroU32, process::exit, sync::Arc},
@@ -198,7 +198,7 @@ fn checked_transaction_with_signers<T: Signers>(
 fn new_stake_account(
     fee_payer: &Pubkey,
     instructions: &mut Vec<Instruction>,
-    lamports: u64,
+    satomis: u64,
 ) -> Keypair {
     // Account for tokens not specified, creating one
     let stake_receiver_keypair = Keypair::new();
@@ -213,7 +213,7 @@ fn new_stake_account(
         system_instruction::create_account(
             fee_payer,
             &stake_receiver_pubkey,
-            lamports,
+            satomis,
             STAKE_STATE_LEN as u64,
             &stake::program::id(),
         ),
@@ -253,14 +253,14 @@ fn command_create_pool(
     let reserve_stake_balance = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(STAKE_STATE_LEN)?
-        + MINIMUM_RESERVE_LAMPORTS;
+        + MINIMUM_RESERVE_SATOMIS;
     let mint_account_balance = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(spl_token::state::Mint::LEN)?;
     let pool_fee_account_balance = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(spl_token::state::Account::LEN)?;
-    let stake_pool_account_lamports = config
+    let stake_pool_account_satomis = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(get_packed_len::<StakePool>())?;
     let empty_validator_list = ValidatorList::new(max_validators);
@@ -271,7 +271,7 @@ fn command_create_pool(
     let mut total_rent_free_balances = reserve_stake_balance
         + mint_account_balance
         + pool_fee_account_balance
-        + stake_pool_account_lamports
+        + stake_pool_account_satomis
         + validator_list_balance;
 
     let default_decimals = spl_token::native_mint::DECIMALS;
@@ -350,7 +350,7 @@ fn command_create_pool(
             system_instruction::create_account(
                 &config.fee_payer.pubkey(),
                 &stake_pool_keypair.pubkey(),
-                stake_pool_account_lamports,
+                stake_pool_account_satomis,
                 get_packed_len::<StakePool>() as u64,
                 &spl_stake_pool::id(),
             ),
@@ -535,7 +535,7 @@ fn command_increase_validator_stake(
     vote_account: &Pubkey,
     amount: f64,
 ) -> CommandResult {
-    let lamports = native_token::sol_to_lamports(amount);
+    let satomis = native_token::sol_to_satomis(amount);
     if !config.no_update {
         command_update(config, stake_pool_address, false, false)?;
     }
@@ -557,7 +557,7 @@ fn command_increase_validator_stake(
                 &stake_pool,
                 stake_pool_address,
                 vote_account,
-                lamports,
+                satomis,
                 validator_seed,
                 validator_stake_info.transient_seed_suffix,
             ),
@@ -574,7 +574,7 @@ fn command_decrease_validator_stake(
     vote_account: &Pubkey,
     amount: f64,
 ) -> CommandResult {
-    let lamports = native_token::sol_to_lamports(amount);
+    let satomis = native_token::sol_to_satomis(amount);
     if !config.no_update {
         command_update(config, stake_pool_address, false, false)?;
     }
@@ -596,7 +596,7 @@ fn command_decrease_validator_stake(
                 &stake_pool,
                 stake_pool_address,
                 vote_account,
-                lamports,
+                satomis,
                 validator_seed,
                 validator_stake_info.transient_seed_suffix,
             ),
@@ -950,7 +950,7 @@ fn command_deposit_sol(
         command_update(config, stake_pool_address, false, false)?;
     }
 
-    let amount = native_token::sol_to_lamports(amount);
+    let amount = native_token::sol_to_satomis(amount);
 
     // Check withdraw_from balance
     let from_pubkey = from
@@ -1066,7 +1066,7 @@ fn command_deposit_sol(
 fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
     let stake_pool = get_stake_pool(&config.rpc_client, stake_pool_address)?;
     let reserve_stake_account_address = stake_pool.reserve_stake.to_string();
-    let total_lamports = stake_pool.total_lamports;
+    let total_satomis = stake_pool.total_satomis;
     let last_update_epoch = stake_pool.last_update_epoch;
     let validator_list = get_validator_list(&config.rpc_client, &stake_pool.validator_list)?;
     let max_number_of_validators = validator_list.header.max_validators;
@@ -1079,7 +1079,7 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
     let minimum_reserve_stake_balance = config
         .rpc_client
         .get_minimum_balance_for_rent_exemption(STAKE_STATE_LEN)?
-        + MINIMUM_RESERVE_LAMPORTS;
+        + MINIMUM_RESERVE_SATOMIS;
     let cli_stake_pool_stake_account_infos = validator_list
         .validators
         .iter()
@@ -1101,12 +1101,12 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
             CliStakePoolStakeAccountInfo {
                 vote_account_address: validator.vote_account_address.to_string(),
                 stake_account_address: stake_account_address.to_string(),
-                validator_active_stake_lamports: validator.active_stake_lamports,
+                validator_active_stake_satomis: validator.active_stake_satomis,
                 validator_last_update_epoch: validator.last_update_epoch,
-                validator_lamports: validator.stake_lamports().unwrap(),
+                validator_satomis: validator.stake_satomis().unwrap(),
                 validator_transient_stake_account_address: transient_stake_account_address
                     .to_string(),
-                validator_transient_stake_lamports: validator.transient_stake_lamports,
+                validator_transient_stake_satomis: validator.transient_stake_satomis,
                 update_required,
             }
         })
@@ -1122,10 +1122,10 @@ fn command_list(config: &Config, stake_pool_address: &Pubkey) -> CommandResult {
     let update_required = last_update_epoch != epoch_info.epoch;
     let cli_stake_pool_details = CliStakePoolDetails {
         reserve_stake_account_address,
-        reserve_stake_lamports: reserve_stake.lamports,
+        reserve_stake_satomis: reserve_stake.satomis,
         minimum_reserve_stake_balance,
         stake_accounts: cli_stake_pool_stake_account_infos,
-        total_lamports,
+        total_satomis,
         total_pool_tokens,
         current_number_of_validators: current_number_of_validators as u32,
         max_number_of_validators,
@@ -1265,7 +1265,7 @@ fn prepare_withdraw_accounts(
 
             (
                 stake_account_address,
-                validator.active_stake_lamports,
+                validator.active_stake_satomis,
                 Some(validator.vote_account_address),
             )
         },
@@ -1285,7 +1285,7 @@ fn prepare_withdraw_accounts(
             (
                 transient_stake_account_address,
                 validator
-                    .transient_stake_lamports
+                    .transient_stake_satomis
                     .saturating_sub(min_balance),
                 Some(validator.vote_account_address),
             )
@@ -1296,9 +1296,9 @@ fn prepare_withdraw_accounts(
 
     accounts.push((
         stake_pool.reserve_stake,
-        reserve_stake.lamports
+        reserve_stake.satomis
             - rpc_client.get_minimum_balance_for_rent_exemption(STAKE_STATE_LEN)?
-            - MINIMUM_RESERVE_LAMPORTS,
+            - MINIMUM_RESERVE_SATOMIS,
         None,
     ));
 
@@ -1313,13 +1313,13 @@ fn prepare_withdraw_accounts(
     };
 
     // Go through available accounts and withdraw from largest to smallest
-    for (stake_address, lamports, vote_address_opt) in accounts {
-        if lamports <= min_balance {
+    for (stake_address, satomis, vote_address_opt) in accounts {
+        if satomis <= min_balance {
             continue;
         }
 
         let available_for_withdrawal_wo_fee =
-            stake_pool.calc_pool_tokens_for_deposit(lamports).unwrap();
+            stake_pool.calc_pool_tokens_for_deposit(satomis).unwrap();
 
         let available_for_withdrawal = if skip_fee {
             available_for_withdrawal_wo_fee
@@ -1448,9 +1448,9 @@ fn command_withdraw_stake(
         let stake_account = config.rpc_client.get_account(&stake_account_address)?;
 
         let available_for_withdrawal = stake_pool
-            .calc_lamports_withdraw_amount(
+            .calc_satomis_withdraw_amount(
                 stake_account
-                    .lamports
+                    .satomis
                     .saturating_sub(stake_pool_minimum_delegation)
                     .saturating_sub(stake_account_rent_exemption),
             )
@@ -1458,7 +1458,7 @@ fn command_withdraw_stake(
 
         if available_for_withdrawal < pool_amount {
             return Err(format!(
-                "Not enough lamports available for withdrawal from {}, {} asked, {} available",
+                "Not enough satomis available for withdrawal from {}, {} asked, {} available",
                 stake_account_address, pool_amount, available_for_withdrawal
             )
             .into());
@@ -1484,9 +1484,9 @@ fn command_withdraw_stake(
         let stake_account = config.rpc_client.get_account(&stake_account_address)?;
 
         let available_for_withdrawal = stake_pool
-            .calc_lamports_withdraw_amount(
+            .calc_satomis_withdraw_amount(
                 stake_account
-                    .lamports
+                    .satomis
                     .saturating_sub(stake_pool_minimum_delegation)
                     .saturating_sub(stake_account_rent_exemption),
             )
@@ -1494,7 +1494,7 @@ fn command_withdraw_stake(
 
         if available_for_withdrawal < pool_amount {
             return Err(format!(
-                "Not enough lamports available for withdrawal from {}, {} asked, {} available",
+                "Not enough satomis available for withdrawal from {}, {} asked, {} available",
                 stake_account_address, pool_amount, available_for_withdrawal
             )
             .into());
@@ -1540,9 +1540,9 @@ fn command_withdraw_stake(
     let mut total_rent_free_balances = 0;
     // Go through prepared accounts and withdraw/claim them
     for withdraw_account in withdraw_accounts {
-        // Convert pool tokens amount to lamports
+        // Convert pool tokens amount to satomis
         let sol_withdraw_amount = stake_pool
-            .calc_lamports_withdraw_amount(withdraw_account.pool_amount)
+            .calc_satomis_withdraw_amount(withdraw_account.pool_amount)
             .unwrap();
 
         if let Some(vote_address) = withdraw_account.vote_address {

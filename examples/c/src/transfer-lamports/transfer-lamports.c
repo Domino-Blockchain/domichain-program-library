@@ -1,5 +1,5 @@
 /**
- * @brief A program demonstrating the transfer of lamports
+ * @brief A program demonstrating the transfer of satomis
  */
 #include <solana_sdk.h>
 
@@ -12,10 +12,10 @@ extern uint64_t transfer(SolParameters *params) {
   SolAccountInfo *source_info = &params->ka[0];
   SolAccountInfo *destination_info = &params->ka[1];
 
-  // Withdraw five lamports from the source
-  *source_info->lamports -= 5;
-  // Deposit five lamports into the destination
-  *destination_info->lamports += 5;
+  // Withdraw five satomis from the source
+  *source_info->satomis -= 5;
+  // Deposit five satomis into the destination
+  *destination_info->satomis += 5;
 
   return SUCCESS;
 }

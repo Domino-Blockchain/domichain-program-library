@@ -34,14 +34,14 @@ export async function createAccount(
     // Otherwise, create the account with the provided keypair and return its public key
     const mintState = await getMint(connection, mint, confirmOptions?.commitment, programId);
     const space = getAccountLenForMint(mintState);
-    const lamports = await connection.getMinimumBalanceForRentExemption(space);
+    const satomis = await connection.getMinimumBalanceForRentExemption(space);
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: keypair.publicKey,
             space,
-            lamports,
+            satomis,
             programId,
         }),
         createInitializeAccountInstruction(keypair.publicKey, mint, owner, programId)

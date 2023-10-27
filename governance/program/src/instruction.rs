@@ -227,7 +227,7 @@ pub enum GovernanceInstruction {
     ///   1. `[]` TokenOwnerRecord account of the Proposal owner
     ///   2. `[signer]` Governance Authority (Token Owner or Governance Delegate)
     ///   3. `[writable]` Signatory Record Account
-    ///   4. `[writable]` Beneficiary Account which would receive lamports from the disposed Signatory Record Account
+    ///   4. `[writable]` Beneficiary Account which would receive satomis from the disposed Signatory Record Account
     RemoveSignatory {
         #[allow(dead_code)]
         /// Signatory to remove from the Proposal
@@ -268,7 +268,7 @@ pub enum GovernanceInstruction {
     ///   1. `[]` TokenOwnerRecord account of the Proposal owner
     ///   2. `[signer]` Governance Authority (Token Owner or Governance Delegate)
     ///   3. `[writable]` ProposalTransaction, account
-    ///   4. `[writable]` Beneficiary Account which would receive lamports from the disposed ProposalTransaction account
+    ///   4. `[writable]` Beneficiary Account which would receive satomis from the disposed ProposalTransaction account
     RemoveTransaction,
 
     /// Cancels Proposal by changing its state to Canceled
@@ -346,7 +346,7 @@ pub enum GovernanceInstruction {
     ///   5. `[]` The Governing Token Mint which was used to cast the vote (vote_governing_token_mint)
     ///   6. `[signer]` Optional Governance Authority (Token Owner or Governance Delegate)
     ///       It's required only when Proposal is still being voted on
-    ///   7. `[writable]` Optional Beneficiary account which would receive lamports when VoteRecord Account is disposed
+    ///   7. `[writable]` Optional Beneficiary account which would receive satomis when VoteRecord Account is disposed
     ///       It's required only when Proposal is still being voted on
     RelinquishVote,
 

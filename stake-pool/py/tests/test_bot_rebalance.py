@@ -3,9 +3,9 @@ import pytest
 from solana.rpc.commitment import Confirmed
 from spl.token.instructions import get_associated_token_address
 
-from stake.constants import STAKE_LEN, LAMPORTS_PER_SOL
+from stake.constants import STAKE_LEN, SATOMIS_PER_SOL
 from stake_pool.actions import deposit_sol
-from stake_pool.constants import MINIMUM_ACTIVE_STAKE, MINIMUM_RESERVE_LAMPORTS
+from stake_pool.constants import MINIMUM_ACTIVE_STAKE, MINIMUM_RESERVE_SATOMIS
 from stake_pool.state import StakePool, ValidatorList
 
 from bot.rebalance import rebalance
@@ -29,7 +29,7 @@ async def test_rebalance_this_is_very_slow(async_client, validators, payer, stak
     resp = await async_client.get_account_info(stake_pool_address, commitment=Confirmed)
     data = resp['result']['value']['data']
     stake_pool = StakePool.decode(data[0], data[1])
-    total_lamports = stake_pool.total_lamports + deposit_amount
+    total_satomis = stake_pool.total_satomis + deposit_amount
     token_account = get_associated_token_address(payer.public_key, stake_pool.pool_mint)
     await deposit_sol(async_client, payer, stake_pool_address, token_account, deposit_amount)
 
@@ -38,49 +38,49 @@ async def test_rebalance_this_is_very_slow(async_client, validators, payer, stak
 
     # should only have minimum left
     resp = await async_client.get_account_info(stake_pool.reserve_stake, commitment=Confirmed)
-    assert resp['result']['value']['lamports'] == stake_rent_exemption + MINIMUM_RESERVE_LAMPORTS
+    assert resp['result']['value']['satomis'] == stake_rent_exemption + MINIMUM_RESERVE_SATOMIS
 
     # should all be the same
     resp = await async_client.get_account_info(validator_list_address, commitment=Confirmed)
     data = resp['result']['value']['data']
     validator_list = ValidatorList.decode(data[0], data[1])
     for validator in validator_list.validators:
-        assert validator.active_stake_lamports == minimum_amount
-        assert validator.transient_stake_lamports == total_lamports / len(validators) - minimum_amount
+        assert validator.active_stake_satomis == minimum_amount
+        assert validator.transient_stake_satomis == total_satomis / len(validators) - minimum_amount
 
     # Test case 2: Decrease everything back to reserve
     print('Waiting for next epoch')
     await waiter.wait_for_next_epoch(async_client)
-    max_in_reserve = total_lamports - minimum_amount * len(validators)
-    await rebalance(ENDPOINT, stake_pool_address, payer, max_in_reserve / LAMPORTS_PER_SOL)
+    max_in_reserve = total_satomis - minimum_amount * len(validators)
+    await rebalance(ENDPOINT, stake_pool_address, payer, max_in_reserve / SATOMIS_PER_SOL)
 
     # should still only have minimum left + rent exemptions from increase
     resp = await async_client.get_account_info(stake_pool.reserve_stake, commitment=Confirmed)
-    reserve_lamports = resp['result']['value']['lamports']
-    assert reserve_lamports == stake_rent_exemption * (1 + len(validator_list.validators)) + MINIMUM_RESERVE_LAMPORTS
+    reserve_satomis = resp['result']['value']['satomis']
+    assert reserve_satomis == stake_rent_exemption * (1 + len(validator_list.validators)) + MINIMUM_RESERVE_SATOMIS
 
     # should all be decreasing now
     resp = await async_client.get_account_info(validator_list_address, commitment=Confirmed)
     data = resp['result']['value']['data']
     validator_list = ValidatorList.decode(data[0], data[1])
     for validator in validator_list.validators:
-        assert validator.active_stake_lamports == minimum_amount
-        assert validator.transient_stake_lamports == max_in_reserve / len(validators) - stake_rent_exemption
+        assert validator.active_stake_satomis == minimum_amount
+        assert validator.transient_stake_satomis == max_in_reserve / len(validators) - stake_rent_exemption
 
     # Test case 3: Do nothing
     print('Waiting for next epoch')
     await waiter.wait_for_next_epoch(async_client)
-    await rebalance(ENDPOINT, stake_pool_address, payer, max_in_reserve / LAMPORTS_PER_SOL)
+    await rebalance(ENDPOINT, stake_pool_address, payer, max_in_reserve / SATOMIS_PER_SOL)
 
     # should still only have minimum left + rent exemptions from increase
     resp = await async_client.get_account_info(stake_pool.reserve_stake, commitment=Confirmed)
-    reserve_lamports = resp['result']['value']['lamports']
-    assert reserve_lamports == stake_rent_exemption + max_in_reserve + MINIMUM_RESERVE_LAMPORTS
+    reserve_satomis = resp['result']['value']['satomis']
+    assert reserve_satomis == stake_rent_exemption + max_in_reserve + MINIMUM_RESERVE_SATOMIS
 
     # should all be decreased now
     resp = await async_client.get_account_info(validator_list_address, commitment=Confirmed)
     data = resp['result']['value']['data']
     validator_list = ValidatorList.decode(data[0], data[1])
     for validator in validator_list.validators:
-        assert validator.active_stake_lamports == minimum_amount
-        assert validator.transient_stake_lamports == 0
+        assert validator.active_stake_satomis == minimum_amount
+        assert validator.transient_stake_satomis == 0

@@ -18,7 +18,7 @@ use {
         transaction::{Transaction, TransactionError},
         transport::TransportError,
     },
-    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_SATOMIS},
 };
 
 async fn setup() -> (BanksClient, Keypair, Hash, StakePoolAccounts, Keypair) {
@@ -29,7 +29,7 @@ async fn setup() -> (BanksClient, Keypair, Hash, StakePoolAccounts, Keypair) {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

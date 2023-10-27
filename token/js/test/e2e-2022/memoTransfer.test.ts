@@ -20,7 +20,7 @@ import {
     getAccountLen,
     ExtensionType,
 } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 const TEST_TOKEN_DECIMALS = 2;
 const TRANSFER_AMOUNT = 1_000;
@@ -35,7 +35,7 @@ describe('memoTransfer', () => {
     let destination: PublicKey;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         mintAuthority = Keypair.generate();
         owner = Keypair.generate();
     });
@@ -65,14 +65,14 @@ describe('memoTransfer', () => {
         const destinationKeypair = Keypair.generate();
         destination = destinationKeypair.publicKey;
         const accountLen = getAccountLen(EXTENSIONS);
-        const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
+        const satomis = await connection.getMinimumBalanceForRentExemption(accountLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
                 fromPubkey: payer.publicKey,
                 newAccountPubkey: destination,
                 space: accountLen,
-                lamports,
+                satomis,
                 programId: TEST_PROGRAM_ID,
             }),
             createInitializeAccountInstruction(destination, mint, owner.publicKey, TEST_PROGRAM_ID),

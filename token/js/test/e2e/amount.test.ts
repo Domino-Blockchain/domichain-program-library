@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import { createMint, amountToUiAmount, uiAmountToAmount } from '../../src';
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 chai.use(chaiAsPromised);
 
@@ -15,7 +15,7 @@ describe('Amount', () => {
     let mintAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         mintAuthority = Keypair.generate();
         const mintKeypair = Keypair.generate();
         mint = await createMint(

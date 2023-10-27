@@ -106,7 +106,7 @@ impl ProgramTestBench {
             .unwrap();
 
         let account = Account {
-            lamports: account_rent,
+            satomis: account_rent,
             data: vec![],
             owner: system_program::id(),
             executable: false,
@@ -231,8 +231,8 @@ impl ProgramTestBench {
         }
     }
 
-    pub async fn transfer_sol(&mut self, to_account: &Pubkey, lamports: u64) {
-        let transfer_ix = system_instruction::transfer(&self.payer.pubkey(), to_account, lamports);
+    pub async fn transfer_sol(&mut self, to_account: &Pubkey, satomis: u64) {
+        let transfer_ix = system_instruction::transfer(&self.payer.pubkey(), to_account, satomis);
 
         self.process_transaction(&[transfer_ix], None)
             .await

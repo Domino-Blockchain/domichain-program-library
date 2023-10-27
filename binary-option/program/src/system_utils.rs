@@ -20,17 +20,17 @@ pub fn create_new_account<'a>(
     rent_info: &AccountInfo<'a>,
 ) -> ProgramResult {
     let rent = &Rent::from_account_info(rent_info)?;
-    let required_lamports = rent
+    let required_satomis = rent
         .minimum_balance(space)
         .max(1)
-        .saturating_sub(new_account_info.lamports());
+        .saturating_sub(new_account_info.satomis());
 
-    msg!("Transfer {} lamports to the new account", required_lamports);
+    msg!("Transfer {} satomis to the new account", required_satomis);
     invoke(
         &system_instruction::create_account(
             from_info.key,
             new_account_info.key,
-            required_lamports,
+            required_satomis,
             space as u64,
             owner_info.key,
         ),
@@ -48,15 +48,15 @@ pub fn topup<'a>(
     size: usize,
 ) -> ProgramResult {
     let rent = &Rent::from_account_info(rent_sysvar_info)?;
-    let required_lamports = rent
+    let required_satomis = rent
         .minimum_balance(size)
         .max(1)
-        .saturating_sub(account_info.lamports());
+        .saturating_sub(account_info.satomis());
 
-    if required_lamports > 0 {
-        msg!("Transfer {} lamports to the new account", required_lamports);
+    if required_satomis > 0 {
+        msg!("Transfer {} satomis to the new account", required_satomis);
         invoke(
-            &system_instruction::transfer(payer_info.key, account_info.key, required_lamports),
+            &system_instruction::transfer(payer_info.key, account_info.key, required_satomis),
             &[
                 payer_info.clone(),
                 account_info.clone(),

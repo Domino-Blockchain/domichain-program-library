@@ -21,7 +21,7 @@ use {
         transaction::{Transaction, TransactionError},
         transport::TransportError,
     },
-    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error, id, instruction, state, MINIMUM_RESERVE_SATOMIS},
     spl_token_2022::extension::ExtensionType,
     test_case::test_case,
 };
@@ -70,7 +70,7 @@ async fn create_required_accounts(
             withdrawer: stake_pool_accounts.withdraw_authority,
         },
         &stake::state::Lockup::default(),
-        MINIMUM_RESERVE_LAMPORTS,
+        MINIMUM_RESERVE_SATOMIS,
     )
     .await;
 }
@@ -86,7 +86,7 @@ async fn success(token_program_id: Pubkey) {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -116,7 +116,7 @@ async fn fail_double_initialize() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -133,7 +133,7 @@ async fn fail_double_initialize() {
             &mut banks_client,
             &payer,
             &latest_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .err()
@@ -159,7 +159,7 @@ async fn fail_with_already_initialized_validator_list() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -176,7 +176,7 @@ async fn fail_with_already_initialized_validator_list() {
             &mut banks_client,
             &payer,
             &latest_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .err()
@@ -209,7 +209,7 @@ async fn fail_with_high_fee() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .err()
@@ -242,7 +242,7 @@ async fn fail_with_high_withdrawal_fee() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .err()
@@ -990,7 +990,7 @@ async fn fail_with_wrong_withdraw_authority() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .err()
@@ -1377,7 +1377,7 @@ async fn fail_with_bad_reserve() {
                 withdrawer: stake_pool_accounts.withdraw_authority,
             },
             &stake::state::Lockup::default(),
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await;
 
@@ -1429,7 +1429,7 @@ async fn fail_with_bad_reserve() {
                 withdrawer: wrong_authority,
             },
             &stake::state::Lockup::default(),
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await;
 
@@ -1484,7 +1484,7 @@ async fn fail_with_bad_reserve() {
                 custodian: wrong_authority,
                 ..stake::state::Lockup::default()
             },
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await;
 
@@ -1527,14 +1527,14 @@ async fn fail_with_bad_reserve() {
     {
         let bad_stake = Keypair::new();
         let rent = banks_client.get_rent().await.unwrap();
-        let lamports = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>())
-            + MINIMUM_RESERVE_LAMPORTS;
+        let satomis = rent.minimum_balance(std::mem::size_of::<stake::state::StakeState>())
+            + MINIMUM_RESERVE_SATOMIS;
 
         let transaction = Transaction::new_signed_with_payer(
             &[system_instruction::create_account(
                 &payer.pubkey(),
                 &bad_stake.pubkey(),
-                lamports,
+                satomis,
                 std::mem::size_of::<stake::state::StakeState>() as u64,
                 &stake::program::id(),
             )],
@@ -1582,16 +1582,16 @@ async fn fail_with_bad_reserve() {
 }
 
 #[tokio::test]
-async fn success_with_extra_reserve_lamports() {
+async fn success_with_extra_reserve_satomis() {
     let (mut banks_client, payer, recent_blockhash) = program_test().start().await;
     let stake_pool_accounts = StakePoolAccounts::default();
-    let init_lamports = 1_000_000_000_000;
+    let init_satomis = 1_000_000_000_000;
     stake_pool_accounts
         .initialize_stake_pool(
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS + init_lamports,
+            MINIMUM_RESERVE_SATOMIS + init_satomis,
         )
         .await
         .unwrap();
@@ -1601,5 +1601,5 @@ async fn success_with_extra_reserve_lamports() {
         &stake_pool_accounts.pool_fee_account.pubkey(),
     )
     .await;
-    assert_eq!(init_pool_tokens, init_lamports);
+    assert_eq!(init_pool_tokens, init_satomis);
 }

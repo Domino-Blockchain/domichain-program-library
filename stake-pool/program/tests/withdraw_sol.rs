@@ -17,7 +17,7 @@ use {
         error::StakePoolError,
         id,
         instruction::{self, FundingType},
-        state, MINIMUM_RESERVE_LAMPORTS,
+        state, MINIMUM_RESERVE_SATOMIS,
     },
     test_case::test_case,
 };
@@ -33,7 +33,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -96,12 +96,12 @@ async fn success(token_program_id: Pubkey) {
         try_from_slice_unchecked::<state::StakePool>(pre_stake_pool.data.as_slice()).unwrap();
 
     // Save reserve state before withdrawing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let error = stake_pool_accounts
         .withdraw_sol(
@@ -127,8 +127,8 @@ async fn success(token_program_id: Pubkey) {
     let amount_withdrawn_minus_fee =
         pool_tokens - stake_pool_accounts.calculate_withdrawal_fee(pool_tokens);
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports - amount_withdrawn_minus_fee
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis - amount_withdrawn_minus_fee
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,
@@ -141,15 +141,15 @@ async fn success(token_program_id: Pubkey) {
     assert_eq!(user_token_balance, 0);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports - amount_withdrawn_minus_fee
+        post_reserve_satomis,
+        pre_reserve_satomis - amount_withdrawn_minus_fee
     );
 }
 
@@ -214,7 +214,7 @@ async fn fail_overdraw_reserve() {
         .await;
     assert!(error.is_none());
 
-    // try to withdraw one lamport, will overdraw
+    // try to withdraw one satomi, will overdraw
     let error = stake_pool_accounts
         .withdraw_sol(
             &mut context.banks_client,
@@ -334,12 +334,12 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     let amount_received = pool_tokens - stake_pool_accounts.calculate_withdrawal_fee(pool_tokens);
 
     // Save reserve state before withdrawing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let error = stake_pool_accounts
         .withdraw_sol_with_slippage(
@@ -381,14 +381,14 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     assert_eq!(user_token_balance, 0);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports - amount_received
+        post_reserve_satomis,
+        pre_reserve_satomis - amount_received
     );
 }

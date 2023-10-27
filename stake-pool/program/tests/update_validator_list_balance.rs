@@ -10,7 +10,7 @@ use {
     solana_sdk::{hash::Hash, signature::Signer, stake::state::StakeState},
     spl_stake_pool::{
         state::{StakePool, StakeStatus, ValidatorList},
-        MAX_VALIDATORS_TO_UPDATE, MINIMUM_RESERVE_LAMPORTS,
+        MAX_VALIDATORS_TO_UPDATE, MINIMUM_RESERVE_SATOMIS,
     },
     spl_token::state::Mint,
     std::num::NonZeroU32,
@@ -41,7 +41,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            reserve_stake_amount + MINIMUM_RESERVE_LAMPORTS,
+            reserve_stake_amount + MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -176,8 +176,8 @@ async fn success_with_normal() {
         stake_pool_accounts,
         stake_accounts,
         _,
-        validator_lamports,
-        reserve_lamports,
+        validator_satomis,
+        reserve_satomis,
         mut slot,
     ) = setup(num_validators).await;
 
@@ -196,11 +196,11 @@ async fn success_with_normal() {
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(stake_pool.total_lamports, validator_list_sum);
+    assert_eq!(stake_pool.total_satomis, validator_list_sum);
     // initially, have all of the deposits plus their rent, and the reserve stake
-    let initial_lamports =
-        (validator_lamports + stake_rent) * num_validators as u64 + reserve_lamports;
-    assert_eq!(validator_list_sum, initial_lamports);
+    let initial_satomis =
+        (validator_satomis + stake_rent) * num_validators as u64 + reserve_satomis;
+    assert_eq!(validator_list_sum, initial_satomis);
 
     // Simulate rewards
     for stake_account in &stake_accounts {
@@ -231,13 +231,13 @@ async fn success_with_normal() {
             false,
         )
         .await;
-    let new_lamports = get_validator_list_sum(
+    let new_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert!(new_lamports > initial_lamports);
+    assert!(new_satomis > initial_satomis);
 
     let stake_pool_info = get_account(
         &mut context.banks_client,
@@ -245,7 +245,7 @@ async fn success_with_normal() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(new_lamports, stake_pool.total_lamports);
+    assert_eq!(new_satomis, stake_pool.total_satomis);
 }
 
 #[tokio::test]
@@ -256,12 +256,12 @@ async fn merge_into_reserve() {
         stake_pool_accounts,
         stake_accounts,
         _,
-        lamports,
+        satomis,
         _,
         mut slot,
     ) = setup(MAX_VALIDATORS_TO_UPDATE).await;
 
-    let pre_lamports = get_validator_list_sum(
+    let pre_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
@@ -274,7 +274,7 @@ async fn merge_into_reserve() {
         .await
         .unwrap()
         .unwrap();
-    let pre_reserve_lamports = reserve_stake.lamports;
+    let pre_reserve_satomis = reserve_stake.satomis;
 
     println!("Decrease from all validators");
     for stake_account in &stake_accounts {
@@ -285,7 +285,7 @@ async fn merge_into_reserve() {
                 &last_blockhash,
                 &stake_account.stake_account,
                 &stake_account.transient_stake_account,
-                lamports,
+                satomis,
                 stake_account.transient_stake_seed,
             )
             .await;
@@ -307,13 +307,13 @@ async fn merge_into_reserve() {
         )
         .await;
 
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
 
     let stake_pool_info = get_account(
         &mut context.banks_client,
@@ -321,7 +321,7 @@ async fn merge_into_reserve() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(expected_lamports, stake_pool.total_lamports);
+    assert_eq!(expected_satomis, stake_pool.total_satomis);
 
     println!("Warp one more epoch so the stakes deactivate");
     let slots_per_epoch = context.genesis_config().epoch_schedule.slots_per_epoch;
@@ -346,13 +346,13 @@ async fn merge_into_reserve() {
             false,
         )
         .await;
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
 
     let reserve_stake = context
         .banks_client
@@ -360,8 +360,8 @@ async fn merge_into_reserve() {
         .await
         .unwrap()
         .unwrap();
-    let post_reserve_lamports = reserve_stake.lamports;
-    assert!(post_reserve_lamports > pre_reserve_lamports);
+    let post_reserve_satomis = reserve_stake.satomis;
+    assert!(post_reserve_satomis > pre_reserve_satomis);
 
     let stake_pool_info = get_account(
         &mut context.banks_client,
@@ -369,7 +369,7 @@ async fn merge_into_reserve() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(expected_lamports, stake_pool.total_lamports);
+    assert_eq!(expected_satomis, stake_pool.total_satomis);
 }
 
 #[tokio::test]
@@ -380,13 +380,13 @@ async fn merge_into_validator_stake() {
         stake_pool_accounts,
         stake_accounts,
         _,
-        lamports,
-        reserve_lamports,
+        satomis,
+        reserve_satomis,
         mut slot,
     ) = setup(MAX_VALIDATORS_TO_UPDATE).await;
 
     let rent = context.banks_client.get_rent().await.unwrap();
-    let pre_lamports = get_validator_list_sum(
+    let pre_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
@@ -401,9 +401,9 @@ async fn merge_into_validator_stake() {
         &last_blockhash,
     )
     .await;
-    let available_lamports =
-        reserve_lamports - (stake_rent + current_minimum_delegation) * stake_accounts.len() as u64;
-    let increase_amount = available_lamports / stake_accounts.len() as u64;
+    let available_satomis =
+        reserve_satomis - (stake_rent + current_minimum_delegation) * stake_accounts.len() as u64;
+    let increase_amount = available_satomis / stake_accounts.len() as u64;
     for stake_account in &stake_accounts {
         let error = stake_pool_accounts
             .increase_validator_stake(
@@ -444,20 +444,20 @@ async fn merge_into_validator_stake() {
         .await;
     assert!(error.is_none());
 
-    let expected_lamports = get_validator_list_sum(
+    let expected_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
     )
     .await;
-    assert_eq!(pre_lamports, expected_lamports);
+    assert_eq!(pre_satomis, expected_satomis);
     let stake_pool_info = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.stake_pool.pubkey(),
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(expected_lamports, stake_pool.total_lamports);
+    assert_eq!(expected_satomis, stake_pool.total_satomis);
 
     // Warp one more epoch so the stakes activate, ready to merge
     let slots_per_epoch = context.genesis_config().epoch_schedule.slots_per_epoch;
@@ -483,7 +483,7 @@ async fn merge_into_validator_stake() {
         )
         .await;
     assert!(error.is_none());
-    let current_lamports = get_validator_list_sum(
+    let current_satomis = get_validator_list_sum(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
         &stake_pool_accounts.validator_list.pubkey(),
@@ -495,7 +495,7 @@ async fn merge_into_validator_stake() {
     )
     .await;
     let stake_pool = try_from_slice_unchecked::<StakePool>(&stake_pool_info.data).unwrap();
-    assert_eq!(current_lamports, stake_pool.total_lamports);
+    assert_eq!(current_satomis, stake_pool.total_satomis);
 
     // Check that transient accounts are gone
     for stake_account in &stake_accounts {
@@ -508,24 +508,24 @@ async fn merge_into_validator_stake() {
     }
 
     // Check validator stake accounts have the expected balance now:
-    // validator stake account minimum + deposited lamports + rents + increased lamports
-    let expected_lamports = current_minimum_delegation + lamports + increase_amount + stake_rent;
+    // validator stake account minimum + deposited satomis + rents + increased satomis
+    let expected_satomis = current_minimum_delegation + satomis + increase_amount + stake_rent;
     for stake_account in &stake_accounts {
         let validator_stake =
             get_account(&mut context.banks_client, &stake_account.stake_account).await;
-        assert_eq!(validator_stake.lamports, expected_lamports);
+        assert_eq!(validator_stake.satomis, expected_satomis);
     }
 
     // Check reserve stake accounts for expected balance:
-    // own rent, other account rents, and 1 extra lamport
+    // own rent, other account rents, and 1 extra satomi
     let reserve_stake = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await;
     assert_eq!(
-        reserve_stake.lamports,
-        MINIMUM_RESERVE_LAMPORTS + stake_rent * (1 + stake_accounts.len() as u64)
+        reserve_stake.satomis,
+        MINIMUM_RESERVE_SATOMIS + stake_rent * (1 + stake_accounts.len() as u64)
     );
 }
 
@@ -537,8 +537,8 @@ async fn merge_transient_stake_after_remove() {
         stake_pool_accounts,
         stake_accounts,
         _,
-        lamports,
-        reserve_lamports,
+        satomis,
+        reserve_satomis,
         mut slot,
     ) = setup(1).await;
 
@@ -550,7 +550,7 @@ async fn merge_transient_stake_after_remove() {
         &last_blockhash,
     )
     .await;
-    let deactivated_lamports = lamports;
+    let deactivated_satomis = satomis;
     // Decrease and remove all validators
     for stake_account in &stake_accounts {
         let error = stake_pool_accounts
@@ -560,7 +560,7 @@ async fn merge_transient_stake_after_remove() {
                 &last_blockhash,
                 &stake_account.stake_account,
                 &stake_account.transient_stake_account,
-                deactivated_lamports,
+                deactivated_satomis,
                 stake_account.transient_stake_seed,
             )
             .await;
@@ -611,15 +611,15 @@ async fn merge_transient_stake_after_remove() {
         StakeStatus::DeactivatingAll
     );
     assert_eq!(
-        validator_list.validators[0].active_stake_lamports,
+        validator_list.validators[0].active_stake_satomis,
         stake_rent + current_minimum_delegation
     );
     assert_eq!(
-        validator_list.validators[0].transient_stake_lamports,
-        deactivated_lamports
+        validator_list.validators[0].transient_stake_satomis,
+        deactivated_satomis
     );
 
-    // Update with merge, status should be ReadyForRemoval and no lamports
+    // Update with merge, status should be ReadyForRemoval and no satomis
     let error = stake_pool_accounts
         .update_validator_list_balance(
             &mut context.banks_client,
@@ -662,7 +662,7 @@ async fn merge_transient_stake_after_remove() {
         validator_list.validators[0].status,
         StakeStatus::ReadyForRemoval
     );
-    assert_eq!(validator_list.validators[0].stake_lamports().unwrap(), 0);
+    assert_eq!(validator_list.validators[0].stake_satomis().unwrap(), 0);
 
     let reserve_stake = context
         .banks_client
@@ -671,8 +671,8 @@ async fn merge_transient_stake_after_remove() {
         .unwrap()
         .unwrap();
     assert_eq!(
-        reserve_stake.lamports,
-        reserve_lamports + deactivated_lamports + stake_rent * 2 + MINIMUM_RESERVE_LAMPORTS
+        reserve_stake.satomis,
+        reserve_satomis + deactivated_satomis + stake_rent * 2 + MINIMUM_RESERVE_SATOMIS
     );
 
     // Update stake pool balance and cleanup, should be gone

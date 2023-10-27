@@ -168,7 +168,7 @@ export class TokenSwap {
   /**
    * Get the minimum balance for the token swap account to be rent exempt
    *
-   * @return Number of lamports required
+   * @return Number of satomis required
    */
   static async getMinBalanceRentForExemptTokenSwap(
     connection: Connection,
@@ -409,7 +409,7 @@ export class TokenSwap {
       SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
         newAccountPubkey: tokenSwapAccount.publicKey,
-        lamports: balanceNeeded,
+        satomis: balanceNeeded,
         space: TokenSwapLayout.span,
         programId: swapProgramId,
       }),

@@ -38,7 +38,7 @@ pub enum AssociatedTokenAccountInstruction {
     /// associated token account owned by an associated token account.
     ///
     /// The tokens are moved from the nested associated token account to the
-    /// wallet's associated token account, and the nested account lamports are
+    /// wallet's associated token account, and the nested account satomis are
     /// moved to the wallet.
     ///
     /// Note: Nested token accounts are an anti-pattern, and almost always

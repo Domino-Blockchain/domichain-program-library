@@ -9,7 +9,7 @@
 //   SolPubkey key = {.x = {
 //                        2,
 //                    }};
-//   uint64_t lamports = 1;
+//   uint64_t satomis = 1;
 //   uint8_t data[] = {0, 0, 0, 0};
 //   SolAccountInfo accounts[] = {};
 //   SolParameters params = {accounts, sizeof(accounts) /

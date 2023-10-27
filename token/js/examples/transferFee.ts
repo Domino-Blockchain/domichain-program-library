@@ -5,7 +5,7 @@ import {
     Keypair,
     SystemProgram,
     Transaction,
-    LAMPORTS_PER_SOL,
+    SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 
 import {
@@ -45,16 +45,16 @@ import {
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+    const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * SATOMIS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const mintSatomis = await connection.getMinimumBalanceForRentExemption(mintLen);
     const mintTransaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: mint,
             space: mintLen,
-            lamports: mintLamports,
+            satomis: mintSatomis,
             programId: TOKEN_2022_PROGRAM_ID,
         }),
         createInitializeTransferFeeConfigInstruction(

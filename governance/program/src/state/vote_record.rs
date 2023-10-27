@@ -281,13 +281,13 @@ mod test {
         let program_id = Pubkey::new_unique();
 
         let info_key = Pubkey::new_unique();
-        let mut lamports = 10u64;
+        let mut satomis = 10u64;
 
         let account_info = AccountInfo::new(
             &info_key,
             false,
             false,
-            &mut lamports,
+            &mut satomis,
             &mut account_data[..],
             &program_id,
             false,

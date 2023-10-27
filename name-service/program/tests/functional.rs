@@ -51,7 +51,7 @@ async fn test_name_service() {
         program_id,
         NameRegistryInstruction::Create {
             hashed_name: hashed_root_name,
-            lamports: rent.minimum_balance(space.saturating_add(NameRecordHeader::LEN)),
+            satomis: rent.minimum_balance(space.saturating_add(NameRecordHeader::LEN)),
             space: space as u32,
         },
         root_name_account_key,
@@ -94,7 +94,7 @@ async fn test_name_service() {
         program_id,
         NameRegistryInstruction::Create {
             hashed_name,
-            lamports: rent.minimum_balance(space.saturating_add(NameRecordHeader::LEN)),
+            satomis: rent.minimum_balance(space.saturating_add(NameRecordHeader::LEN)),
             space: space as u32,
         },
         name_account_key,

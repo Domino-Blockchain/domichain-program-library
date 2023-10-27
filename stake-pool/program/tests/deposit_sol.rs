@@ -17,7 +17,7 @@ use {
     spl_stake_pool::{
         error, id,
         instruction::{self, FundingType},
-        state, MINIMUM_RESERVE_LAMPORTS,
+        state, MINIMUM_RESERVE_SATOMIS,
     },
     spl_token::error as token_error,
     test_case::test_case,
@@ -34,7 +34,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -81,12 +81,12 @@ async fn success(token_program_id: Pubkey) {
         try_from_slice_unchecked::<state::StakePool>(pre_stake_pool.data.as_slice()).unwrap();
 
     // Save reserve state before depositing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let error = stake_pool_accounts
         .deposit_sol(
@@ -111,8 +111,8 @@ async fn success(token_program_id: Pubkey) {
     let post_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(post_stake_pool.data.as_slice()).unwrap();
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports + TEST_STAKE_AMOUNT
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis + TEST_STAKE_AMOUNT
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,
@@ -127,15 +127,15 @@ async fn success(token_program_id: Pubkey) {
     assert_eq!(user_token_balance, tokens_issued_user);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports + TEST_STAKE_AMOUNT
+        post_reserve_satomis,
+        pre_reserve_satomis + TEST_STAKE_AMOUNT
     );
 }
 
@@ -277,7 +277,7 @@ async fn success_with_sol_deposit_authority() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -349,7 +349,7 @@ async fn fail_without_sol_deposit_authority_signature() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -522,12 +522,12 @@ async fn success_with_slippage(token_program_id: Pubkey) {
         try_from_slice_unchecked::<state::StakePool>(pre_stake_pool.data.as_slice()).unwrap();
 
     // Save reserve state before depositing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let new_pool_tokens = pre_stake_pool
         .calc_pool_tokens_for_deposit(TEST_STAKE_AMOUNT)
@@ -580,8 +580,8 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     let post_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(post_stake_pool.data.as_slice()).unwrap();
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports + TEST_STAKE_AMOUNT
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis + TEST_STAKE_AMOUNT
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,
@@ -594,14 +594,14 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     assert_eq!(user_token_balance, tokens_issued);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports + TEST_STAKE_AMOUNT
+        post_reserve_satomis,
+        pre_reserve_satomis + TEST_STAKE_AMOUNT
     );
 }

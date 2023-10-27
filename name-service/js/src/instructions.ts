@@ -9,7 +9,7 @@ export function createInstruction(
   nameOwnerKey: PublicKey,
   payerKey: PublicKey,
   hashed_name: Buffer,
-  lamports: Numberu64,
+  satomis: Numberu64,
   space: Numberu32,
   nameClassKey?: PublicKey,
   nameParent?: PublicKey,
@@ -19,7 +19,7 @@ export function createInstruction(
     Buffer.from(Int8Array.from([0])),
     new Numberu32(hashed_name.length).toBuffer(),
     hashed_name,
-    lamports.toBuffer(),
+    satomis.toBuffer(),
     space.toBuffer(),
   ];
 

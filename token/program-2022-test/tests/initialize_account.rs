@@ -92,7 +92,7 @@ async fn no_extensions() {
         .expect("account not none");
     assert_eq!(account_info.data.len(), spl_token_2022::state::Account::LEN);
     assert_eq!(account_info.owner, spl_token_2022::id());
-    assert_eq!(account_info.lamports, rent.minimum_balance(space));
+    assert_eq!(account_info.satomis, rent.minimum_balance(space));
 }
 
 #[tokio::test]
@@ -238,7 +238,7 @@ async fn single_extension() {
         ExtensionType::get_account_len::<Account>(&[ExtensionType::TransferFeeAmount]),
     );
     assert_eq!(account_info.owner, spl_token_2022::id());
-    assert_eq!(account_info.lamports, rent.minimum_balance(space));
+    assert_eq!(account_info.satomis, rent.minimum_balance(space));
     let state = StateWithExtensions::<Account>::unpack(&account_info.data).unwrap();
     assert_eq!(state.base.mint, mint_account.pubkey());
     assert_eq!(

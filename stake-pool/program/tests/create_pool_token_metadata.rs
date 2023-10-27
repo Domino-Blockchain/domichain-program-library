@@ -16,7 +16,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError::{AlreadyInUse, SignatureMissing, WrongManager},
-        instruction, MINIMUM_RESERVE_LAMPORTS,
+        instruction, MINIMUM_RESERVE_SATOMIS,
     },
     test_case::test_case,
 };
@@ -31,7 +31,7 @@ async fn setup(token_program_id: Pubkey) -> (ProgramTestContext, StakePoolAccoun
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

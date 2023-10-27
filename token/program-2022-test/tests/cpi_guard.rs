@@ -605,7 +605,7 @@ async fn test_cpi_guard_close_account() {
             .await
             .unwrap();
 
-        // cpi close with guard enabled fails if lamports diverted to third party
+        // cpi close with guard enabled fails if satomis diverted to third party
         let account = make_close_test_account(&token, &alice, maybe_close_authority).await;
         let error = token
             .process_ixs(
@@ -616,7 +616,7 @@ async fn test_cpi_guard_close_account() {
             .unwrap_err();
         assert_eq!(error, client_error(TokenError::CpiGuardCloseAccountBlocked));
 
-        // but close suceeds if lamports are returned to owner
+        // but close suceeds if satomis are returned to owner
         token
             .process_ixs(
                 &[mk_close(account, alice.pubkey(), authority.pubkey())],

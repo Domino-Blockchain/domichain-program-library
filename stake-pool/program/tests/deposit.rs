@@ -18,7 +18,7 @@ use {
         transaction::{Transaction, TransactionError},
         transport::TransportError,
     },
-    spl_stake_pool::{error::StakePoolError, id, instruction, state, MINIMUM_RESERVE_LAMPORTS},
+    spl_stake_pool::{error::StakePoolError, id, instruction, state, MINIMUM_RESERVE_SATOMIS},
     spl_token::error as token_error,
     test_case::test_case,
 };
@@ -42,7 +42,7 @@ async fn setup(
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -66,7 +66,7 @@ async fn setup(
         withdrawer: user.pubkey(),
     };
 
-    let stake_lamports = create_independent_stake_account(
+    let stake_satomis = create_independent_stake_account(
         &mut context.banks_client,
         &context.payer,
         &context.last_blockhash,
@@ -121,7 +121,7 @@ async fn setup(
         user,
         deposit_stake.pubkey(),
         pool_token_account.pubkey(),
-        stake_lamports,
+        stake_satomis,
     )
 }
 
@@ -136,7 +136,7 @@ async fn success(token_program_id: Pubkey) {
         user,
         deposit_stake,
         pool_token_account,
-        stake_lamports,
+        stake_satomis,
     ) = setup(token_program_id).await;
 
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -164,12 +164,12 @@ async fn success(token_program_id: Pubkey) {
         .unwrap();
 
     // Save reserve state before depositing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let error = stake_pool_accounts
         .deposit_stake(
@@ -192,7 +192,7 @@ async fn success(token_program_id: Pubkey) {
         .expect("get_account")
         .is_none());
 
-    let tokens_issued = stake_lamports; // For now tokens are 1:1 to stake
+    let tokens_issued = stake_satomis; // For now tokens are 1:1 to stake
 
     // Stake pool should add its balance to the pool balance
     let post_stake_pool = get_account(
@@ -203,8 +203,8 @@ async fn success(token_program_id: Pubkey) {
     let post_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(post_stake_pool.data.as_slice()).unwrap();
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports + stake_lamports
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis + stake_satomis
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,
@@ -219,7 +219,7 @@ async fn success(token_program_id: Pubkey) {
             .calc_pool_tokens_sol_deposit_fee(stake_rent)
             .unwrap()
         - post_stake_pool
-            .calc_pool_tokens_stake_deposit_fee(stake_lamports - stake_rent)
+            .calc_pool_tokens_stake_deposit_fee(stake_satomis - stake_rent)
             .unwrap();
     assert_eq!(user_token_balance, tokens_issued_user);
 
@@ -235,8 +235,8 @@ async fn success(token_program_id: Pubkey) {
         .find(&validator_stake_account.vote.pubkey())
         .unwrap();
     assert_eq!(
-        post_validator_stake_item.stake_lamports().unwrap(),
-        pre_validator_stake_item.stake_lamports().unwrap() + stake_lamports - stake_rent,
+        post_validator_stake_item.stake_satomis().unwrap(),
+        pre_validator_stake_item.stake_satomis().unwrap() + stake_satomis - stake_rent,
     );
 
     // Check validator stake account actual SOL balance
@@ -246,23 +246,23 @@ async fn success(token_program_id: Pubkey) {
     )
     .await;
     assert_eq!(
-        validator_stake_account.lamports,
-        post_validator_stake_item.stake_lamports().unwrap()
+        validator_stake_account.satomis,
+        post_validator_stake_item.stake_satomis().unwrap()
     );
-    assert_eq!(post_validator_stake_item.transient_stake_lamports, 0);
+    assert_eq!(post_validator_stake_item.transient_stake_satomis, 0);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
-    assert_eq!(post_reserve_lamports, pre_reserve_lamports + stake_rent);
+    .satomis;
+    assert_eq!(post_reserve_satomis, pre_reserve_satomis + stake_rent);
 }
 
 #[tokio::test]
-async fn success_with_extra_stake_lamports() {
+async fn success_with_extra_stake_satomis() {
     let (
         mut context,
         stake_pool_accounts,
@@ -270,17 +270,17 @@ async fn success_with_extra_stake_lamports() {
         user,
         deposit_stake,
         pool_token_account,
-        stake_lamports,
+        stake_satomis,
     ) = setup(spl_token::id()).await;
 
-    let extra_lamports = TEST_STAKE_AMOUNT * 3 + 1;
+    let extra_satomis = TEST_STAKE_AMOUNT * 3 + 1;
 
     transfer(
         &mut context.banks_client,
         &context.payer,
         &context.last_blockhash,
         &deposit_stake,
-        extra_lamports,
+        extra_satomis,
     )
     .await;
 
@@ -333,12 +333,12 @@ async fn success_with_extra_stake_lamports() {
         .unwrap();
 
     // Save reserve state before depositing
-    let pre_reserve_lamports = get_account(
+    let pre_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
 
     let error = stake_pool_accounts
         .deposit_stake_with_referral(
@@ -362,12 +362,12 @@ async fn success_with_extra_stake_lamports() {
         .expect("get_account")
         .is_none());
 
-    let tokens_issued = stake_lamports + extra_lamports;
+    let tokens_issued = stake_satomis + extra_satomis;
     // For now tokens are 1:1 to stake
 
     // Stake pool should add its balance to the pool balance
 
-    // The extra lamports will not get recorded in total stake lamports unless
+    // The extra satomis will not get recorded in total stake satomis unless
     // update_stake_pool_balance is called
     let post_stake_pool = get_account(
         &mut context.banks_client,
@@ -378,8 +378,8 @@ async fn success_with_extra_stake_lamports() {
     let post_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(post_stake_pool.data.as_slice()).unwrap();
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports + extra_lamports + stake_lamports
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis + extra_satomis + stake_satomis
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,
@@ -391,10 +391,10 @@ async fn success_with_extra_stake_lamports() {
         get_token_balance(&mut context.banks_client, &pool_token_account).await;
 
     let fee_tokens = post_stake_pool
-        .calc_pool_tokens_sol_deposit_fee(extra_lamports + stake_rent)
+        .calc_pool_tokens_sol_deposit_fee(extra_satomis + stake_rent)
         .unwrap()
         + post_stake_pool
-            .calc_pool_tokens_stake_deposit_fee(stake_lamports - stake_rent)
+            .calc_pool_tokens_stake_deposit_fee(stake_satomis - stake_rent)
             .unwrap();
     let tokens_issued_user = tokens_issued - fee_tokens;
     assert_eq!(user_token_balance, tokens_issued_user);
@@ -429,8 +429,8 @@ async fn success_with_extra_stake_lamports() {
         .find(&validator_stake_account.vote.pubkey())
         .unwrap();
     assert_eq!(
-        post_validator_stake_item.stake_lamports().unwrap(),
-        pre_validator_stake_item.stake_lamports().unwrap() + stake_lamports - stake_rent,
+        post_validator_stake_item.stake_satomis().unwrap(),
+        pre_validator_stake_item.stake_satomis().unwrap() + stake_satomis - stake_rent,
     );
 
     // Check validator stake account actual SOL balance
@@ -440,21 +440,21 @@ async fn success_with_extra_stake_lamports() {
     )
     .await;
     assert_eq!(
-        validator_stake_account.lamports,
-        post_validator_stake_item.stake_lamports().unwrap()
+        validator_stake_account.satomis,
+        post_validator_stake_item.stake_satomis().unwrap()
     );
-    assert_eq!(post_validator_stake_item.transient_stake_lamports, 0);
+    assert_eq!(post_validator_stake_item.transient_stake_satomis, 0);
 
     // Check reserve
-    let post_reserve_lamports = get_account(
+    let post_reserve_satomis = get_account(
         &mut context.banks_client,
         &stake_pool_accounts.reserve_stake.pubkey(),
     )
     .await
-    .lamports;
+    .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports + stake_rent + extra_lamports
+        post_reserve_satomis,
+        pre_reserve_satomis + stake_rent + extra_satomis
     );
 }
 
@@ -467,7 +467,7 @@ async fn fail_with_wrong_stake_program_id() {
         _user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let wrong_stake_program = Pubkey::new_unique();
@@ -526,7 +526,7 @@ async fn fail_with_wrong_token_program_id() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let wrong_token_program = Keypair::new();
@@ -575,7 +575,7 @@ async fn fail_with_wrong_validator_list_account() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let wrong_validator_list = Keypair::new();
@@ -616,7 +616,7 @@ async fn fail_with_unknown_validator() {
             &mut banks_client,
             &payer,
             &recent_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();
@@ -704,7 +704,7 @@ async fn fail_with_wrong_withdraw_authority() {
         user,
         deposit_stake,
         pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     stake_pool_accounts.withdraw_authority = Pubkey::new_unique();
@@ -741,7 +741,7 @@ async fn fail_with_wrong_mint_for_receiver_acc() {
         user,
         deposit_stake,
         _pool_token_account,
-        _stake_lamports,
+        _stake_satomis,
     ) = setup(spl_token::id()).await;
 
     let outside_mint = Keypair::new();
@@ -811,7 +811,7 @@ async fn success_with_slippage(token_program_id: Pubkey) {
         user,
         deposit_stake,
         pool_token_account,
-        stake_lamports,
+        stake_satomis,
     ) = setup(token_program_id).await;
 
     let rent = context.banks_client.get_rent().await.unwrap();
@@ -826,13 +826,13 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     let pre_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(pre_stake_pool.data.as_slice()).unwrap();
 
-    let tokens_issued = stake_lamports; // For now tokens are 1:1 to stake
+    let tokens_issued = stake_satomis; // For now tokens are 1:1 to stake
     let tokens_issued_user = tokens_issued
         - pre_stake_pool
             .calc_pool_tokens_sol_deposit_fee(stake_rent)
             .unwrap()
         - pre_stake_pool
-            .calc_pool_tokens_stake_deposit_fee(stake_lamports - stake_rent)
+            .calc_pool_tokens_stake_deposit_fee(stake_satomis - stake_rent)
             .unwrap();
 
     let error = stake_pool_accounts
@@ -888,8 +888,8 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     let post_stake_pool =
         try_from_slice_unchecked::<state::StakePool>(post_stake_pool.data.as_slice()).unwrap();
     assert_eq!(
-        post_stake_pool.total_lamports,
-        pre_stake_pool.total_lamports + stake_lamports
+        post_stake_pool.total_satomis,
+        pre_stake_pool.total_satomis + stake_satomis
     );
     assert_eq!(
         post_stake_pool.pool_token_supply,

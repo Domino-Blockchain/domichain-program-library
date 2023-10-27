@@ -36,8 +36,8 @@ pub fn process_instruction(
     assert_eq!(rent_via_sysvar, rent_via_account);
     // Can't print `exemption_threshold` because BPF does not support printing floats
     msg!(
-        "Rent: lamports_per_byte_year: {:?}, burn_percent: {:?}",
-        rent_via_sysvar.lamports_per_byte_year,
+        "Rent: satomis_per_byte_year: {:?}, burn_percent: {:?}",
+        rent_via_sysvar.satomis_per_byte_year,
         rent_via_sysvar.burn_percent
     );
 

@@ -26,8 +26,8 @@ async fn test_success() {
     // limit to track compute unit increase
     test.set_compute_max_units(38_000);
 
-    const SOL_DEPOSIT_AMOUNT_LAMPORTS: u64 = 10 * LAMPORTS_TO_SOL * INITIAL_COLLATERAL_RATIO;
-    const SOL_RESERVE_COLLATERAL_LAMPORTS: u64 = 2 * SOL_DEPOSIT_AMOUNT_LAMPORTS;
+    const SOL_DEPOSIT_AMOUNT_SATOMIS: u64 = 10 * SATOMIS_TO_SOL * INITIAL_COLLATERAL_RATIO;
+    const SOL_RESERVE_COLLATERAL_SATOMIS: u64 = 2 * SOL_DEPOSIT_AMOUNT_SATOMIS;
 
     let user_accounts_owner = Keypair::new();
     let user_transfer_authority = Keypair::new();
@@ -41,8 +41,8 @@ async fn test_success() {
         &sol_oracle,
         &user_accounts_owner,
         AddReserveArgs {
-            user_liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
-            liquidity_amount: SOL_RESERVE_COLLATERAL_LAMPORTS,
+            user_liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
+            liquidity_amount: SOL_RESERVE_COLLATERAL_SATOMIS,
             liquidity_mint_decimals: 9,
             liquidity_mint_pubkey: spl_token::native_mint::id(),
             config: TEST_RESERVE_CONFIG,
@@ -75,12 +75,12 @@ async fn test_success() {
                 &user_transfer_authority.pubkey(),
                 &user_accounts_owner.pubkey(),
                 &[],
-                SOL_DEPOSIT_AMOUNT_LAMPORTS,
+                SOL_DEPOSIT_AMOUNT_SATOMIS,
             )
             .unwrap(),
             deposit_obligation_collateral(
                 spl_token_lending::id(),
-                SOL_DEPOSIT_AMOUNT_LAMPORTS,
+                SOL_DEPOSIT_AMOUNT_SATOMIS,
                 sol_test_reserve.user_collateral_pubkey,
                 sol_test_reserve.collateral_supply_pubkey,
                 sol_test_reserve.pubkey,
@@ -104,12 +104,12 @@ async fn test_success() {
         get_token_balance(&mut banks_client, sol_test_reserve.collateral_supply_pubkey).await;
     assert_eq!(
         collateral_supply_balance,
-        initial_collateral_supply_balance + SOL_DEPOSIT_AMOUNT_LAMPORTS
+        initial_collateral_supply_balance + SOL_DEPOSIT_AMOUNT_SATOMIS
     );
     let user_collateral_balance =
         get_token_balance(&mut banks_client, sol_test_reserve.user_collateral_pubkey).await;
     assert_eq!(
         user_collateral_balance,
-        initial_user_collateral_balance - SOL_DEPOSIT_AMOUNT_LAMPORTS
+        initial_user_collateral_balance - SOL_DEPOSIT_AMOUNT_SATOMIS
     );
 }

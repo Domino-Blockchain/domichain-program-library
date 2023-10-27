@@ -21,10 +21,10 @@ pub fn process_instruction(
     let source_info = next_account_info(account_info_iter)?;
     let destination_info = next_account_info(account_info_iter)?;
 
-    // Withdraw five lamports from the source
-    **source_info.try_borrow_mut_lamports()? -= 5;
-    // Deposit five lamports into the destination
-    **destination_info.try_borrow_mut_lamports()? += 5;
+    // Withdraw five satomis from the source
+    **source_info.try_borrow_mut_satomis()? -= 5;
+    // Deposit five satomis into the destination
+    **destination_info.try_borrow_mut_satomis()? += 5;
 
     Ok(())
 }

@@ -95,12 +95,12 @@ export function unpackMultisig(
     return { address, ...multisig };
 }
 
-/** Get the minimum lamport balance for a multisig to be rent exempt
+/** Get the minimum satomi balance for a multisig to be rent exempt
  *
  * @param connection Connection to use
  * @param commitment Desired level of commitment for querying the state
  *
- * @return Amount of lamports required
+ * @return Amount of satomis required
  */
 export async function getMinimumBalanceForRentExemptMultisig(
     connection: Connection,

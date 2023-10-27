@@ -16,7 +16,7 @@ use {
     },
     spl_stake_pool::{
         error::StakePoolError::{SignatureMissing, WrongManager},
-        instruction, MINIMUM_RESERVE_LAMPORTS,
+        instruction, MINIMUM_RESERVE_SATOMIS,
     },
 };
 
@@ -30,7 +30,7 @@ async fn setup() -> (ProgramTestContext, StakePoolAccounts) {
             &mut context.banks_client,
             &context.payer,
             &context.last_blockhash,
-            MINIMUM_RESERVE_LAMPORTS,
+            MINIMUM_RESERVE_SATOMIS,
         )
         .await
         .unwrap();

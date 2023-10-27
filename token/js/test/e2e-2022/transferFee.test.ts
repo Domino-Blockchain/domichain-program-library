@@ -26,7 +26,7 @@ import {
     withdrawWithheldTokensFromMint,
 } from '../../src/extensions/transferFee/index';
 
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 const TEST_TOKEN_DECIMALS = 2;
 const MINT_EXTENSIONS = [ExtensionType.TransferFeeConfig];
 const MINT_AMOUNT = BigInt(1_000_000_000);
@@ -45,7 +45,7 @@ describe('transferFee', () => {
     let withdrawWithheldAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         transferFeeConfigAuthority = Keypair.generate();
         withdrawWithheldAuthority = Keypair.generate();
     });
@@ -54,13 +54,13 @@ describe('transferFee', () => {
         const mintKeypair = Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(MINT_EXTENSIONS);
-        const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+        const mintSatomis = await connection.getMinimumBalanceForRentExemption(mintLen);
         const mintTransaction = new Transaction().add(
             SystemProgram.createAccount({
                 fromPubkey: payer.publicKey,
                 newAccountPubkey: mint,
                 space: mintLen,
-                lamports: mintLamports,
+                satomis: mintSatomis,
                 programId: TEST_PROGRAM_ID,
             }),
             createInitializeTransferFeeConfigInstruction(

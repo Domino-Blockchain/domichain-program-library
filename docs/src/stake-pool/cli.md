@@ -793,7 +793,7 @@ Creating account to receive stake CZF2z3JJoDmJRcVjtsrz1BKUUGNL3VPW5FPFqge1bzmQ
 Signature: 2xBPVPJ749AE4hHNCNYdjuHv1EdMvxm9uvvraWfTA7Urrvecwh9w64URCyLLroLQ2RKDGE2QELM2ZHd8qRkjavJM
 ```
 
-Note that the associated validator stake account must have enough lamports to
+Note that the associated validator stake account must have enough satomis to
 satisfy the pool token amount requested.
 
 #### Special case: exiting pool with a delinquent staker

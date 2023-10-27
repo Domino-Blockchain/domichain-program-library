@@ -9,7 +9,7 @@ use program_test::*;
 use solana_sdk::signature::Keypair;
 use spl_governance::{
     error::GovernanceError,
-    state::{enums::VoteThreshold, governance::SECURITY_DEPOSIT_BASE_LAMPORTS},
+    state::{enums::VoteThreshold, governance::SECURITY_DEPOSIT_BASE_SATOMIS},
 };
 use spl_governance_tools::account::AccountMaxSize;
 
@@ -669,13 +669,13 @@ async fn test_create_proposal_with_security_deposit() {
         .await
         .unwrap();
 
-    let expected_lamports = governance_test
+    let expected_satomis = governance_test
         .bench
         .rent
         .minimum_balance(proposal_deposit_account.get_max_size().unwrap())
-        + SECURITY_DEPOSIT_BASE_LAMPORTS;
+        + SECURITY_DEPOSIT_BASE_SATOMIS;
 
-    assert_eq!(expected_lamports, proposal_deposit_account_info.lamports);
+    assert_eq!(expected_satomis, proposal_deposit_account_info.satomis);
 }
 
 #[tokio::test]
@@ -745,13 +745,13 @@ async fn test_create_multiple_proposals_with_security_deposits() {
         .await
         .unwrap();
 
-    let expected_lamports = governance_test
+    let expected_satomis = governance_test
         .bench
         .rent
         .minimum_balance(proposal_deposit_account2.get_max_size().unwrap())
-        + SECURITY_DEPOSIT_BASE_LAMPORTS;
+        + SECURITY_DEPOSIT_BASE_SATOMIS;
 
-    assert_eq!(expected_lamports, proposal_deposit_account_info2.lamports);
+    assert_eq!(expected_satomis, proposal_deposit_account_info2.satomis);
 
     // Proposal 3
     let proposal_deposit_account3 = governance_test
@@ -769,11 +769,11 @@ async fn test_create_multiple_proposals_with_security_deposits() {
         .await
         .unwrap();
 
-    let expected_lamports = governance_test
+    let expected_satomis = governance_test
         .bench
         .rent
         .minimum_balance(proposal_deposit_account3.get_max_size().unwrap())
-        + 2 * SECURITY_DEPOSIT_BASE_LAMPORTS;
+        + 2 * SECURITY_DEPOSIT_BASE_SATOMIS;
 
-    assert_eq!(expected_lamports, proposal_deposit_account_info3.lamports);
+    assert_eq!(expected_satomis, proposal_deposit_account_info3.satomis);
 }

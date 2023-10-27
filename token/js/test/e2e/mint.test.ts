@@ -7,7 +7,7 @@ import { Keypair } from '@solana/web3.js';
 
 import { createMint, getMint, createAccount, getAccount, mintTo, mintToChecked } from '../../src';
 
-import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { TEST_PROGRAM_ID, newAccountWithSatomis, getConnection } from '../common';
 
 const TEST_TOKEN_DECIMALS = 2;
 describe('mint', () => {
@@ -19,7 +19,7 @@ describe('mint', () => {
     let account: PublicKey;
     before(async () => {
         connection = await getConnection();
-        payer = await newAccountWithLamports(connection, 1000000000);
+        payer = await newAccountWithSatomis(connection, 1000000000);
         mintAuthority = Keypair.generate();
         const mintKeypair = Keypair.generate();
         mint = await createMint(

@@ -26,7 +26,7 @@ async fn assert_instruction_count() {
     program_test.add_account(
         shared_key,
         Account {
-            lamports: 5000000000000,
+            satomis: 5000000000000,
             data: vec![0_u8; NUM_TO_SHARE * 2],
             owner: program_id,
             ..Account::default()
@@ -66,7 +66,7 @@ async fn test_helloworld() {
     program_test.add_account(
         shared_key,
         Account {
-            lamports: 5000000000000,
+            satomis: 5000000000000,
             data: vec![0_u8; NUM_TO_SHARE * 2],
             owner: program_id,
             ..Account::default()

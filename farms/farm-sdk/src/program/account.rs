@@ -115,11 +115,11 @@ pub fn check_mint_authority(
 }
 
 pub fn is_empty(account: &AccountInfo) -> Result<bool, ProgramError> {
-    Ok(account.data_is_empty() || account.try_lamports()? == 0)
+    Ok(account.data_is_empty() || account.try_satomis()? == 0)
 }
 
 pub fn exists(account: &AccountInfo) -> Result<bool, ProgramError> {
-    Ok(account.try_lamports()? > 0)
+    Ok(account.try_satomis()? > 0)
 }
 
 pub fn get_balance_increase(
@@ -355,20 +355,20 @@ pub fn transfer_sol_from_owned<'a, 'b>(
     destination_account: &'a AccountInfo<'b>,
     amount: u64,
 ) -> ProgramResult {
-    **destination_account.try_borrow_mut_lamports()? = destination_account
-        .try_lamports()?
+    **destination_account.try_borrow_mut_satomis()? = destination_account
+        .try_satomis()?
         .checked_add(amount)
         .ok_or(ProgramError::InsufficientFunds)?;
-    let source_balance = program_owned_source_account.try_lamports()?;
+    let source_balance = program_owned_source_account.try_satomis()?;
     if source_balance < amount {
         msg!(
-            "Error: Not enough funds to withdraw {} lamports from {}",
+            "Error: Not enough funds to withdraw {} satomis from {}",
             amount,
             program_owned_source_account.key
         );
         return Err(ProgramError::InsufficientFunds);
     }
-    **program_owned_source_account.try_borrow_mut_lamports()? = source_balance
+    **program_owned_source_account.try_borrow_mut_satomis()? = source_balance
         .checked_sub(amount)
         .ok_or(ProgramError::InsufficientFunds)?;
 
@@ -380,9 +380,9 @@ pub fn transfer_sol<'a, 'b>(
     destination_account: &'a AccountInfo<'b>,
     amount: u64,
 ) -> ProgramResult {
-    if source_account.try_lamports()? < amount {
+    if source_account.try_satomis()? < amount {
         msg!(
-            "Error: Not enough funds to withdraw {} lamports from {}",
+            "Error: Not enough funds to withdraw {} satomis from {}",
             amount,
             source_account.key
         );
@@ -525,7 +525,7 @@ pub fn close_system_account<'a, 'b>(
     if *target_account.owner != *authority_account {
         return Err(ProgramError::IllegalOwner);
     }
-    let cur_balance = target_account.try_lamports()?;
+    let cur_balance = target_account.try_satomis()?;
     transfer_sol_from_owned(target_account, receiving_account, cur_balance)?;
 
     if target_account.data_len() > 2000 {

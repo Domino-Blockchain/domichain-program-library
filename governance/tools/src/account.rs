@@ -90,7 +90,7 @@ pub fn create_and_serialize_account_signed<'a, T: BorshSerialize + AccountMaxSiz
     program_id: &Pubkey,
     system_info: &AccountInfo<'a>,
     rent: &Rent,
-    extra_lamports: u64, // Extra lamports added on top of the rent exempt amount
+    extra_satomis: u64, // Extra satomis added on top of the rent exempt amount
 ) -> Result<(), ProgramError> {
     create_and_serialize_account_with_owner_signed(
         payer_info,
@@ -101,7 +101,7 @@ pub fn create_and_serialize_account_signed<'a, T: BorshSerialize + AccountMaxSiz
         program_id, // By default use PDA program_id as the owner of the account
         system_info,
         rent,
-        extra_lamports,
+        extra_satomis,
     )
 }
 
@@ -117,7 +117,7 @@ pub fn create_and_serialize_account_with_owner_signed<'a, T: BorshSerialize + Ac
     owner_program_id: &Pubkey,
     system_info: &AccountInfo<'a>,
     rent: &Rent,
-    extra_lamports: u64, // Extra lamports added on top of the rent exempt amount
+    extra_satomis: u64, // Extra satomis added on top of the rent exempt amount
 ) -> Result<(), ProgramError> {
     // Get PDA and assert it's the same as the requested account address
     let (account_address, bump_seed) =
@@ -144,17 +144,17 @@ pub fn create_and_serialize_account_with_owner_signed<'a, T: BorshSerialize + Ac
     let bump = &[bump_seed];
     signers_seeds.push(bump);
 
-    let rent_exempt_lamports = rent.minimum_balance(account_size);
-    let total_lamports = rent_exempt_lamports.checked_add(extra_lamports).unwrap();
+    let rent_exempt_satomis = rent.minimum_balance(account_size);
+    let total_satomis = rent_exempt_satomis.checked_add(extra_satomis).unwrap();
 
-    // If the account has some lamports already it can't be created using create_account instruction
-    // Anybody can send lamports to a PDA and by doing so create the account and perform DoS attack by blocking create_account
-    if account_info.lamports() > 0 {
-        let top_up_lamports = total_lamports.saturating_sub(account_info.lamports());
+    // If the account has some satomis already it can't be created using create_account instruction
+    // Anybody can send satomis to a PDA and by doing so create the account and perform DoS attack by blocking create_account
+    if account_info.satomis() > 0 {
+        let top_up_satomis = total_satomis.saturating_sub(account_info.satomis());
 
-        if top_up_lamports > 0 {
+        if top_up_satomis > 0 {
             invoke(
-                &system_instruction::transfer(payer_info.key, account_info.key, top_up_lamports),
+                &system_instruction::transfer(payer_info.key, account_info.key, top_up_satomis),
                 &[
                     payer_info.clone(),
                     account_info.clone(),
@@ -179,7 +179,7 @@ pub fn create_and_serialize_account_with_owner_signed<'a, T: BorshSerialize + Ac
         let create_account_instruction = create_account(
             payer_info.key,
             account_info.key,
-            total_lamports,
+            total_satomis,
             account_size as u64,
             owner_program_id,
         );
@@ -278,18 +278,18 @@ pub fn assert_is_valid_account_of_types<T: BorshDeserialize + PartialEq, F: Fn(&
     Ok(())
 }
 
-/// Disposes account by transferring its lamports to the beneficiary account, resizing data to 0 and changing program owner to SystemProgram
-// After transaction completes the runtime would remove the account with no lamports
+/// Disposes account by transferring its satomis to the beneficiary account, resizing data to 0 and changing program owner to SystemProgram
+// After transaction completes the runtime would remove the account with no satomis
 pub fn dispose_account(
     account_info: &AccountInfo,
     beneficiary_info: &AccountInfo,
 ) -> Result<(), ProgramError> {
-    let account_lamports = account_info.lamports();
-    **account_info.lamports.borrow_mut() = 0;
+    let account_satomis = account_info.satomis();
+    **account_info.satomis.borrow_mut() = 0;
 
-    **beneficiary_info.lamports.borrow_mut() = beneficiary_info
-        .lamports()
-        .checked_add(account_lamports)
+    **beneficiary_info.satomis.borrow_mut() = beneficiary_info
+        .satomis()
+        .checked_add(account_satomis)
         .unwrap();
 
     account_info.assign(&system_program::id());
@@ -308,12 +308,12 @@ pub fn extend_account_size<'a>(
         return Err(GovernanceToolsError::InvalidNewAccountSize.into());
     }
 
-    let rent_exempt_lamports = rent.minimum_balance(new_account_size);
-    let top_up_lamports = rent_exempt_lamports.saturating_sub(account_info.lamports());
+    let rent_exempt_satomis = rent.minimum_balance(new_account_size);
+    let top_up_satomis = rent_exempt_satomis.saturating_sub(account_info.satomis());
 
-    if top_up_lamports > 0 {
+    if top_up_satomis > 0 {
         invoke(
-            &system_instruction::transfer(payer_info.key, account_info.key, top_up_lamports),
+            &system_instruction::transfer(payer_info.key, account_info.key, top_up_satomis),
             &[
                 payer_info.clone(),
                 account_info.clone(),

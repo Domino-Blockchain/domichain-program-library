@@ -64,11 +64,11 @@ async fn test_associated_token_address() {
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len,);
     assert_eq!(associated_account.owner, spl_token_2022::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 }
 
 #[tokio::test]
-async fn test_create_with_fewer_lamports() {
+async fn test_create_with_fewer_satomis() {
     let wallet_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
     let associated_token_address = get_associated_token_address_with_program_id(
@@ -84,7 +84,7 @@ async fn test_create_with_fewer_lamports() {
         ExtensionType::get_account_len::<Account>(&[ExtensionType::ImmutableOwner]);
     let expected_token_account_balance = rent.minimum_balance(expected_token_account_len);
 
-    // Transfer lamports into `associated_token_address` before creating it - enough to be
+    // Transfer satomis into `associated_token_address` before creating it - enough to be
     // rent-exempt for 0 data, but not for an initialized token account
     let mut transaction = Transaction::new_with_payer(
         &[system_instruction::transfer(
@@ -105,7 +105,7 @@ async fn test_create_with_fewer_lamports() {
         rent.minimum_balance(0)
     );
 
-    // Check that the program adds the extra lamports
+    // Check that the program adds the extra satomis
     let mut transaction = Transaction::new_with_payer(
         &[create_associated_token_account(
             &payer.pubkey(),
@@ -128,7 +128,7 @@ async fn test_create_with_fewer_lamports() {
 }
 
 #[tokio::test]
-async fn test_create_with_excess_lamports() {
+async fn test_create_with_excess_satomis() {
     let wallet_address = Pubkey::new_unique();
     let token_mint_address = Pubkey::new_unique();
     let associated_token_address = get_associated_token_address_with_program_id(
@@ -145,7 +145,7 @@ async fn test_create_with_excess_lamports() {
         ExtensionType::get_account_len::<Account>(&[ExtensionType::ImmutableOwner]);
     let expected_token_account_balance = rent.minimum_balance(expected_token_account_len);
 
-    // Transfer 1 lamport into `associated_token_address` before creating it
+    // Transfer 1 satomi into `associated_token_address` before creating it
     let mut transaction = Transaction::new_with_payer(
         &[system_instruction::transfer(
             &payer.pubkey(),
@@ -165,7 +165,7 @@ async fn test_create_with_excess_lamports() {
         expected_token_account_balance + 1
     );
 
-    // Check that the program doesn't add any lamports
+    // Check that the program doesn't add any satomis
     let mut transaction = Transaction::new_with_payer(
         &[create_associated_token_account(
             &payer.pubkey(),
@@ -310,5 +310,5 @@ async fn test_create_associated_token_account_using_legacy_implicit_instruction(
         .expect("associated_account not none");
     assert_eq!(associated_account.data.len(), expected_token_account_len);
     assert_eq!(associated_account.owner, spl_token_2022::id());
-    assert_eq!(associated_account.lamports, expected_token_account_balance);
+    assert_eq!(associated_account.satomis, expected_token_account_balance);
 }

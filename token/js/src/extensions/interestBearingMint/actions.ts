@@ -38,13 +38,13 @@ export async function createInterestBearingMint(
     programId = TOKEN_2022_PROGRAM_ID
 ): Promise<PublicKey> {
     const mintLen = getMintLen([ExtensionType.InterestBearingConfig]);
-    const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+    const satomis = await connection.getMinimumBalanceForRentExemption(mintLen);
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
             fromPubkey: payer.publicKey,
             newAccountPubkey: keypair.publicKey,
             space: mintLen,
-            lamports,
+            satomis,
             programId,
         }),
         createInitializeInterestBearingMintInstruction(keypair.publicKey, rateAuthority, rate, programId),

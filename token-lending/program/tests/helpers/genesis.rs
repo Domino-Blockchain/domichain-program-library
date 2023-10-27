@@ -22,7 +22,7 @@ impl From<Account> for Base64Account {
     fn from(account: Account) -> Self {
         Self {
             owner: account.owner.to_string(),
-            balance: account.lamports,
+            balance: account.satomis,
             executable: account.executable,
             data: base64::encode(&account.data),
         }
@@ -78,7 +78,7 @@ impl GenesisAccounts {
 
     pub async fn fetch_and_insert(&mut self, banks_client: &mut BanksClient, pubkey: Pubkey) {
         let mut account: Account = banks_client.get_account(pubkey).await.unwrap().unwrap();
-        account.lamports = u32::MAX as u64;
+        account.satomis = u32::MAX as u64;
         self.0.insert(pubkey.to_string(), account.into());
     }
 

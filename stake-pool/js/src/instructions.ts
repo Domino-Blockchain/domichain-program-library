@@ -33,7 +33,7 @@ export type StakePoolInstructionType =
 
 const MOVE_STAKE_LAYOUT = BufferLayout.struct<any>([
   BufferLayout.u8('instruction'),
-  BufferLayout.ns64('lamports'),
+  BufferLayout.ns64('satomis'),
   BufferLayout.ns64('transientStakeSeed'),
 ]);
 
@@ -88,7 +88,7 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
     index: 14,
     layout: BufferLayout.struct<any>([
       BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
+      BufferLayout.ns64('satomis'),
     ]),
   },
   /// Withdraw SOL directly from the pool's reserve account. Fails if the
@@ -104,7 +104,7 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
     index: 19,
     layout: BufferLayout.struct<any>([
       BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
+      BufferLayout.ns64('satomis'),
       BufferLayout.ns64('transientStakeSeed'),
       BufferLayout.ns64('ephemeralStakeSeed'),
     ]),
@@ -113,7 +113,7 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
     index: 20,
     layout: BufferLayout.struct<any>([
       BufferLayout.u8('instruction'),
-      BufferLayout.ns64('lamports'),
+      BufferLayout.ns64('satomis'),
       BufferLayout.ns64('transientStakeSeed'),
       BufferLayout.ns64('ephemeralStakeSeed'),
     ]),
@@ -122,8 +122,8 @@ export const STAKE_POOL_INSTRUCTION_LAYOUTS: {
     index: 21,
     layout: BufferLayout.struct<any>([
       BufferLayout.u8('instruction'),
-      /// Amount of lamports to redelegate
-      BufferLayout.ns64('lamports'),
+      /// Amount of satomis to redelegate
+      BufferLayout.ns64('satomis'),
       /// Seed used to create source transient stake account
       BufferLayout.ns64('sourceTransientStakeSeed'),
       /// Seed used to create destination ephemeral account.
@@ -179,8 +179,8 @@ export type DecreaseValidatorStakeParams = {
   validatorList: PublicKey;
   validatorStake: PublicKey;
   transientStake: PublicKey;
-  // Amount of lamports to split into the transient stake account
-  lamports: number;
+  // Amount of satomis to split into the transient stake account
+  satomis: number;
   // Seed to used to create the transient stake account
   transientStakeSeed: number;
 };
@@ -202,8 +202,8 @@ export type IncreaseValidatorStakeParams = {
   transientStake: PublicKey;
   validatorStake: PublicKey;
   validatorVote: PublicKey;
-  // Amount of lamports to split into the transient stake account
-  lamports: number;
+  // Amount of satomis to split into the transient stake account
+  satomis: number;
   // Seed to used to create the transient stake account
   transientStakeSeed: number;
 };
@@ -277,7 +277,7 @@ export type DepositSolParams = {
   managerFeeAccount: PublicKey;
   referralPoolAccount: PublicKey;
   poolMint: PublicKey;
-  lamports: number;
+  satomis: number;
 };
 
 export type RedelegateParams = {
@@ -291,8 +291,8 @@ export type RedelegateParams = {
   destinationTransientStake: PublicKey;
   destinationValidatorStake: PublicKey;
   validator: PublicKey;
-  // Amount of lamports to redelegate
-  lamports: number | BN;
+  // Amount of satomis to redelegate
+  satomis: number | BN;
   // Seed used to create source transient stake account
   sourceTransientStakeSeed: number | BN;
   // Seed used to create destination ephemeral account
@@ -418,12 +418,12 @@ export class StakePoolInstruction {
       transientStake,
       validatorStake,
       validatorVote,
-      lamports,
+      satomis,
       transientStakeSeed,
     } = params;
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.IncreaseValidatorStake;
-    const data = encodeData(type, { lamports, transientStakeSeed });
+    const data = encodeData(type, { satomis, transientStakeSeed });
 
     const keys = [
       { pubkey: stakePool, isSigner: false, isWritable: false },
@@ -465,14 +465,14 @@ export class StakePoolInstruction {
       transientStake,
       validatorStake,
       validatorVote,
-      lamports,
+      satomis,
       transientStakeSeed,
       ephemeralStake,
       ephemeralStakeSeed,
     } = params;
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.IncreaseAdditionalValidatorStake;
-    const data = encodeData(type, { lamports, transientStakeSeed, ephemeralStakeSeed });
+    const data = encodeData(type, { satomis, transientStakeSeed, ephemeralStakeSeed });
 
     const keys = [
       { pubkey: stakePool, isSigner: false, isWritable: false },
@@ -510,12 +510,12 @@ export class StakePoolInstruction {
       validatorList,
       validatorStake,
       transientStake,
-      lamports,
+      satomis,
       transientStakeSeed,
     } = params;
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.DecreaseValidatorStake;
-    const data = encodeData(type, { lamports, transientStakeSeed });
+    const data = encodeData(type, { satomis, transientStakeSeed });
 
     const keys = [
       { pubkey: stakePool, isSigner: false, isWritable: false },
@@ -551,14 +551,14 @@ export class StakePoolInstruction {
       validatorList,
       validatorStake,
       transientStake,
-      lamports,
+      satomis,
       transientStakeSeed,
       ephemeralStakeSeed,
       ephemeralStake,
     } = params;
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.DecreaseAdditionalValidatorStake;
-    const data = encodeData(type, { lamports, transientStakeSeed, ephemeralStakeSeed });
+    const data = encodeData(type, { satomis, transientStakeSeed, ephemeralStakeSeed });
 
     const keys = [
       { pubkey: stakePool, isSigner: false, isWritable: false },
@@ -641,11 +641,11 @@ export class StakePoolInstruction {
       managerFeeAccount,
       referralPoolAccount,
       poolMint,
-      lamports,
+      satomis,
     } = params;
 
     const type = STAKE_POOL_INSTRUCTION_LAYOUTS.DepositSol;
-    const data = encodeData(type, { lamports });
+    const data = encodeData(type, { satomis });
 
     const keys = [
       { pubkey: stakePool, isSigner: false, isWritable: true },
@@ -785,7 +785,7 @@ export class StakePoolInstruction {
       destinationTransientStake,
       destinationValidatorStake,
       validator,
-      lamports,
+      satomis,
       sourceTransientStakeSeed,
       ephemeralStakeSeed,
       destinationTransientStakeSeed,
@@ -810,7 +810,7 @@ export class StakePoolInstruction {
     ];
 
     const data = encodeData(STAKE_POOL_INSTRUCTION_LAYOUTS.Redelegate, {
-      lamports,
+      satomis,
       sourceTransientStakeSeed,
       ephemeralStakeSeed,
       destinationTransientStakeSeed,
@@ -866,7 +866,7 @@ export class StakePoolInstruction {
       managerFeeAccount: instruction.keys[6].pubkey,
       referralPoolAccount: instruction.keys[7].pubkey,
       poolMint: instruction.keys[8].pubkey,
-      lamports: amount,
+      satomis: amount,
     };
   }
 

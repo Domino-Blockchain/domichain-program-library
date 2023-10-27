@@ -106,7 +106,7 @@ export interface StakePool {
   poolMint: PublicKey;
   managerFeeAccount: PublicKey;
   tokenProgramId: PublicKey;
-  totalLamports: BN;
+  totalSatomis: BN;
   poolTokenSupply: BN;
   lastUpdateEpoch: BN;
   lockup: Lockup;
@@ -125,7 +125,7 @@ export interface StakePool {
   solWithdrawalFee: Fee;
   nextSolWithdrawalFee?: Fee | undefined;
   lastEpochPoolTokenSupply: BN;
-  lastEpochTotalLamports: BN;
+  lastEpochTotalSatomis: BN;
 }
 
 export const StakePoolLayout = struct<StakePool>([
@@ -139,7 +139,7 @@ export const StakePoolLayout = struct<StakePool>([
   publicKey('poolMint'),
   publicKey('managerFeeAccount'),
   publicKey('tokenProgramId'),
-  u64('totalLamports'),
+  u64('totalSatomis'),
   u64('poolTokenSupply'),
   u64('lastUpdateEpoch'),
   struct([u64('unixTimestamp'), u64('epoch'), publicKey('custodian')], 'lockup'),
@@ -158,7 +158,7 @@ export const StakePoolLayout = struct<StakePool>([
   struct(feeFields, 'solWithdrawalFee'),
   option(struct(feeFields), 'nextSolWithdrawalFee'),
   u64('lastEpochPoolTokenSupply'),
-  u64('lastEpochTotalLamports'),
+  u64('lastEpochTotalSatomis'),
 ]);
 
 export enum ValidatorStakeInfoStatus {
@@ -170,8 +170,8 @@ export enum ValidatorStakeInfoStatus {
 export interface ValidatorStakeInfo {
   status: ValidatorStakeInfoStatus;
   voteAccountAddress: PublicKey;
-  activeStakeLamports: BN;
-  transientStakeLamports: BN;
+  activeStakeSatomis: BN;
+  transientStakeSatomis: BN;
   transientSeedSuffixStart: BN;
   transientSeedSuffixEnd: BN;
   lastUpdateEpoch: BN;
@@ -181,12 +181,12 @@ export const ValidatorStakeInfoLayout = struct<ValidatorStakeInfo>([
   /// Amount of active stake delegated to this validator
   /// Note that if `last_update_epoch` does not match the current epoch then
   /// this field may not be accurate
-  u64('activeStakeLamports'),
+  u64('activeStakeSatomis'),
   /// Amount of transient stake delegated to this validator
   /// Note that if `last_update_epoch` does not match the current epoch then
   /// this field may not be accurate
-  u64('transientStakeLamports'),
-  /// Last epoch the active and transient stake lamports fields were updated
+  u64('transientStakeSatomis'),
+  /// Last epoch the active and transient stake satomis fields were updated
   u64('lastUpdateEpoch'),
   /// Start of the validator transient account seed suffixes
   u64('transientSeedSuffixStart'),

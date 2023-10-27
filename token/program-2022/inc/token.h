@@ -429,14 +429,14 @@ typedef enum Token_TokenInstruction_Tag {
     Token_TokenInstruction_InitializeAccount2,
     /**
      * Given a wrapped / native token account (a token account containing SOL)
-     * updates its amount field based on the account's underlying `lamports`.
+     * updates its amount field based on the account's underlying `satomis`.
      * This is useful if a non-wrapped SOL account uses `system_instruction::transfer`
-     * to move lamports to a wrapped token account, and needs to have its token
+     * to move satomis to a wrapped token account, and needs to have its token
      * `amount` field updated.
      *
      * Accounts expected by this instruction:
      *
-     *   0. `[writable]`  The native token account to sync with its underlying lamports.
+     *   0. `[writable]`  The native token account to sync with its underlying satomis.
      */
     Token_TokenInstruction_SyncNative,
 } Token_TokenInstruction_Tag;

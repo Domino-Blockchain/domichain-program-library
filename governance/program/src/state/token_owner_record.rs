@@ -535,13 +535,13 @@ mod test {
         let program_id = Pubkey::new_unique();
 
         let info_key = Pubkey::new_unique();
-        let mut lamports = 10u64;
+        let mut satomis = 10u64;
 
         let legacy_account_info = AccountInfo::new(
             &info_key,
             false,
             false,
-            &mut lamports,
+            &mut satomis,
             &mut legacy_data[..],
             &program_id,
             false,

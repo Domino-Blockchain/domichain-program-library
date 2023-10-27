@@ -190,7 +190,7 @@ Every stake pool is initialized with an undelegated reserve stake account, used
 to hold undelegated stake in process of rebalancing. After the staker decreases
 the stake on a validator, one epoch later, the update operation will merge the
 decreased stake into the reserve. Conversely, whenever the staker increases the
-stake on a validator, the lamports are drawn from the reserve stake account.
+stake on a validator, the satomis are drawn from the reserve stake account.
 
 ### Validator list account
 

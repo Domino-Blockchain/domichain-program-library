@@ -6480,7 +6480,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "spl-example-transfer-lamports"
+name = "spl-example-transfer-satomis"
 version = "1.0.0"
 dependencies = [
  "domichain-program",

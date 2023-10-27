@@ -61,10 +61,10 @@ async fn _success(token_program_id: Pubkey, test_type: SuccessTestType) {
         try_from_slice_unchecked::<state::StakePool>(stake_pool_before.data.as_slice()).unwrap();
 
     // Check user recipient stake account balance
-    let initial_stake_lamports =
+    let initial_stake_satomis =
         get_account(&mut context.banks_client, &user_stake_recipient.pubkey())
             .await
-            .lamports;
+            .satomis;
 
     // Save validator stake account record before withdrawal
     let validator_list = get_account(
@@ -177,7 +177,7 @@ async fn _success(token_program_id: Pubkey, test_type: SuccessTestType) {
     .await;
     let stake_pool =
         try_from_slice_unchecked::<state::StakePool>(stake_pool.data.as_slice()).unwrap();
-    // first and only deposit, lamports:pool 1:1
+    // first and only deposit, satomis:pool 1:1
     let tokens_withdrawal_fee = match test_type {
         SuccessTestType::Success => {
             stake_pool_accounts.calculate_withdrawal_fee(tokens_to_withdraw)
@@ -186,8 +186,8 @@ async fn _success(token_program_id: Pubkey, test_type: SuccessTestType) {
     };
     let tokens_burnt = tokens_to_withdraw - tokens_withdrawal_fee;
     assert_eq!(
-        stake_pool.total_lamports,
-        stake_pool_before.total_lamports - tokens_burnt
+        stake_pool.total_satomis,
+        stake_pool_before.total_satomis - tokens_burnt
     );
     assert_eq!(
         stake_pool.pool_token_supply,
@@ -219,12 +219,12 @@ async fn _success(token_program_id: Pubkey, test_type: SuccessTestType) {
         .find(&validator_stake_account.vote.pubkey())
         .unwrap();
     assert_eq!(
-        validator_stake_item.stake_lamports().unwrap(),
-        validator_stake_item_before.stake_lamports().unwrap() - tokens_burnt
+        validator_stake_item.stake_satomis().unwrap(),
+        validator_stake_item_before.stake_satomis().unwrap() - tokens_burnt
     );
     assert_eq!(
-        validator_stake_item.active_stake_lamports,
-        validator_stake_item.stake_lamports().unwrap(),
+        validator_stake_item.active_stake_satomis,
+        validator_stake_item.stake_satomis().unwrap(),
     );
 
     // Check tokens used
@@ -245,16 +245,16 @@ async fn _success(token_program_id: Pubkey, test_type: SuccessTestType) {
     )
     .await;
     assert_eq!(
-        validator_stake_account.lamports,
-        validator_stake_item.active_stake_lamports
+        validator_stake_account.satomis,
+        validator_stake_item.active_stake_satomis
     );
 
     // Check user recipient stake account balance
     let user_stake_recipient_account =
         get_account(&mut context.banks_client, &user_stake_recipient.pubkey()).await;
     assert_eq!(
-        user_stake_recipient_account.lamports,
-        initial_stake_lamports + tokens_burnt
+        user_stake_recipient_account.satomis,
+        initial_stake_satomis + tokens_burnt
     );
 }
 
@@ -668,7 +668,7 @@ async fn fail_with_not_enough_tokens() {
         error,
         TransactionError::InstructionError(
             0,
-            InstructionError::Custom(StakePoolError::StakeLamportsNotEqualToMinimum as u32)
+            InstructionError::Custom(StakePoolError::StakeSatomisNotEqualToMinimum as u32)
         ),
     );
 
@@ -782,9 +782,9 @@ async fn success_with_slippage(token_program_id: Pubkey) {
     )
     .await;
 
-    // first and only deposit, lamports:pool 1:1
+    // first and only deposit, satomis:pool 1:1
     let tokens_withdrawal_fee = stake_pool_accounts.calculate_withdrawal_fee(tokens_to_withdraw);
-    let received_lamports = tokens_to_withdraw - tokens_withdrawal_fee;
+    let received_satomis = tokens_to_withdraw - tokens_withdrawal_fee;
 
     let new_authority = Pubkey::new_unique();
     let error = stake_pool_accounts
@@ -798,7 +798,7 @@ async fn success_with_slippage(token_program_id: Pubkey) {
             &validator_stake_account.stake_account,
             &new_authority,
             tokens_to_withdraw,
-            received_lamports + 1,
+            received_satomis + 1,
         )
         .await
         .unwrap()
@@ -822,7 +822,7 @@ async fn success_with_slippage(token_program_id: Pubkey) {
             &validator_stake_account.stake_account,
             &new_authority,
             tokens_to_withdraw,
-            received_lamports,
+            received_satomis,
         )
         .await;
     assert!(error.is_none());

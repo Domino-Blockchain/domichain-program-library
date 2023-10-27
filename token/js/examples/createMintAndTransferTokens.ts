@@ -1,4 +1,4 @@
-import { clusterApiUrl, Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { clusterApiUrl, Connection, Keypair, SATOMIS_PER_SOL } from '@solana/web3.js';
 import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from '../src'; // @FIXME: replace with @solana/spl-token
 
 (async () => {
@@ -7,7 +7,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from 
 
     // Generate a new wallet keypair and airdrop SOL
     const fromWallet = Keypair.generate();
-    const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, LAMPORTS_PER_SOL);
+    const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, SATOMIS_PER_SOL);
 
     // Wait for airdrop confirmation
     await connection.confirmTransaction({

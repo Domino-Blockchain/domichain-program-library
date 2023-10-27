@@ -4,7 +4,7 @@ import {
   Keypair,
   SystemProgram,
   AccountInfo,
-  LAMPORTS_PER_SOL,
+  SATOMIS_PER_SOL,
 } from '@solana/web3.js';
 import { StakePoolLayout } from '../src/layouts';
 import {
@@ -45,7 +45,7 @@ describe('StakePoolProgram', () => {
   const stakePoolAccount = <AccountInfo<any>>{
     executable: true,
     owner: stakePoolAddress,
-    lamports: 99999,
+    satomis: 99999,
     data,
   };
 
@@ -59,7 +59,7 @@ describe('StakePoolProgram', () => {
       managerFeeAccount: Keypair.generate().publicKey,
       referralPoolAccount: Keypair.generate().publicKey,
       poolMint: Keypair.generate().publicKey,
-      lamports: 99999,
+      satomis: 99999,
     };
 
     const instruction = StakePoolInstruction.depositSol(payload);
@@ -79,7 +79,7 @@ describe('StakePoolProgram', () => {
     const decodedData = decodeData(STAKE_POOL_INSTRUCTION_LAYOUTS.DepositSol, instruction.data);
 
     expect(decodedData.instruction).toEqual(STAKE_POOL_INSTRUCTION_LAYOUTS.DepositSol.index);
-    expect(decodedData.lamports).toEqual(payload.lamports);
+    expect(decodedData.satomis).toEqual(payload.satomis);
 
     payload.depositAuthority = Keypair.generate().publicKey;
 
@@ -102,7 +102,7 @@ describe('StakePoolProgram', () => {
       return <AccountInfo<any>>{
         executable: true,
         owner: from,
-        lamports: balance,
+        satomis: balance,
         data: null,
       };
     });
@@ -128,7 +128,7 @@ describe('StakePoolProgram', () => {
         return <AccountInfo<any>>{
           executable: true,
           owner: from,
-          lamports: balance,
+          satomis: balance,
           data: null,
         };
       });
@@ -194,7 +194,7 @@ describe('StakePoolProgram', () => {
           return stakePoolAccount;
         }
         if (pubKey.equals(CONSTANTS.poolTokenAccount)) {
-          return mockTokenAccount(LAMPORTS_PER_SOL);
+          return mockTokenAccount(SATOMIS_PER_SOL);
         }
         return null;
       });
@@ -247,7 +247,7 @@ describe('StakePoolProgram', () => {
           return stakePoolAccount;
         }
         if (pubKey.equals(CONSTANTS.poolTokenAccount)) {
-          return mockTokenAccount(LAMPORTS_PER_SOL * 2);
+          return mockTokenAccount(SATOMIS_PER_SOL * 2);
         }
         if (pubKey.equals(stakePoolMock.validatorList)) {
           return mockValidatorList();
@@ -270,7 +270,7 @@ describe('StakePoolProgram', () => {
           return stakePoolAccount;
         }
         if (pubKey.equals(CONSTANTS.poolTokenAccount)) {
-          return mockTokenAccount(LAMPORTS_PER_SOL * 2);
+          return mockTokenAccount(SATOMIS_PER_SOL * 2);
         }
         if (pubKey.equals(stakePoolMock.validatorList)) {
           return mockValidatorList();
@@ -329,7 +329,7 @@ describe('StakePoolProgram', () => {
         destinationVoteAccount: PublicKey.default,
         destinationTransientStakeSeed: 20,
         ephemeralStakeSeed: 100,
-        lamports: 100,
+        satomis: 100,
       };
       const res = await redelegate(data);
 
@@ -338,7 +338,7 @@ describe('StakePoolProgram', () => {
       );
 
       expect(decodedData.instruction).toBe(21);
-      expect(decodedData.lamports).toBe(data.lamports);
+      expect(decodedData.satomis).toBe(data.satomis);
       expect(decodedData.sourceTransientStakeSeed).toBe(data.sourceTransientStakeSeed);
       expect(decodedData.destinationTransientStakeSeed).toBe(data.destinationTransientStakeSeed);
       expect(decodedData.ephemeralStakeSeed).toBe(data.ephemeralStakeSeed);

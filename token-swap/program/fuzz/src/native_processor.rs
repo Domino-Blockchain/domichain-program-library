@@ -91,8 +91,8 @@ pub fn do_process_instruction(instruction: Instruction, accounts: &[AccountInfo]
             for account_meta in account_metas.iter_mut() {
                 if account_info.key == account_meta.0 {
                     let account = &mut account_meta.1;
-                    let mut lamports = account.lamports.borrow_mut();
-                    **lamports = **account_info.lamports.borrow();
+                    let mut satomis = account.satomis.borrow_mut();
+                    **satomis = **account_info.satomis.borrow();
                     let mut data = account.data.borrow_mut();
                     data.clone_from_slice(*account_info.data.borrow());
                 }

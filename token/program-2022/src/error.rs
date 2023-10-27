@@ -14,8 +14,8 @@ use {
 #[derive(Clone, Debug, Eq, Error, FromPrimitive, PartialEq)]
 pub enum TokenError {
     // 0
-    /// Lamport balance below rent-exempt threshold.
-    #[error("Lamport balance below rent-exempt threshold")]
+    /// Satomi balance below rent-exempt threshold.
+    #[error("Satomi balance below rent-exempt threshold")]
     NotRentExempt,
     /// Insufficient funds for the operation requested.
     #[error("Insufficient funds")]
@@ -171,8 +171,8 @@ pub enum TokenError {
         "CPI Guard is enabled, and a program attempted to burn user funds via CPI without using a delegate"
     )]
     CpiGuardBurnBlocked,
-    /// CPI Guard is enabled, and a program attempted to close an account without returning lamports to owner
-    #[error("CPI Guard is enabled, and a program attempted to close an account via CPI without returning lamports to owner")]
+    /// CPI Guard is enabled, and a program attempted to close an account without returning satomis to owner
+    #[error("CPI Guard is enabled, and a program attempted to close an account via CPI without returning satomis to owner")]
     CpiGuardCloseAccountBlocked,
 
     // 45
@@ -211,7 +211,7 @@ impl PrintProgramError for TokenError {
         E: 'static + std::error::Error + DecodeError<E> + num_traits::FromPrimitive,
     {
         match self {
-            TokenError::NotRentExempt => msg!("Error: Lamport balance below rent-exempt threshold"),
+            TokenError::NotRentExempt => msg!("Error: Satomi balance below rent-exempt threshold"),
             TokenError::InsufficientFunds => msg!("Error: insufficient funds"),
             TokenError::InvalidMint => msg!("Error: Invalid Mint"),
             TokenError::MintMismatch => msg!("Error: Account not associated with this Mint"),
@@ -318,7 +318,7 @@ impl PrintProgramError for TokenError {
                 msg!("CPI Guard is enabled, and a program attempted to burn user funds without using a delegate")
             }
             TokenError::CpiGuardCloseAccountBlocked => {
-                msg!("CPI Guard is enabled, and a program attempted to close an account without returning lamports to owner")
+                msg!("CPI Guard is enabled, and a program attempted to close an account without returning satomis to owner")
             }
             TokenError::CpiGuardApproveBlocked => {
                 msg!("CPI Guard is enabled, and a program attempted to approve a delegate")

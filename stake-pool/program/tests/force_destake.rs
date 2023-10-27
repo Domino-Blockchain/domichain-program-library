@@ -60,21 +60,21 @@ async fn setup() -> (
     let (stake_address, _) =
         find_stake_program_address(&id(), &voter_pubkey, &stake_pool_pubkey, validator_seed);
     program_test.add_account(stake_address, stake_account);
-    let active_stake_lamports = TEST_STAKE_AMOUNT - MINIMUM_ACTIVE_STAKE;
+    let active_stake_satomis = TEST_STAKE_AMOUNT - MINIMUM_ACTIVE_STAKE;
     // add to validator list
     validator_list.validators.push(ValidatorStakeInfo {
         status: StakeStatus::Active,
         vote_account_address: voter_pubkey,
-        active_stake_lamports,
-        transient_stake_lamports: 0,
+        active_stake_satomis,
+        transient_stake_satomis: 0,
         last_update_epoch: 0,
         transient_seed_suffix: 0,
         unused: 0,
         validator_seed_suffix: raw_validator_seed,
     });
 
-    stake_pool.total_lamports += active_stake_lamports;
-    stake_pool.pool_token_supply += active_stake_lamports;
+    stake_pool.total_satomis += active_stake_satomis;
+    stake_pool.pool_token_supply += active_stake_satomis;
 
     add_reserve_stake_account(
         &mut program_test,
@@ -116,26 +116,26 @@ async fn setup() -> (
 #[tokio::test]
 async fn success_update() {
     let (mut context, stake_pool_accounts, voter_pubkey, validator_seed) = setup().await;
-    let pre_reserve_lamports = context
+    let pre_reserve_satomis = context
         .banks_client
         .get_account(stake_pool_accounts.reserve_stake.pubkey())
         .await
         .unwrap()
         .unwrap()
-        .lamports;
+        .satomis;
     let (stake_address, _) = find_stake_program_address(
         &id(),
         &voter_pubkey,
         &stake_pool_accounts.stake_pool.pubkey(),
         validator_seed,
     );
-    let validator_stake_lamports = context
+    let validator_stake_satomis = context
         .banks_client
         .get_account(stake_address)
         .await
         .unwrap()
         .unwrap()
-        .lamports;
+        .satomis;
     // update should merge the destaked validator stake account into the reserve
     let error = stake_pool_accounts
         .update_all(
@@ -147,16 +147,16 @@ async fn success_update() {
         )
         .await;
     assert!(error.is_none());
-    let post_reserve_lamports = context
+    let post_reserve_satomis = context
         .banks_client
         .get_account(stake_pool_accounts.reserve_stake.pubkey())
         .await
         .unwrap()
         .unwrap()
-        .lamports;
+        .satomis;
     assert_eq!(
-        post_reserve_lamports,
-        pre_reserve_lamports + validator_stake_lamports
+        post_reserve_satomis,
+        pre_reserve_satomis + validator_stake_satomis
     );
     // test no more validator stake account
     assert!(context

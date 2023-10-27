@@ -128,7 +128,7 @@ pub enum StakePoolInstruction {
     /// validator stake account, into its "transient" stake account.
     ///
     /// The instruction only succeeds if the transient stake account does not
-    /// exist. The amount of lamports to move must be at least rent-exemption plus
+    /// exist. The amount of satomis to move must be at least rent-exemption plus
     /// `max(crate::MINIMUM_ACTIVE_STAKE, domichain_program::stake::tools::get_minimum_delegation())`.
     ///
     ///  0. `[]` Stake pool
@@ -142,8 +142,8 @@ pub enum StakePoolInstruction {
     ///  8. `[]` System program
     ///  9. `[]` Stake program
     DecreaseValidatorStake {
-        /// amount of lamports to split into the transient stake account
-        lamports: u64,
+        /// amount of satomis to split into the transient stake account
+        satomis: u64,
         /// seed used to create transient stake account
         transient_stake_seed: u64,
     },
@@ -172,14 +172,14 @@ pub enum StakePoolInstruction {
     /// 11. `[]` Stake Config sysvar
     /// 12. `[]` System program
     /// 13. `[]` Stake program
-    ///  userdata: amount of lamports to increase on the given validator.
+    ///  userdata: amount of satomis to increase on the given validator.
     ///  The actual amount split into the transient stake account is:
-    ///  `lamports + stake_rent_exemption`
+    ///  `satomis + stake_rent_exemption`
     ///  The rent-exemption of the stake account is withdrawn back to the reserve
     ///  after it is merged.
     IncreaseValidatorStake {
-        /// amount of lamports to increase on the given validator
-        lamports: u64,
+        /// amount of satomis to increase on the given validator
+        satomis: u64,
         /// seed used to create transient stake account
         transient_stake_seed: u64,
     },
@@ -332,7 +332,7 @@ pub enum StakePoolInstruction {
     ///   0. `[w]` Stake pool
     ///   1. `[]` Stake pool withdraw authority
     ///   2. `[w]` Reserve stake account, to deposit SOL
-    ///   3. `[s]` Account providing the lamports to be deposited into the pool
+    ///   3. `[s]` Account providing the satomis to be deposited into the pool
     ///   4. `[w]` User account to receive pool tokens
     ///   5. `[w]` Account to receive fee tokens
     ///   6. `[w]` Account to receive a portion of fee as referral fees
@@ -357,7 +357,7 @@ pub enum StakePoolInstruction {
     ///   2. `[s]` User transfer authority, for pool token account
     ///   3. `[w]` User account to burn pool tokens
     ///   4. `[w]` Reserve stake account, to withdraw SOL
-    ///   5. `[w]` Account receiving the lamports from the reserve, must be a system account
+    ///   5. `[w]` Account receiving the satomis from the reserve, must be a system account
     ///   6. `[w]` Account to receive pool fee tokens
     ///   7. `[w]` Pool token mint account
     ///   8. '[]' Clock sysvar
@@ -428,14 +428,14 @@ pub enum StakePoolInstruction {
     /// 11. `[]` Stake Config sysvar
     /// 12. `[]` System program
     /// 13. `[]` Stake program
-    ///  userdata: amount of lamports to increase on the given validator.
+    ///  userdata: amount of satomis to increase on the given validator.
     ///  The actual amount split into the transient stake account is:
-    ///  `lamports + stake_rent_exemption`
+    ///  `satomis + stake_rent_exemption`
     ///  The rent-exemption of the stake account is withdrawn back to the reserve
     ///  after it is merged.
     IncreaseAdditionalValidatorStake {
-        /// amount of lamports to increase on the given validator
-        lamports: u64,
+        /// amount of satomis to increase on the given validator
+        satomis: u64,
         /// seed used to create transient stake account
         transient_stake_seed: u64,
         /// seed used to create ephemeral account.
@@ -450,7 +450,7 @@ pub enum StakePoolInstruction {
     /// ephemeral stake account, deactivates it, then merges or splits it into
     /// the transient stake account delegated to the appropriate validator.
     ///
-    ///  The amount of lamports to move must be at least rent-exemption plus
+    ///  The amount of satomis to move must be at least rent-exemption plus
     /// `max(crate::MINIMUM_ACTIVE_STAKE, domichain_program::stake::tools::get_minimum_delegation())`.
     ///
     ///  0. `[]` Stake pool
@@ -465,8 +465,8 @@ pub enum StakePoolInstruction {
     ///  9. `[]` System program
     /// 10. `[]` Stake program
     DecreaseAdditionalValidatorStake {
-        /// amount of lamports to split into the transient stake account
-        lamports: u64,
+        /// amount of satomis to split into the transient stake account
+        satomis: u64,
         /// seed used to create transient stake account
         transient_stake_seed: u64,
         /// seed used to create ephemeral account.
@@ -487,14 +487,14 @@ pub enum StakePoolInstruction {
     /// The instruction only succeeds if the source transient stake account and
     /// ephemeral stake account do not exist.
     ///
-    /// The amount of lamports to move must be at least twice rent-exemption
+    /// The amount of satomis to move must be at least twice rent-exemption
     /// plus the minimum delegation amount. Rent-exemption is required for the
     /// source transient stake account, and rent-exemption plus minimum delegation
     /// is required for the destination ephemeral stake account.
     ///
     /// The amount that arrives at the destination validator in the end is
-    /// `redelegate_lamports - 2 * rent_exemption` if the destination transient
-    /// account does *not* exist, and `redelegate_lamports - rent_exemption` if
+    /// `redelegate_satomis - 2 * rent_exemption` if the destination transient
+    /// account does *not* exist, and `redelegate_satomis - rent_exemption` if
     /// the destination transient account already exists. One `rent_exemption`
     /// is deactivated with the source transient account during redelegation,
     /// and another `rent_exemption` is deactivated when creating the destination
@@ -516,9 +516,9 @@ pub enum StakePoolInstruction {
     /// 13. `[]` System program
     /// 14. `[]` Stake program
     Redelegate {
-        /// Amount of lamports to redelegate
+        /// Amount of satomis to redelegate
         #[allow(dead_code)] // but it's not
-        lamports: u64,
+        satomis: u64,
         /// Seed used to create source transient stake account
         #[allow(dead_code)] // but it's not
         source_transient_stake_seed: u64,
@@ -557,7 +557,7 @@ pub enum StakePoolInstruction {
     },
 
     ///   Withdraw the token from the pool at the current ratio, specifying a
-    ///   minimum expected output lamport amount.
+    ///   minimum expected output satomi amount.
     ///
     ///   Succeeds if the stake account has enough SOL to cover the desired amount
     ///   of pool tokens, and if the withdrawal keeps the total staked amount
@@ -579,10 +579,10 @@ pub enum StakePoolInstruction {
     ///  12. `[]` Stake program id,
     ///  userdata: amount of pool tokens to withdraw
     WithdrawStakeWithSlippage {
-        /// Pool tokens to burn in exchange for lamports
+        /// Pool tokens to burn in exchange for satomis
         pool_tokens_in: u64,
-        /// Minimum amount of lamports that must be received
-        minimum_lamports_out: u64,
+        /// Minimum amount of satomis that must be received
+        minimum_satomis_out: u64,
     },
 
     ///   Deposit SOL directly into the pool's reserve account, with a specified
@@ -592,7 +592,7 @@ pub enum StakePoolInstruction {
     ///   0. `[w]` Stake pool
     ///   1. `[]` Stake pool withdraw authority
     ///   2. `[w]` Reserve stake account, to deposit SOL
-    ///   3. `[s]` Account providing the lamports to be deposited into the pool
+    ///   3. `[s]` Account providing the satomis to be deposited into the pool
     ///   4. `[w]` User account to receive pool tokens
     ///   5. `[w]` Account to receive fee tokens
     ///   6. `[w]` Account to receive a portion of fee as referral fees
@@ -601,8 +601,8 @@ pub enum StakePoolInstruction {
     ///   9. `[]` Token program id
     ///  10. `[s]` (Optional) Stake pool sol deposit authority.
     DepositSolWithSlippage {
-        /// Amount of lamports to deposit into the reserve
-        lamports_in: u64,
+        /// Amount of satomis to deposit into the reserve
+        satomis_in: u64,
         /// Minimum amount of pool tokens that must be received
         minimum_pool_tokens_out: u64,
     },
@@ -616,7 +616,7 @@ pub enum StakePoolInstruction {
     ///   2. `[s]` User transfer authority, for pool token account
     ///   3. `[w]` User account to burn pool tokens
     ///   4. `[w]` Reserve stake account, to withdraw SOL
-    ///   5. `[w]` Account receiving the lamports from the reserve, must be a system account
+    ///   5. `[w]` Account receiving the satomis from the reserve, must be a system account
     ///   6. `[w]` Account to receive pool fee tokens
     ///   7. `[w]` Pool token mint account
     ///   8. '[]' Clock sysvar
@@ -625,10 +625,10 @@ pub enum StakePoolInstruction {
     ///  11. `[]` Token program id
     ///  12. `[s]` (Optional) Stake pool sol withdraw authority
     WithdrawSolWithSlippage {
-        /// Pool tokens to burn in exchange for lamports
+        /// Pool tokens to burn in exchange for satomis
         pool_tokens_in: u64,
-        /// Minimum amount of lamports that must be received
-        minimum_lamports_out: u64,
+        /// Minimum amount of satomis that must be received
+        minimum_satomis_out: u64,
     },
 }
 
@@ -756,7 +756,7 @@ pub fn decrease_validator_stake(
     validator_list: &Pubkey,
     validator_stake: &Pubkey,
     transient_stake: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     transient_stake_seed: u64,
 ) -> Instruction {
     let accounts = vec![
@@ -775,7 +775,7 @@ pub fn decrease_validator_stake(
         program_id: *program_id,
         accounts,
         data: StakePoolInstruction::DecreaseValidatorStake {
-            lamports,
+            satomis,
             transient_stake_seed,
         }
         .try_to_vec()
@@ -794,7 +794,7 @@ pub fn decrease_additional_validator_stake(
     validator_stake: &Pubkey,
     ephemeral_stake: &Pubkey,
     transient_stake: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     transient_stake_seed: u64,
     ephemeral_stake_seed: u64,
 ) -> Instruction {
@@ -815,7 +815,7 @@ pub fn decrease_additional_validator_stake(
         program_id: *program_id,
         accounts,
         data: StakePoolInstruction::DecreaseAdditionalValidatorStake {
-            lamports,
+            satomis,
             transient_stake_seed,
             ephemeral_stake_seed,
         }
@@ -836,7 +836,7 @@ pub fn increase_validator_stake(
     transient_stake: &Pubkey,
     validator_stake: &Pubkey,
     validator: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     transient_stake_seed: u64,
 ) -> Instruction {
     let accounts = vec![
@@ -859,7 +859,7 @@ pub fn increase_validator_stake(
         program_id: *program_id,
         accounts,
         data: StakePoolInstruction::IncreaseValidatorStake {
-            lamports,
+            satomis,
             transient_stake_seed,
         }
         .try_to_vec()
@@ -880,7 +880,7 @@ pub fn increase_additional_validator_stake(
     transient_stake: &Pubkey,
     validator_stake: &Pubkey,
     validator: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     transient_stake_seed: u64,
     ephemeral_stake_seed: u64,
 ) -> Instruction {
@@ -904,7 +904,7 @@ pub fn increase_additional_validator_stake(
         program_id: *program_id,
         accounts,
         data: StakePoolInstruction::IncreaseAdditionalValidatorStake {
-            lamports,
+            satomis,
             transient_stake_seed,
             ephemeral_stake_seed,
         }
@@ -926,7 +926,7 @@ pub fn redelegate(
     destination_transient_stake: &Pubkey,
     destination_validator_stake: &Pubkey,
     validator: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     source_transient_stake_seed: u64,
     ephemeral_stake_seed: u64,
     destination_transient_stake_seed: u64,
@@ -952,7 +952,7 @@ pub fn redelegate(
         program_id: *program_id,
         accounts,
         data: StakePoolInstruction::Redelegate {
-            lamports,
+            satomis,
             source_transient_stake_seed,
             ephemeral_stake_seed,
             destination_transient_stake_seed,
@@ -1055,7 +1055,7 @@ pub fn increase_validator_stake_with_vote(
     stake_pool: &StakePool,
     stake_pool_address: &Pubkey,
     vote_account_address: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     validator_stake_seed: Option<NonZeroU32>,
     transient_stake_seed: u64,
 ) -> Instruction {
@@ -1084,7 +1084,7 @@ pub fn increase_validator_stake_with_vote(
         &transient_stake_address,
         &validator_stake_address,
         vote_account_address,
-        lamports,
+        satomis,
         transient_stake_seed,
     )
 }
@@ -1096,7 +1096,7 @@ pub fn increase_additional_validator_stake_with_vote(
     stake_pool: &StakePool,
     stake_pool_address: &Pubkey,
     vote_account_address: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     validator_stake_seed: Option<NonZeroU32>,
     transient_stake_seed: u64,
     ephemeral_stake_seed: u64,
@@ -1129,7 +1129,7 @@ pub fn increase_additional_validator_stake_with_vote(
         &transient_stake_address,
         &validator_stake_address,
         vote_account_address,
-        lamports,
+        satomis,
         transient_stake_seed,
         ephemeral_stake_seed,
     )
@@ -1142,7 +1142,7 @@ pub fn decrease_validator_stake_with_vote(
     stake_pool: &StakePool,
     stake_pool_address: &Pubkey,
     vote_account_address: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     validator_stake_seed: Option<NonZeroU32>,
     transient_stake_seed: u64,
 ) -> Instruction {
@@ -1168,7 +1168,7 @@ pub fn decrease_validator_stake_with_vote(
         &stake_pool.validator_list,
         &validator_stake_address,
         &transient_stake_address,
-        lamports,
+        satomis,
         transient_stake_seed,
     )
 }
@@ -1180,7 +1180,7 @@ pub fn decrease_additional_validator_stake_with_vote(
     stake_pool: &StakePool,
     stake_pool_address: &Pubkey,
     vote_account_address: &Pubkey,
-    lamports: u64,
+    satomis: u64,
     validator_stake_seed: Option<NonZeroU32>,
     transient_stake_seed: u64,
     ephemeral_stake_seed: u64,
@@ -1210,7 +1210,7 @@ pub fn decrease_additional_validator_stake_with_vote(
         &validator_stake_address,
         &ephemeral_stake_address,
         &transient_stake_address,
-        lamports,
+        satomis,
         transient_stake_seed,
         ephemeral_stake_seed,
     )
@@ -1639,21 +1639,21 @@ fn deposit_sol_internal(
     stake_pool: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_from: &Pubkey,
+    satomis_from: &Pubkey,
     pool_tokens_to: &Pubkey,
     manager_fee_account: &Pubkey,
     referrer_pool_tokens_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     sol_deposit_authority: Option<&Pubkey>,
-    lamports_in: u64,
+    satomis_in: u64,
     minimum_pool_tokens_out: Option<u64>,
 ) -> Instruction {
     let mut accounts = vec![
         AccountMeta::new(*stake_pool, false),
         AccountMeta::new_readonly(*stake_pool_withdraw_authority, false),
         AccountMeta::new(*reserve_stake_account, false),
-        AccountMeta::new(*lamports_from, true),
+        AccountMeta::new(*satomis_from, true),
         AccountMeta::new(*pool_tokens_to, false),
         AccountMeta::new(*manager_fee_account, false),
         AccountMeta::new(*referrer_pool_tokens_account, false),
@@ -1669,7 +1669,7 @@ fn deposit_sol_internal(
             program_id: *program_id,
             accounts,
             data: StakePoolInstruction::DepositSolWithSlippage {
-                lamports_in,
+                satomis_in,
                 minimum_pool_tokens_out,
             }
             .try_to_vec()
@@ -1679,7 +1679,7 @@ fn deposit_sol_internal(
         Instruction {
             program_id: *program_id,
             accounts,
-            data: StakePoolInstruction::DepositSol(lamports_in)
+            data: StakePoolInstruction::DepositSol(satomis_in)
                 .try_to_vec()
                 .unwrap(),
         }
@@ -1692,27 +1692,27 @@ pub fn deposit_sol(
     stake_pool: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_from: &Pubkey,
+    satomis_from: &Pubkey,
     pool_tokens_to: &Pubkey,
     manager_fee_account: &Pubkey,
     referrer_pool_tokens_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
-    lamports_in: u64,
+    satomis_in: u64,
 ) -> Instruction {
     deposit_sol_internal(
         program_id,
         stake_pool,
         stake_pool_withdraw_authority,
         reserve_stake_account,
-        lamports_from,
+        satomis_from,
         pool_tokens_to,
         manager_fee_account,
         referrer_pool_tokens_account,
         pool_mint,
         token_program_id,
         None,
-        lamports_in,
+        satomis_in,
         None,
     )
 }
@@ -1723,13 +1723,13 @@ pub fn deposit_sol_with_slippage(
     stake_pool: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_from: &Pubkey,
+    satomis_from: &Pubkey,
     pool_tokens_to: &Pubkey,
     manager_fee_account: &Pubkey,
     referrer_pool_tokens_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
-    lamports_in: u64,
+    satomis_in: u64,
     minimum_pool_tokens_out: u64,
 ) -> Instruction {
     deposit_sol_internal(
@@ -1737,14 +1737,14 @@ pub fn deposit_sol_with_slippage(
         stake_pool,
         stake_pool_withdraw_authority,
         reserve_stake_account,
-        lamports_from,
+        satomis_from,
         pool_tokens_to,
         manager_fee_account,
         referrer_pool_tokens_account,
         pool_mint,
         token_program_id,
         None,
-        lamports_in,
+        satomis_in,
         Some(minimum_pool_tokens_out),
     )
 }
@@ -1758,27 +1758,27 @@ pub fn deposit_sol_with_authority(
     sol_deposit_authority: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_from: &Pubkey,
+    satomis_from: &Pubkey,
     pool_tokens_to: &Pubkey,
     manager_fee_account: &Pubkey,
     referrer_pool_tokens_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
-    lamports_in: u64,
+    satomis_in: u64,
 ) -> Instruction {
     deposit_sol_internal(
         program_id,
         stake_pool,
         stake_pool_withdraw_authority,
         reserve_stake_account,
-        lamports_from,
+        satomis_from,
         pool_tokens_to,
         manager_fee_account,
         referrer_pool_tokens_account,
         pool_mint,
         token_program_id,
         Some(sol_deposit_authority),
-        lamports_in,
+        satomis_in,
         None,
     )
 }
@@ -1790,13 +1790,13 @@ pub fn deposit_sol_with_authority_and_slippage(
     sol_deposit_authority: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_from: &Pubkey,
+    satomis_from: &Pubkey,
     pool_tokens_to: &Pubkey,
     manager_fee_account: &Pubkey,
     referrer_pool_tokens_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
-    lamports_in: u64,
+    satomis_in: u64,
     minimum_pool_tokens_out: u64,
 ) -> Instruction {
     deposit_sol_internal(
@@ -1804,14 +1804,14 @@ pub fn deposit_sol_with_authority_and_slippage(
         stake_pool,
         stake_pool_withdraw_authority,
         reserve_stake_account,
-        lamports_from,
+        satomis_from,
         pool_tokens_to,
         manager_fee_account,
         referrer_pool_tokens_account,
         pool_mint,
         token_program_id,
         Some(sol_deposit_authority),
-        lamports_in,
+        satomis_in,
         Some(minimum_pool_tokens_out),
     )
 }
@@ -1830,7 +1830,7 @@ fn withdraw_stake_internal(
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     pool_tokens_in: u64,
-    minimum_lamports_out: Option<u64>,
+    minimum_satomis_out: Option<u64>,
 ) -> Instruction {
     let accounts = vec![
         AccountMeta::new(*stake_pool, false),
@@ -1847,13 +1847,13 @@ fn withdraw_stake_internal(
         AccountMeta::new_readonly(*token_program_id, false),
         AccountMeta::new_readonly(stake::program::id(), false),
     ];
-    if let Some(minimum_lamports_out) = minimum_lamports_out {
+    if let Some(minimum_satomis_out) = minimum_satomis_out {
         Instruction {
             program_id: *program_id,
             accounts,
             data: StakePoolInstruction::WithdrawStakeWithSlippage {
                 pool_tokens_in,
-                minimum_lamports_out,
+                minimum_satomis_out,
             }
             .try_to_vec()
             .unwrap(),
@@ -1918,7 +1918,7 @@ pub fn withdraw_stake_with_slippage(
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     pool_tokens_in: u64,
-    minimum_lamports_out: u64,
+    minimum_satomis_out: u64,
 ) -> Instruction {
     withdraw_stake_internal(
         program_id,
@@ -1934,7 +1934,7 @@ pub fn withdraw_stake_with_slippage(
         pool_mint,
         token_program_id,
         pool_tokens_in,
-        Some(minimum_lamports_out),
+        Some(minimum_satomis_out),
     )
 }
 
@@ -1945,13 +1945,13 @@ fn withdraw_sol_internal(
     user_transfer_authority: &Pubkey,
     pool_tokens_from: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_to: &Pubkey,
+    satomis_to: &Pubkey,
     manager_fee_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     sol_withdraw_authority: Option<&Pubkey>,
     pool_tokens_in: u64,
-    minimum_lamports_out: Option<u64>,
+    minimum_satomis_out: Option<u64>,
 ) -> Instruction {
     let mut accounts = vec![
         AccountMeta::new(*stake_pool, false),
@@ -1959,7 +1959,7 @@ fn withdraw_sol_internal(
         AccountMeta::new_readonly(*user_transfer_authority, true),
         AccountMeta::new(*pool_tokens_from, false),
         AccountMeta::new(*reserve_stake_account, false),
-        AccountMeta::new(*lamports_to, false),
+        AccountMeta::new(*satomis_to, false),
         AccountMeta::new(*manager_fee_account, false),
         AccountMeta::new(*pool_mint, false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
@@ -1970,13 +1970,13 @@ fn withdraw_sol_internal(
     if let Some(sol_withdraw_authority) = sol_withdraw_authority {
         accounts.push(AccountMeta::new_readonly(*sol_withdraw_authority, true));
     }
-    if let Some(minimum_lamports_out) = minimum_lamports_out {
+    if let Some(minimum_satomis_out) = minimum_satomis_out {
         Instruction {
             program_id: *program_id,
             accounts,
             data: StakePoolInstruction::WithdrawSolWithSlippage {
                 pool_tokens_in,
-                minimum_lamports_out,
+                minimum_satomis_out,
             }
             .try_to_vec()
             .unwrap(),
@@ -2000,7 +2000,7 @@ pub fn withdraw_sol(
     user_transfer_authority: &Pubkey,
     pool_tokens_from: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_to: &Pubkey,
+    satomis_to: &Pubkey,
     manager_fee_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
@@ -2013,7 +2013,7 @@ pub fn withdraw_sol(
         user_transfer_authority,
         pool_tokens_from,
         reserve_stake_account,
-        lamports_to,
+        satomis_to,
         manager_fee_account,
         pool_mint,
         token_program_id,
@@ -2032,12 +2032,12 @@ pub fn withdraw_sol_with_slippage(
     user_transfer_authority: &Pubkey,
     pool_tokens_from: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_to: &Pubkey,
+    satomis_to: &Pubkey,
     manager_fee_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     pool_tokens_in: u64,
-    minimum_lamports_out: u64,
+    minimum_satomis_out: u64,
 ) -> Instruction {
     withdraw_sol_internal(
         program_id,
@@ -2046,13 +2046,13 @@ pub fn withdraw_sol_with_slippage(
         user_transfer_authority,
         pool_tokens_from,
         reserve_stake_account,
-        lamports_to,
+        satomis_to,
         manager_fee_account,
         pool_mint,
         token_program_id,
         None,
         pool_tokens_in,
-        Some(minimum_lamports_out),
+        Some(minimum_satomis_out),
     )
 }
 
@@ -2067,7 +2067,7 @@ pub fn withdraw_sol_with_authority(
     user_transfer_authority: &Pubkey,
     pool_tokens_from: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_to: &Pubkey,
+    satomis_to: &Pubkey,
     manager_fee_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
@@ -2080,7 +2080,7 @@ pub fn withdraw_sol_with_authority(
         user_transfer_authority,
         pool_tokens_from,
         reserve_stake_account,
-        lamports_to,
+        satomis_to,
         manager_fee_account,
         pool_mint,
         token_program_id,
@@ -2102,12 +2102,12 @@ pub fn withdraw_sol_with_authority_and_slippage(
     user_transfer_authority: &Pubkey,
     pool_tokens_from: &Pubkey,
     reserve_stake_account: &Pubkey,
-    lamports_to: &Pubkey,
+    satomis_to: &Pubkey,
     manager_fee_account: &Pubkey,
     pool_mint: &Pubkey,
     token_program_id: &Pubkey,
     pool_tokens_in: u64,
-    minimum_lamports_out: u64,
+    minimum_satomis_out: u64,
 ) -> Instruction {
     withdraw_sol_internal(
         program_id,
@@ -2116,13 +2116,13 @@ pub fn withdraw_sol_with_authority_and_slippage(
         user_transfer_authority,
         pool_tokens_from,
         reserve_stake_account,
-        lamports_to,
+        satomis_to,
         manager_fee_account,
         pool_mint,
         token_program_id,
         Some(sol_withdraw_authority),
         pool_tokens_in,
-        Some(minimum_lamports_out),
+        Some(minimum_satomis_out),
     )
 }
 

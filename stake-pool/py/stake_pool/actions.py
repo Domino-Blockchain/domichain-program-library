@@ -16,7 +16,7 @@ import stake.instructions as st
 from stake.state import StakeAuthorize
 from stake_pool.constants import \
     MAX_VALIDATORS_TO_UPDATE, \
-    MINIMUM_RESERVE_LAMPORTS, \
+    MINIMUM_RESERVE_SATOMIS, \
     STAKE_POOL_PROGRAM_ID, \
     find_stake_program_address, \
     find_transient_stake_program_address, \
@@ -40,7 +40,7 @@ async def create(client: AsyncClient, manager: Keypair,
             sys.CreateAccountParams(
                 from_pubkey=manager.public_key,
                 new_account_pubkey=stake_pool.public_key,
-                lamports=pool_balance,
+                satomis=pool_balance,
                 space=STAKE_POOL_LAYOUT.sizeof(),
                 program_id=STAKE_POOL_PROGRAM_ID,
             )
@@ -55,7 +55,7 @@ async def create(client: AsyncClient, manager: Keypair,
             sys.CreateAccountParams(
                 from_pubkey=manager.public_key,
                 new_account_pubkey=validator_list.public_key,
-                lamports=validator_list_balance,
+                satomis=validator_list_balance,
                 space=validator_list_size,
                 program_id=STAKE_POOL_PROGRAM_ID,
             )
@@ -101,7 +101,7 @@ async def create_all(
         STAKE_POOL_PROGRAM_ID, stake_pool.public_key)
 
     reserve_stake = Keypair()
-    await create_stake(client, manager, reserve_stake, pool_withdraw_authority, MINIMUM_RESERVE_LAMPORTS)
+    await create_stake(client, manager, reserve_stake, pool_withdraw_authority, MINIMUM_RESERVE_SATOMIS)
 
     pool_mint = Keypair()
     await create_mint(client, manager, pool_mint, pool_withdraw_authority)
@@ -355,7 +355,7 @@ async def withdraw_stake(
             sys.CreateAccountParams(
                 from_pubkey=payer.public_key,
                 new_account_pubkey=destination_stake.public_key,
-                lamports=stake_rent_exemption,
+                satomis=stake_rent_exemption,
                 space=STAKE_LEN,
                 program_id=STAKE_PROGRAM_ID,
             )
@@ -479,7 +479,7 @@ async def update_stake_pool(client: AsyncClient, payer: Keypair, stake_pool_addr
 
 async def increase_validator_stake(
     client: AsyncClient, payer: Keypair, staker: Keypair, stake_pool_address: PublicKey,
-    validator_vote: PublicKey, lamports: int
+    validator_vote: PublicKey, satomis: int
 ):
     resp = await client.get_account_info(stake_pool_address, commitment=Confirmed)
     data = resp['result']['value']['data']
@@ -525,7 +525,7 @@ async def increase_validator_stake(
                 stake_config_sysvar=SYSVAR_STAKE_CONFIG_ID,
                 system_program_id=sys.SYS_PROGRAM_ID,
                 stake_program_id=STAKE_PROGRAM_ID,
-                lamports=lamports,
+                satomis=satomis,
                 transient_stake_seed=transient_stake_seed,
             )
         )
@@ -538,7 +538,7 @@ async def increase_validator_stake(
 
 async def decrease_validator_stake(
     client: AsyncClient, payer: Keypair, staker: Keypair, stake_pool_address: PublicKey,
-    validator_vote: PublicKey, lamports: int
+    validator_vote: PublicKey, satomis: int
 ):
     resp = await client.get_account_info(stake_pool_address, commitment=Confirmed)
     data = resp['result']['value']['data']
@@ -580,7 +580,7 @@ async def decrease_validator_stake(
                 rent_sysvar=SYSVAR_RENT_PUBKEY,
                 system_program_id=sys.SYS_PROGRAM_ID,
                 stake_program_id=STAKE_PROGRAM_ID,
-                lamports=lamports,
+                satomis=satomis,
                 transient_stake_seed=transient_stake_seed,
             )
         )
