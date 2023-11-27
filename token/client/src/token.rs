@@ -1,7 +1,7 @@
 use {
     crate::client::{ProgramClient, ProgramClientError, SendTransaction},
     domichain_program_test::tokio::time,
-    solana_sdk::{
+    domichain_sdk::{
         account::Account as BaseAccount,
         hash::Hash,
         instruction::Instruction,
@@ -25,7 +25,7 @@ use {
         },
         instruction,
         pod::EncryptionPubkey,
-        solana_zk_token_sdk::errors::ProofError,
+        domichain_zk_token_sdk::errors::ProofError,
         state::{Account, AccountState, Mint, Multisig},
     },
     std::{
@@ -37,8 +37,8 @@ use {
 };
 #[cfg(feature = "proof-program")]
 use {
-    solana_sdk::epoch_info::EpochInfo,
-    spl_token_2022::solana_zk_token_sdk::{
+    domichain_sdk::epoch_info::EpochInfo,
+    spl_token_2022::domichain_zk_token_sdk::{
         encryption::{auth_encryption::*, elgamal::*},
         instruction::transfer_with_fee::FeeParameters,
     },

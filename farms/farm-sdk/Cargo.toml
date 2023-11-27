@@ -37,5 +37,5 @@ ahash = "0.7.6"
 domichain-program = { path = "../../../domichain/sdk/program" }
 
 [dev-dependencies]
-solana-program-test = "1.9.18"
+domichain-program-test = { path = "../../../domichain/program-test" }
 

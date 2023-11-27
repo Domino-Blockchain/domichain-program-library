@@ -1,16 +1,16 @@
 use crate::{signers_of, Error, MULTISIG_SIGNER_ARG};
 use clap::ArgMatches;
-use solana_clap_utils::{
+use domichain_clap_utils::{
     input_parsers::{pubkey_of_signer, value_of},
     input_validators::normalize_to_url_if_moniker,
     keypair::{signer_from_path, signer_from_path_with_config, SignerFromPathConfig},
     nonce::{NONCE_ARG, NONCE_AUTHORITY_ARG},
     offline::{BLOCKHASH_ARG, DUMP_TRANSACTION_MESSAGE, SIGN_ONLY_ARG},
 };
-use solana_cli_output::OutputFormat;
-use solana_client::nonblocking::rpc_client::RpcClient;
-use solana_remote_wallet::remote_wallet::RemoteWalletManager;
-use solana_sdk::{
+use domichain_cli_output::OutputFormat;
+use domichain_client::nonblocking::rpc_client::RpcClient;
+use domichain_remote_wallet::remote_wallet::RemoteWalletManager;
+use domichain_sdk::{
     account::Account as RawAccount, commitment_config::CommitmentConfig, pubkey::Pubkey,
     signature::Signer,
 };
@@ -54,21 +54,21 @@ impl<'a> Config<'a> {
         multisigner_ids: &'a mut Vec<Pubkey>,
     ) -> Config<'a> {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_else(|_| {
+            domichain_cli_config::Config::load(config_file).unwrap_or_else(|_| {
                 eprintln!("error: Could not find config file `{}`", config_file);
                 exit(1);
             })
-        } else if let Some(config_file) = &*solana_cli_config::CONFIG_FILE {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+        } else if let Some(config_file) = &*domichain_cli_config::CONFIG_FILE {
+            domichain_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
         let json_rpc_url = normalize_to_url_if_moniker(
             matches
                 .value_of("json_rpc_url")
                 .unwrap_or(&cli_config.json_rpc_url),
         );
-        let websocket_url = solana_cli_config::Config::compute_websocket_url(&json_rpc_url);
+        let websocket_url = domichain_cli_config::Config::compute_websocket_url(&json_rpc_url);
         let rpc_client = Arc::new(RpcClient::new_with_commitment(
             json_rpc_url,
             CommitmentConfig::confirmed(),
@@ -128,14 +128,14 @@ impl<'a> Config<'a> {
         websocket_url: String,
     ) -> Config<'a> {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_else(|_| {
+            domichain_cli_config::Config::load(config_file).unwrap_or_else(|_| {
                 eprintln!("error: Could not find config file `{}`", config_file);
                 exit(1);
             })
-        } else if let Some(config_file) = &*solana_cli_config::CONFIG_FILE {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+        } else if let Some(config_file) = &*domichain_cli_config::CONFIG_FILE {
+            domichain_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
         let multisigner_pubkeys =
             Self::extract_multisig_signers(matches, wallet_manager, bulk_signers, multisigner_ids);

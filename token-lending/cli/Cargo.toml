@@ -10,11 +10,11 @@ version = "0.2.0"
 
 [dependencies]
 clap = "2.33.3"
-solana-clap-utils = "=1.14.12"
-solana-cli-config = "=1.14.12"
-solana-client = "=1.14.12"
-solana-logger = "=1.14.12"
-solana-sdk = "=1.14.12"
+domichain-clap-utils = { path = "../../../domichain/clap-utils" }
+domichain-cli-config = { path = "../../../domichain/cli-config" }
+domichain-client = { path = "../../../domichain/client" }
+domichain-logger = { path = "../../../domichain/logger" }
+domichain-sdk = { path = "../../../domichain/sdk" }
 domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token-lending = { version = "0.2", path="../program", features = [ "no-entrypoint" ] }
 spl-token = { version = "3.5", path="../../token/program", features = [ "no-entrypoint" ]  }

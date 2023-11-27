@@ -4,11 +4,11 @@ use clap::{
     ArgMatches, SubCommand,
 };
 use serde::Serialize;
-use solana_account_decoder::{
+use domichain_account_decoder::{
     parse_token::{get_token_account_mint, parse_token, TokenAccountType, UiAccountState},
     UiAccountData,
 };
-use solana_clap_utils::{
+use domichain_clap_utils::{
     fee_payer::fee_payer_arg,
     input_parsers::{pubkey_of_signer, pubkeys_of_multiple_signers, value_of},
     input_validators::{
@@ -21,13 +21,13 @@ use solana_clap_utils::{
     offline::{self, *},
     ArgConstant,
 };
-use solana_cli_output::{
+use domichain_cli_output::{
     return_signers_data, CliSignOnlyData, CliSignature, OutputFormat, QuietDisplay,
     ReturnSignersConfig, VerboseDisplay,
 };
-use solana_client::rpc_request::TokenAccountsFilter;
-use solana_remote_wallet::remote_wallet::RemoteWalletManager;
-use solana_sdk::{
+use domichain_client::rpc_request::TokenAccountsFilter;
+use domichain_remote_wallet::remote_wallet::RemoteWalletManager;
+use domichain_sdk::{
     native_token::*,
     program_option::COption,
     pubkey::Pubkey,
@@ -305,8 +305,8 @@ pub(crate) async fn check_fee_payer_balance(
         Err(format!(
             "Fee payer, {}, has insufficient balance: {} required, {} available",
             config.fee_payer()?.pubkey(),
-            satomis_to_sol(required_balance),
-            satomis_to_sol(balance)
+            satomis_to_domi(required_balance),
+            satomis_to_domi(balance)
         )
         .into())
     } else {
@@ -324,8 +324,8 @@ async fn check_wallet_balance(
         Err(format!(
             "Wallet {}, has insufficient balance: {} required, {} available",
             wallet,
-            satomis_to_sol(required_balance),
-            satomis_to_sol(balance)
+            satomis_to_domi(required_balance),
+            satomis_to_domi(balance)
         )
         .into())
     } else {
@@ -1387,7 +1387,7 @@ async fn command_wrap(
     immutable_owner: bool,
     bulk_signers: BulkSigners,
 ) -> CommandResult {
-    let satomis = sol_to_satomis(sol);
+    let satomis = domi_to_satomis(sol);
     let token = native_token_client_from_config(config)?;
 
     let account =
@@ -1470,7 +1470,7 @@ async fn command_unwrap(
 
         println_display(
             config,
-            format!("  Amount: {} SOL", satomis_to_sol(account_data.satomis)),
+            format!("  Amount: {} SOL", satomis_to_domi(account_data.satomis)),
         );
     }
 
@@ -3577,7 +3577,7 @@ async fn main() -> Result<(), Error> {
     )
     .await;
 
-    solana_logger::setup_with_default("solana=info");
+    domichain_logger::setup_with_default("solana=info");
     let result =
         process_command(&sub_command, matches, &config, wallet_manager, bulk_signers).await?;
     println!("{}", result);
@@ -4307,7 +4307,7 @@ mod tests {
     use {
         super::*,
         serial_test::serial,
-        solana_sdk::{
+        domichain_sdk::{
             bpf_loader,
             hash::Hash,
             program_pack::Pack,
@@ -4315,7 +4315,7 @@ mod tests {
             system_instruction,
             transaction::Transaction,
         },
-        solana_test_validator::{ProgramInfo, TestValidator, TestValidatorGenesis},
+        domichain_test_validator::{ProgramInfo, TestValidator, TestValidatorGenesis},
         spl_token_2022::{extension::non_transferable::NonTransferable, state::Multisig},
         spl_token_client::client::{
             ProgramClient, ProgramOfflineClient, ProgramRpcClient, ProgramRpcClientSendTransaction,
@@ -4331,7 +4331,7 @@ mod tests {
     const TEST_DECIMALS: u8 = 0;
 
     async fn new_validator_for_test() -> (TestValidator, Keypair) {
-        solana_logger::setup();
+        domichain_logger::setup();
         let mut test_validator_genesis = TestValidatorGenesis::default();
         test_validator_genesis.add_programs_with_path(&[
             ProgramInfo {
@@ -4411,7 +4411,7 @@ mod tests {
 
         let nonce_rent = config
             .rpc_client
-            .get_minimum_balance_for_rent_exemption(solana_sdk::nonce::State::size())
+            .get_minimum_balance_for_rent_exemption(domichain_sdk::nonce::State::size())
             .await
             .unwrap();
         let instr = system_instruction::create_nonce_account(
