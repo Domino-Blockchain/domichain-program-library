@@ -1393,7 +1393,7 @@ async fn command_wrap(
     let account =
         wrapped_sol_account.unwrap_or_else(|| token.get_associated_token_address(&wallet_address));
 
-    println_display(config, format!("Wrapping {} SOL into {}", sol, account));
+    println_display(config, format!("Wrapping {} DOMI into {}", sol, account));
 
     if !config.sign_only {
         if let Some(account_data) = config.program_client.get_account(account).await? {
@@ -1462,15 +1462,15 @@ async fn command_unwrap(
 
         if account_data.satomis == 0 {
             if use_associated_account {
-                return Err("No wrapped SOL in associated account; did you mean to specify an auxiliary address?".to_string().into());
+                return Err("No wrapped DOMI in associated account; did you mean to specify an auxiliary address?".to_string().into());
             } else {
-                return Err(format!("No wrapped SOL in {}", account).into());
+                return Err(format!("No wrapped DOMI in {}", account).into());
             }
         }
 
         println_display(
             config,
-            format!("  Amount: {} SOL", satomis_to_domi(account_data.satomis)),
+            format!("  Amount: {} DOMI", satomis_to_domi(account_data.satomis)),
         );
     }
 
@@ -2952,7 +2952,7 @@ fn app<'a, 'b>(
         )
         .subcommand(
             SubCommand::with_name(CommandName::Wrap.into())
-                .about("Wrap native SOL in a SOL token account")
+                .about("Wrap native DOMI in a DOMI token account")
                 .arg(
                     Arg::with_name("amount")
                         .validator(is_amount)
@@ -2960,7 +2960,7 @@ fn app<'a, 'b>(
                         .takes_value(true)
                         .index(1)
                         .required(true)
-                        .help("Amount of SOL to wrap"),
+                        .help("Amount of DOMI to wrap"),
                 )
                 .arg(
                     Arg::with_name("wallet_keypair")
@@ -2969,8 +2969,8 @@ fn app<'a, 'b>(
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .help(
-                            "Specify the keypair for the wallet which will have its native SOL wrapped. \
-                             This wallet will be assigned as the owner of the wrapped SOL token account. \
+                            "Specify the keypair for the wallet which will have its native DOMI wrapped. \
+                             This wallet will be assigned as the owner of the wrapped DOMI token account. \
                              This may be a keypair file or the ASK keyword. \
                              Defaults to the client keypair."
                         ),
@@ -2979,7 +2979,7 @@ fn app<'a, 'b>(
                     Arg::with_name("create_aux_account")
                         .takes_value(false)
                         .long("create-aux-account")
-                        .help("Wrap SOL in an auxiliary account instead of associated token account"),
+                        .help("Wrap DOMI in an auxiliary account instead of associated token account"),
                 )
                 .arg(
                     Arg::with_name("immutable")
@@ -2994,7 +2994,7 @@ fn app<'a, 'b>(
         )
         .subcommand(
             SubCommand::with_name(CommandName::Unwrap.into())
-                .about("Unwrap a SOL token account")
+                .about("Unwrap a DOMI token account")
                 .arg(
                     Arg::with_name("account")
                         .validator(is_valid_pubkey)
@@ -3011,8 +3011,8 @@ fn app<'a, 'b>(
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .help(
-                            "Specify the keypair for the wallet which owns the wrapped SOL. \
-                             This wallet will receive the unwrapped SOL. \
+                            "Specify the keypair for the wallet which owns the wrapped DOMI. \
+                             This wallet will receive the unwrapped DOMI. \
                              This may be a keypair file or the ASK keyword. \
                              Defaults to the client keypair."
                         ),
@@ -3098,7 +3098,7 @@ fn app<'a, 'b>(
                         .validator(is_valid_pubkey)
                         .value_name("REFUND_ACCOUNT_ADDRESS")
                         .takes_value(true)
-                        .help("The address of the account to receive remaining SOL [default: --owner]"),
+                        .help("The address of the account to receive remaining DOMI [default: --owner]"),
                 )
                 .arg(
                     Arg::with_name("close_authority")
@@ -3146,7 +3146,7 @@ fn app<'a, 'b>(
                         .validator(is_valid_pubkey)
                         .value_name("REFUND_ACCOUNT_ADDRESS")
                         .takes_value(true)
-                        .help("The address of the account to receive remaining SOL [default: --owner]"),
+                        .help("The address of the account to receive remaining DOMI [default: --owner]"),
                 )
                 .arg(
                     Arg::with_name("close_authority")
@@ -3331,12 +3331,12 @@ fn app<'a, 'b>(
                     Arg::with_name("close_empty_associated_accounts")
                     .long("close-empty-associated-accounts")
                     .takes_value(false)
-                    .help("close all empty associated token accounts (to get SOL back)")
+                    .help("close all empty associated token accounts (to get DOMI back)")
                 )
         )
         .subcommand(
             SubCommand::with_name(CommandName::SyncNative.into())
-                .about("Sync a native SOL token account to its underlying satomis")
+                .about("Sync a native DOMI token account to its underlying satomis")
                 .arg(
                     owner_address_arg()
                         .index(1)
