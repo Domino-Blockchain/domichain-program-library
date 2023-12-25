@@ -13,7 +13,7 @@ domichain-program = { path = "../../../domichain/sdk/program" }
 thiserror = "1.0"
 spl-token = {version = "3.1.1", path = "../../token/program", features = ["no-entrypoint"]}
 arrayref = "0.3.6"
-borsh = "0.9"
+borsh = "0.10.3"
 uint = "0.9"
 
 [lib]

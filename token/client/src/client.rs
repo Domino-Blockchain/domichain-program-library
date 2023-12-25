@@ -1,8 +1,8 @@
 use {
     async_trait::async_trait,
-    solana_client::nonblocking::rpc_client::RpcClient,
+    domichain_client::nonblocking::rpc_client::RpcClient,
     domichain_program_test::{tokio::sync::Mutex, BanksClient, ProgramTestContext},
-    solana_sdk::{
+    domichain_sdk::{
         account::Account, hash::Hash, pubkey::Pubkey, signature::Signature,
         transaction::Transaction,
     },
@@ -118,7 +118,7 @@ enum ProgramBanksClientContext {
     Context(Arc<Mutex<ProgramTestContext>>),
 }
 
-/// Program client for `BanksClient` from crate `solana-program-test`.
+/// Program client for `BanksClient` from crate `domichain-program-test`.
 pub struct ProgramBanksClient<ST> {
     context: ProgramBanksClientContext,
     send: ST,
@@ -201,7 +201,7 @@ where
     }
 }
 
-/// Program client for `RpcClient` from crate `solana-client`.
+/// Program client for `RpcClient` from crate `domichain-client`.
 pub struct ProgramRpcClient<ST> {
     client: Arc<RpcClient>,
     send: ST,

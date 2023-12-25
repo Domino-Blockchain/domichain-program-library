@@ -1,6 +1,6 @@
 #![cfg(feature = "display")]
 
-use {crate::client::RpcClientResponse, solana_cli_output::display::writeln_transaction, std::fmt};
+use {crate::client::RpcClientResponse, domichain_cli_output::display::writeln_transaction, std::fmt};
 
 impl fmt::Display for RpcClientResponse {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -18,7 +18,7 @@ impl fmt::Display for RpcClientResponse {
 mod tests {
     use {
         super::*,
-        solana_sdk::{
+        domichain_sdk::{
             hash::Hash,
             pubkey::Pubkey,
             signature::{Signature, Signer, SIGNATURE_BYTES},

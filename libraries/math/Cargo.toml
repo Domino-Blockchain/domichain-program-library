@@ -12,8 +12,8 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-borsh = "0.9"
-borsh-derive = "0.9.0"
+borsh = "0.10.3"
+borsh-derive = "0.10.3"
 num-derive = "0.3"
 num-traits = "0.2"
 domichain-program = { path = "../../../domichain/sdk/program" }

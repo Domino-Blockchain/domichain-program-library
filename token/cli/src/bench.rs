@@ -2,17 +2,17 @@
 use {
     crate::{config::Config, owner_address_arg, CommandResult, Error},
     clap::{value_t_or_exit, App, AppSettings, Arg, ArgMatches, SubCommand},
-    solana_clap_utils::{
+    domichain_clap_utils::{
         input_parsers::pubkey_of_signer,
         input_validators::{is_amount, is_parsable, is_valid_pubkey},
     },
-    solana_client::{
+    domichain_client::{
         nonblocking::rpc_client::RpcClient, rpc_client::RpcClient as BlockingRpcClient,
         tpu_client::TpuClient, tpu_client::TpuClientConfig,
     },
-    solana_remote_wallet::remote_wallet::RemoteWalletManager,
-    solana_sdk::{
-        message::Message, native_token::Sol, program_pack::Pack, pubkey::Pubkey, signature::Signer,
+    domichain_remote_wallet::remote_wallet::RemoteWalletManager,
+    domichain_sdk::{
+        message::Message, native_token::Domi, program_pack::Pack, pubkey::Pubkey, signature::Signer,
         system_instruction,
     },
     spl_associated_token_account::*,
@@ -446,7 +446,7 @@ async fn send_messages(
     println!(
         "Sending {:?} messages for ~{}",
         messages.len(),
-        Sol(satomis_required)
+        Domi(satomis_required)
     );
 
     crate::check_fee_payer_balance(config, satomis_required).await?;

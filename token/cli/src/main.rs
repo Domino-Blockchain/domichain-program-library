@@ -4,11 +4,11 @@ use clap::{
     ArgMatches, SubCommand,
 };
 use serde::Serialize;
-use solana_account_decoder::{
+use domichain_account_decoder::{
     parse_token::{get_token_account_mint, parse_token, TokenAccountType, UiAccountState},
     UiAccountData,
 };
-use solana_clap_utils::{
+use domichain_clap_utils::{
     fee_payer::fee_payer_arg,
     input_parsers::{pubkey_of_signer, pubkeys_of_multiple_signers, value_of},
     input_validators::{
@@ -21,13 +21,13 @@ use solana_clap_utils::{
     offline::{self, *},
     ArgConstant,
 };
-use solana_cli_output::{
+use domichain_cli_output::{
     return_signers_data, CliSignOnlyData, CliSignature, OutputFormat, QuietDisplay,
     ReturnSignersConfig, VerboseDisplay,
 };
-use solana_client::rpc_request::TokenAccountsFilter;
-use solana_remote_wallet::remote_wallet::RemoteWalletManager;
-use solana_sdk::{
+use domichain_client::rpc_request::TokenAccountsFilter;
+use domichain_remote_wallet::remote_wallet::RemoteWalletManager;
+use domichain_sdk::{
     native_token::*,
     program_option::COption,
     pubkey::Pubkey,
@@ -305,8 +305,8 @@ pub(crate) async fn check_fee_payer_balance(
         Err(format!(
             "Fee payer, {}, has insufficient balance: {} required, {} available",
             config.fee_payer()?.pubkey(),
-            satomis_to_sol(required_balance),
-            satomis_to_sol(balance)
+            satomis_to_domi(required_balance),
+            satomis_to_domi(balance)
         )
         .into())
     } else {
@@ -324,8 +324,8 @@ async fn check_wallet_balance(
         Err(format!(
             "Wallet {}, has insufficient balance: {} required, {} available",
             wallet,
-            satomis_to_sol(required_balance),
-            satomis_to_sol(balance)
+            satomis_to_domi(required_balance),
+            satomis_to_domi(balance)
         )
         .into())
     } else {
@@ -1387,13 +1387,13 @@ async fn command_wrap(
     immutable_owner: bool,
     bulk_signers: BulkSigners,
 ) -> CommandResult {
-    let satomis = sol_to_satomis(sol);
+    let satomis = domi_to_satomis(sol);
     let token = native_token_client_from_config(config)?;
 
     let account =
         wrapped_sol_account.unwrap_or_else(|| token.get_associated_token_address(&wallet_address));
 
-    println_display(config, format!("Wrapping {} SOL into {}", sol, account));
+    println_display(config, format!("Wrapping {} DOMI into {}", sol, account));
 
     if !config.sign_only {
         if let Some(account_data) = config.program_client.get_account(account).await? {
@@ -1462,15 +1462,15 @@ async fn command_unwrap(
 
         if account_data.satomis == 0 {
             if use_associated_account {
-                return Err("No wrapped SOL in associated account; did you mean to specify an auxiliary address?".to_string().into());
+                return Err("No wrapped DOMI in associated account; did you mean to specify an auxiliary address?".to_string().into());
             } else {
-                return Err(format!("No wrapped SOL in {}", account).into());
+                return Err(format!("No wrapped DOMI in {}", account).into());
             }
         }
 
         println_display(
             config,
-            format!("  Amount: {} SOL", satomis_to_sol(account_data.satomis)),
+            format!("  Amount: {} DOMI", satomis_to_domi(account_data.satomis)),
         );
     }
 
@@ -2413,7 +2413,7 @@ fn app<'a, 'b>(
                 .global(true)
                 .validator(is_url_or_moniker)
                 .help(
-                    "URL for Solana's JSON RPC or moniker (or their first letter): \
+                    "URL for Domichain's JSON RPC or moniker (or their first letter): \
                        [mainnet-beta, testnet, devnet, localhost] \
                     Default from the configuration file."
                 ),
@@ -2952,7 +2952,7 @@ fn app<'a, 'b>(
         )
         .subcommand(
             SubCommand::with_name(CommandName::Wrap.into())
-                .about("Wrap native SOL in a SOL token account")
+                .about("Wrap native DOMI in a DOMI token account")
                 .arg(
                     Arg::with_name("amount")
                         .validator(is_amount)
@@ -2960,7 +2960,7 @@ fn app<'a, 'b>(
                         .takes_value(true)
                         .index(1)
                         .required(true)
-                        .help("Amount of SOL to wrap"),
+                        .help("Amount of DOMI to wrap"),
                 )
                 .arg(
                     Arg::with_name("wallet_keypair")
@@ -2969,8 +2969,8 @@ fn app<'a, 'b>(
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .help(
-                            "Specify the keypair for the wallet which will have its native SOL wrapped. \
-                             This wallet will be assigned as the owner of the wrapped SOL token account. \
+                            "Specify the keypair for the wallet which will have its native DOMI wrapped. \
+                             This wallet will be assigned as the owner of the wrapped DOMI token account. \
                              This may be a keypair file or the ASK keyword. \
                              Defaults to the client keypair."
                         ),
@@ -2979,7 +2979,7 @@ fn app<'a, 'b>(
                     Arg::with_name("create_aux_account")
                         .takes_value(false)
                         .long("create-aux-account")
-                        .help("Wrap SOL in an auxiliary account instead of associated token account"),
+                        .help("Wrap DOMI in an auxiliary account instead of associated token account"),
                 )
                 .arg(
                     Arg::with_name("immutable")
@@ -2994,7 +2994,7 @@ fn app<'a, 'b>(
         )
         .subcommand(
             SubCommand::with_name(CommandName::Unwrap.into())
-                .about("Unwrap a SOL token account")
+                .about("Unwrap a DOMI token account")
                 .arg(
                     Arg::with_name("account")
                         .validator(is_valid_pubkey)
@@ -3011,8 +3011,8 @@ fn app<'a, 'b>(
                         .validator(is_valid_signer)
                         .takes_value(true)
                         .help(
-                            "Specify the keypair for the wallet which owns the wrapped SOL. \
-                             This wallet will receive the unwrapped SOL. \
+                            "Specify the keypair for the wallet which owns the wrapped DOMI. \
+                             This wallet will receive the unwrapped DOMI. \
                              This may be a keypair file or the ASK keyword. \
                              Defaults to the client keypair."
                         ),
@@ -3098,7 +3098,7 @@ fn app<'a, 'b>(
                         .validator(is_valid_pubkey)
                         .value_name("REFUND_ACCOUNT_ADDRESS")
                         .takes_value(true)
-                        .help("The address of the account to receive remaining SOL [default: --owner]"),
+                        .help("The address of the account to receive remaining DOMI [default: --owner]"),
                 )
                 .arg(
                     Arg::with_name("close_authority")
@@ -3146,7 +3146,7 @@ fn app<'a, 'b>(
                         .validator(is_valid_pubkey)
                         .value_name("REFUND_ACCOUNT_ADDRESS")
                         .takes_value(true)
-                        .help("The address of the account to receive remaining SOL [default: --owner]"),
+                        .help("The address of the account to receive remaining DOMI [default: --owner]"),
                 )
                 .arg(
                     Arg::with_name("close_authority")
@@ -3331,12 +3331,12 @@ fn app<'a, 'b>(
                     Arg::with_name("close_empty_associated_accounts")
                     .long("close-empty-associated-accounts")
                     .takes_value(false)
-                    .help("close all empty associated token accounts (to get SOL back)")
+                    .help("close all empty associated token accounts (to get DOMI back)")
                 )
         )
         .subcommand(
             SubCommand::with_name(CommandName::SyncNative.into())
-                .about("Sync a native SOL token account to its underlying satomis")
+                .about("Sync a native DOMI token account to its underlying satomis")
                 .arg(
                     owner_address_arg()
                         .index(1)
@@ -3577,7 +3577,7 @@ async fn main() -> Result<(), Error> {
     )
     .await;
 
-    solana_logger::setup_with_default("solana=info");
+    domichain_logger::setup_with_default("domichain=info");
     let result =
         process_command(&sub_command, matches, &config, wallet_manager, bulk_signers).await?;
     println!("{}", result);
@@ -4307,7 +4307,7 @@ mod tests {
     use {
         super::*,
         serial_test::serial,
-        solana_sdk::{
+        domichain_sdk::{
             bpf_loader,
             hash::Hash,
             program_pack::Pack,
@@ -4315,7 +4315,7 @@ mod tests {
             system_instruction,
             transaction::Transaction,
         },
-        solana_test_validator::{ProgramInfo, TestValidator, TestValidatorGenesis},
+        domichain_test_validator::{ProgramInfo, TestValidator, TestValidatorGenesis},
         spl_token_2022::{extension::non_transferable::NonTransferable, state::Multisig},
         spl_token_client::client::{
             ProgramClient, ProgramOfflineClient, ProgramRpcClient, ProgramRpcClientSendTransaction,
@@ -4331,7 +4331,7 @@ mod tests {
     const TEST_DECIMALS: u8 = 0;
 
     async fn new_validator_for_test() -> (TestValidator, Keypair) {
-        solana_logger::setup();
+        domichain_logger::setup();
         let mut test_validator_genesis = TestValidatorGenesis::default();
         test_validator_genesis.add_programs_with_path(&[
             ProgramInfo {
@@ -4411,7 +4411,7 @@ mod tests {
 
         let nonce_rent = config
             .rpc_client
-            .get_minimum_balance_for_rent_exemption(solana_sdk::nonce::State::size())
+            .get_minimum_balance_for_rent_exemption(domichain_sdk::nonce::State::size())
             .await
             .unwrap();
         let instr = system_instruction::create_nonce_account(

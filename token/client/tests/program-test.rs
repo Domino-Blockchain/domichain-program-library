@@ -3,7 +3,7 @@ use {
         tokio::{self, sync::Mutex},
         ProgramTest,
     },
-    solana_sdk::{
+    domichain_sdk::{
         program_option::COption,
         signer::{keypair::Keypair, Signer},
     },

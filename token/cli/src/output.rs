@@ -1,14 +1,14 @@
 use crate::{config::Config, sort::UnsupportedAccount};
 use console::{style, Emoji};
 use serde::{Deserialize, Serialize, Serializer};
-use solana_account_decoder::{
+use domichain_account_decoder::{
     parse_token::{UiAccountState, UiMint, UiMultisig, UiTokenAccount, UiTokenAmount},
     parse_token_extension::{
         UiCpiGuard, UiDefaultAccountState, UiExtension, UiInterestBearingConfig, UiMemoTransfer,
         UiMintCloseAuthority, UiPermanentDelegate, UiTransferFeeAmount, UiTransferFeeConfig,
     },
 };
-use solana_cli_output::{display::writeln_name_value, OutputFormat, QuietDisplay, VerboseDisplay};
+use domichain_cli_output::{display::writeln_name_value, OutputFormat, QuietDisplay, VerboseDisplay};
 use std::fmt::{self, Display};
 
 pub(crate) trait Output: Serialize + fmt::Display + QuietDisplay + VerboseDisplay {}
