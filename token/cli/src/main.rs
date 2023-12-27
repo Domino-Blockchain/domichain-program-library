@@ -242,23 +242,6 @@ fn is_multisig_minimum_signers(string: String) -> Result<(), String> {
     }
 }
 
-fn is_valid_token_program_id<T>(string: T) -> Result<(), String>
-where
-    T: AsRef<str> + Display,
-{
-    match is_pubkey(string.as_ref()) {
-        Ok(()) => {
-            let program_id = string.as_ref().parse::<Pubkey>().unwrap();
-            if VALID_TOKEN_PROGRAM_IDS.contains(&program_id) {
-                Ok(())
-            } else {
-                Err(format!("Unrecognized token program id: {}", program_id))
-            }
-        }
-        Err(e) => Err(e),
-    }
-}
-
 pub(crate) type Error = Box<dyn std::error::Error + Send + Sync>;
 fn print_error_and_exit<T, E: Display>(e: E) -> T {
     eprintln!("error: {}", e);
@@ -417,7 +400,7 @@ async fn command_create_token(
         ),
     );
 
-    let token = token_client_from_config(config, &token_pubkey, Some(decimals))?;
+    let token = token_client_from_config(config, &token_pubkey, Some(decimals)).unwrap();
 
     let freeze_authority = if enable_freeze { Some(authority) } else { None };
 
@@ -474,9 +457,9 @@ async fn command_create_token(
             extensions,
             &bulk_signers,
         )
-        .await?;
+        .await.unwrap();
 
-    let tx_return = finish_tx(config, &res, false).await?;
+    let tx_return = finish_tx(config, &res, false).await.unwrap();
     Ok(match tx_return {
         TransactionReturnData::CliSignature(cli_signature) => format_output(
             CliCreateToken {
@@ -2401,7 +2384,7 @@ fn app<'a, 'b>(
                 .value_name("ADDRESS")
                 .takes_value(true)
                 .global(true)
-                .validator(is_valid_token_program_id)
+                .validator(is_pubkey)
                 .help("SPL Token program id"),
         )
         .arg(
