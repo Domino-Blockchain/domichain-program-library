@@ -12,6 +12,7 @@ fn process_instruction(
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
+    domichain_program::msg!("[{file}:{line}] Starting token program", file=file!(), line=line!());
     if let Err(error) = Processor::process(program_id, accounts, instruction_data) {
         // catch the error so we can print it
         error.print::<TokenError>();
