@@ -38,6 +38,7 @@ members = [
   "token-upgrade/program",
   "token/cli",
   "token/program",
+  "token/program-btci",
   "token/program-2022",
   "token/program-2022-test",
   "token/client",
