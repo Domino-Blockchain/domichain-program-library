@@ -400,7 +400,7 @@ async fn command_create_token(
         ),
     );
 
-    let token = token_client_from_config(config, &token_pubkey, Some(decimals)).unwrap();
+    let token = token_client_from_config(config, &token_pubkey, Some(decimals))?;
 
     let freeze_authority = if enable_freeze { Some(authority) } else { None };
 
@@ -457,9 +457,9 @@ async fn command_create_token(
             extensions,
             &bulk_signers,
         )
-        .await.unwrap();
+        .await?;
 
-    let tx_return = finish_tx(config, &res, false).await.unwrap();
+    let tx_return = finish_tx(config, &res, false).await?;
     Ok(match tx_return {
         TransactionReturnData::CliSignature(cli_signature) => format_output(
             CliCreateToken {

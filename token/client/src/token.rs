@@ -491,7 +491,7 @@ where
         extension_initialization_params: Vec<ExtensionInitializationParams>,
         signing_keypairs: &S,
     ) -> TokenResult<T::Output> {
-        let decimals = self.decimals.ok_or(TokenError::MissingDecimals).map_err(|e| dbg!(e))?;
+        let decimals = self.decimals.ok_or(TokenError::MissingDecimals)?;
 
         let extension_types = extension_initialization_params
             .iter()
@@ -505,13 +505,13 @@ where
             self.client
                 .get_minimum_balance_for_rent_exemption(space)
                 .await
-                .map_err(TokenError::Client).map_err(|e| dbg!(e))?,
+                .map_err(TokenError::Client)?,
             space as u64,
             &self.program_id,
         )];
 
         for params in extension_initialization_params {
-            instructions.push(params.instruction(&self.program_id, &self.pubkey).map_err(|e| dbg!(e))?);
+            instructions.push(params.instruction(&self.program_id, &self.pubkey)?);
         }
 
         instructions.push(instruction::initialize_mint(
@@ -520,9 +520,9 @@ where
             mint_authority,
             freeze_authority,
             decimals,
-        ).map_err(|e| dbg!(e))?);
+        )?);
 
-        self.process_ixs(&instructions, signing_keypairs).await.map_err(|e| dbg!(e))
+        self.process_ixs(&instructions, signing_keypairs).await
     }
 
     /// Create native mint
