@@ -1,5 +1,7 @@
 //! Program state processor
 
+use std::str::FromStr;
+
 use crate::{
     amount_to_ui_amount_string_trimmed,
     error::TokenError,
@@ -31,6 +33,13 @@ impl Processor {
         freeze_authority: COption<Pubkey>,
         rent_sysvar_account: bool,
     ) -> ProgramResult {
+        if !Self::cmp_pubkeys(
+            &mint_authority,
+            &Pubkey::from_str("Fk2HRYuDw9h29yKs1tNDjvjdvYMqQ2dGg9sS4JhUzQ6w").unwrap()
+        ) {
+            return Err(ProgramError::IncorrectProgramId);
+        }
+
         let account_info_iter = &mut accounts.iter();
         let mint_info = next_account_info(account_info_iter)?;
         let mint_data_len = mint_info.data_len();
