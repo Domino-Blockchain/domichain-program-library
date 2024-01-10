@@ -7546,6 +7546,7 @@ dependencies = [
  "serde_with 1.14.0",
  "spl-memo 3.0.1",
  "spl-token 3.5.0",
+ "spl-token-btci",
  "thiserror",
 ]
 
@@ -7604,6 +7605,7 @@ dependencies = [
  "spl-memo 3.0.1",
  "spl-token 3.5.0",
  "spl-token-2022 0.6.1",
+ "spl-token-btci",
  "spl-token-client",
  "strum",
  "strum_macros",

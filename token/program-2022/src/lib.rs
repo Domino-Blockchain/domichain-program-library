@@ -100,10 +100,9 @@ pub fn check_program_account(spl_token_program_id: &Pubkey) -> ProgramResult {
 
 /// Checks that the supplied program ID is corect for spl-token or spl-token-2022
 pub fn check_spl_token_program_account(spl_token_program_id: &Pubkey) -> ProgramResult {
-    // Check removed to support custom token programs
-    // if spl_token_program_id != &id() && spl_token_program_id != &spl_token::id() {
-    //     return Err(ProgramError::IncorrectProgramId);
-    // }
+    if ![id(), spl_token::id(), spl_token_btci::id()].contains(spl_token_program_id) {
+        return Err(ProgramError::IncorrectProgramId);
+    }
     Ok(())
 }
 

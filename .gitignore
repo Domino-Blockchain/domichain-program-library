@@ -1,11 +1,5 @@
 target
-target_0
-target_1
-target_2
-target_3
-target_4
-target_5
-target_6
+target_*
 .env
 .vscode
 bin

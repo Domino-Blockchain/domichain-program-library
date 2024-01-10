@@ -104,7 +104,11 @@ pub const MULTISIG_SIGNER_ARG: ArgConstant<'static> = ArgConstant {
     help: "Member signer of a multisig account",
 };
 
-static VALID_TOKEN_PROGRAM_IDS: [Pubkey; 2] = [spl_token_2022::ID, spl_token::ID];
+static VALID_TOKEN_PROGRAM_IDS: [Pubkey; 3] = [
+    spl_token_2022::ID,
+    spl_token::ID,
+    spl_token_btci::ID,
+];
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumString, IntoStaticStr)]
 #[strum(serialize_all = "kebab-case")]
@@ -239,6 +243,23 @@ fn is_multisig_minimum_signers(string: String) -> Result<(), String> {
         Err(format!("must be at most {}", MAX_SIGNERS))
     } else {
         Ok(())
+    }
+}
+
+fn is_valid_token_program_id<T>(string: T) -> Result<(), String>
+where
+    T: AsRef<str> + Display,
+{
+    match is_pubkey(string.as_ref()) {
+        Ok(()) => {
+            let program_id = string.as_ref().parse::<Pubkey>().unwrap();
+            if VALID_TOKEN_PROGRAM_IDS.contains(&program_id) {
+                Ok(())
+            } else {
+                Err(format!("Unrecognized token program id: {}", program_id))
+            }
+        }
+        Err(e) => Err(e),
     }
 }
 
@@ -2384,7 +2405,7 @@ fn app<'a, 'b>(
                 .value_name("ADDRESS")
                 .takes_value(true)
                 .global(true)
-                .validator(is_pubkey)
+                .validator(is_valid_token_program_id)
                 .help("SPL Token program id"),
         )
         .arg(
