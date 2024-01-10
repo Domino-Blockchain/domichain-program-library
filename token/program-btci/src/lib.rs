@@ -5,14 +5,9 @@
 //! An ERC20-like Token program for the Solana blockchain
 
 pub mod error;
-pub mod extension;
-pub mod generic_token_account;
 pub mod instruction;
 pub mod native_mint;
-pub mod pod;
 pub mod processor;
-#[cfg(feature = "serde-traits")]
-pub mod serialization;
 pub mod state;
 
 #[cfg(not(feature = "no-entrypoint"))]
@@ -20,13 +15,7 @@ mod entrypoint;
 
 // Export current sdk types for downstream users building with a different sdk version
 pub use domichain_program;
-use domichain_program::{
-    entrypoint::ProgramResult,
-    program_error::ProgramError,
-    program_memory::sol_memcmp,
-    pubkey::{Pubkey, PUBKEY_BYTES},
-};
-pub use domichain_zk_token_sdk;
+use domichain_program::{entrypoint::ProgramResult, program_error::ProgramError, pubkey::Pubkey};
 
 /// Convert the UI representation of a token amount (using the decimals field defined in its mint)
 /// to the raw amount
@@ -88,26 +77,12 @@ pub fn try_ui_amount_into_amount(ui_amount: String, decimals: u8) -> Result<u64,
         .map_err(|_| ProgramError::InvalidArgument)
 }
 
-domichain_program::declare_id!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+domichain_program::declare_id!("Token9SPyLZ3C9UDifE6ycx3G7PBR5zpogL5AUgAGxy");
 
-/// Checks that the supplied program ID is correct for spl-token-2022
+/// Checks that the supplied program ID is the correct one for SPL-token
 pub fn check_program_account(spl_token_program_id: &Pubkey) -> ProgramResult {
     if spl_token_program_id != &id() {
         return Err(ProgramError::IncorrectProgramId);
     }
     Ok(())
-}
-
-/// Checks that the supplied program ID is corect for spl-token or spl-token-2022
-pub fn check_spl_token_program_account(spl_token_program_id: &Pubkey) -> ProgramResult {
-    if ![id(), spl_token::id(), spl_token_btci::id()].contains(spl_token_program_id) {
-        return Err(ProgramError::IncorrectProgramId);
-    }
-    Ok(())
-}
-
-/// Checks two pubkeys for equality in a computationally cheap way using
-/// `sol_memcmp`
-pub fn cmp_pubkeys(a: &Pubkey, b: &Pubkey) -> bool {
-    sol_memcmp(a.as_ref(), b.as_ref(), PUBKEY_BYTES) == 0
 }
