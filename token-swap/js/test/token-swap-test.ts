@@ -9,7 +9,7 @@ import {
 import {AccountLayout, Token, TOKEN_PROGRAM_ID} from '@solana/spl-token';
 
 import {TokenSwap, CurveType, TOKEN_SWAP_PROGRAM_ID} from '../src';
-import {newAccountWithSatomis} from '../src/util/new-account-with-satomis';
+import {newAccountWithSatomis} from '../src/util/new-account-with-lamports';
 import {sleep} from '../src/util/sleep';
 import {Numberu64} from '../src';
 
@@ -375,7 +375,7 @@ export async function createAccountAndSwapAtomic(): Promise<void> {
     SystemProgram.createAccount({
       fromPubkey: owner.publicKey,
       newAccountPubkey: newAccount.publicKey,
-      satomis: balanceNeeded,
+      lamports: balanceNeeded,
       space: AccountLayout.span,
       programId: mintB.programId,
     }),
