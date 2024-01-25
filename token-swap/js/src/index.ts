@@ -409,7 +409,7 @@ export class TokenSwap {
       SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
         newAccountPubkey: tokenSwapAccount.publicKey,
-        satomis: balanceNeeded,
+        lamports: balanceNeeded,
         space: TokenSwapLayout.span,
         programId: swapProgramId,
       }),
