@@ -33,6 +33,7 @@ roots = { version = "0.0.7", optional = true }
 
 [lib]
 crate-type = ["cdylib", "lib"]
+target = "wasm32-wasi"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
