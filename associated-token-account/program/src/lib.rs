@@ -16,7 +16,7 @@ use domichain_program::{
     sysvar,
 };
 
-domichain_program::declare_id!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+domichain_program::declare_id!("FCG3wAYg9gNLEDmJauNopceZo9tUx1FqH7Ysjm7jheLm");
 
 pub(crate) fn get_associated_token_address_and_bump_seed(
     wallet_address: &Pubkey,

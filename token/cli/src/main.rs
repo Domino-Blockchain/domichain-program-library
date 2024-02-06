@@ -253,11 +253,12 @@ where
     match is_pubkey(string.as_ref()) {
         Ok(()) => {
             let program_id = string.as_ref().parse::<Pubkey>().unwrap();
-            if VALID_TOKEN_PROGRAM_IDS.contains(&program_id) {
-                Ok(())
-            } else {
-                Err(format!("Unrecognized token program id: {}", program_id))
-            }
+            Ok(())
+            // if VALID_TOKEN_PROGRAM_IDS.contains(&program_id) {
+            //     Ok(())
+            // } else {
+            //     Err(format!("Unrecognized token program id: {}", program_id))
+            // }
         }
         Err(e) => Err(e),
     }

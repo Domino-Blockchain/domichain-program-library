@@ -77,7 +77,7 @@ pub fn try_ui_amount_into_amount(ui_amount: String, decimals: u8) -> Result<u64,
         .map_err(|_| ProgramError::InvalidArgument)
 }
 
-domichain_program::declare_id!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+domichain_program::declare_id!("E6MGqpUar31wjvconpQxzdBts7Z3pvBookQgAgeH4VtS");
 
 /// Checks that the supplied program ID is the correct one for SPL-token
 pub fn check_program_account(spl_token_program_id: &Pubkey) -> ProgramResult {
