@@ -47,19 +47,19 @@ wait # Building
 echo "Copying"
 
 cd ./domichain-program-library
-# E6MGqpUar31wjvconpQxzdBts7Z3pvBookQgAgeH4VtS
+# 7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s | was TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
 # domichain-keygen new --no-bip39-passphrase -o ./spl_token-4.0.0-keypair.json
 cp ./target_1/wasm32-wasi/release/spl_token.wasm ./spl_token-4.0.0.wasm &
-# FCgt5eHwR6GvSDTTKcFjpZdYB5rLMumaTK3Z5jk89egj
+# BvVePGKKwuGb6QVJHG6LvCrULB7QBgjocqnYxYHUkNEd | was BvVePGKKwuGb6QVJHG6LvCrULB7QBgjocqnYxYHUkNEd
 # domichain-keygen new --no-bip39-passphrase -o ./spl_token-2022-0.6.1-keypair.json
 cp ./target_2/wasm32-wasi/release/spl_token_2022.wasm ./spl_token-2022-0.6.1.wasm &
-# C4P8Bc8e2qcrneQpP23Vco11kaRuK2WRfNaQXw4fvuUx
+# 5a1Cq6HtzDGzX45xRY7MboGFvdPoLKnUPG7drPTqYn7L
 # domichain-keygen new --no-bip39-passphrase -o ./spl_token-btci-4.0.0-keypair.json
 cp ./target_3/wasm32-wasi/release/spl_token_btci.wasm ./spl_token-btci-4.0.0.wasm &
-# FCG3wAYg9gNLEDmJauNopceZo9tUx1FqH7Ysjm7jheLm
+# Dt8fRCpjeV6JDemhPmtcTKijgKdPxXHn9Wo9cXY5agtG
 # domichain-keygen new --no-bip39-passphrase -o ./spl_associated-token-account-1.0.5-keypair.json
 cp ./target_4/wasm32-wasi/release/spl_associated_token_account.wasm ./spl_associated-token-account-1.0.5.wasm &
-# 6GxvpLmwufhfqkq4XKBPg5DLrZWHE6Es6uJ7e3hie5J6
+# 4ZH2DZxr5irLBnfEYtZBVKLWeWnu1uAv9NJkWJyhJvHv
 # domichain-keygen new --no-bip39-passphrase -o ./spl_token-swap-3.0.0-keypair.json
 cp ./target_5/wasm32-wasi/release/spl_token_swap.wasm ./spl_token-swap-3.0.0.wasm &
 cd -
@@ -80,7 +80,7 @@ cd -
 
 echo "Deploying"
 
-# E6MGqpUar31wjvconpQxzdBts7Z3pvBookQgAgeH4VtS
+# 7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s
 cd ./domichain-program-library
 domichain-wasm program deploy ./spl_token-4.0.0.wasm \
     --program-id ./spl_token-4.0.0-keypair.json &

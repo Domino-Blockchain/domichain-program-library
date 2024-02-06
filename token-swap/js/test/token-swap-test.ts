@@ -15,7 +15,7 @@ import {Numberu64} from '../src';
 
 // New token program ID
 const TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
-  'E6MGqpUar31wjvconpQxzdBts7Z3pvBookQgAgeH4VtS',
+  '7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s',
 );
 
 // The following globals are created by `createTokenSwap` and used by subsequent tests

@@ -20,11 +20,11 @@ import * as Layout from './layout';
 import {loadAccount} from './util/account';
 
 export const TOKEN_SWAP_PROGRAM_ID: PublicKey = new PublicKey(
-  '6GxvpLmwufhfqkq4XKBPg5DLrZWHE6Es6uJ7e3hie5J6',
+  '4ZH2DZxr5irLBnfEYtZBVKLWeWnu1uAv9NJkWJyhJvHv',
 );
 
 export const OLD_TOKEN_SWAP_PROGRAM_ID: PublicKey = new PublicKey(
-  '6GxvpLmwufhfqkq4XKBPg5DLrZWHE6Es6uJ7e3hie5J6',
+  '4ZH2DZxr5irLBnfEYtZBVKLWeWnu1uAv9NJkWJyhJvHv',
 );
 
 /**

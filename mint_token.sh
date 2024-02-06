@@ -18,7 +18,6 @@ cli=$(cli_program $1)
 
 echo -e "Mint with token program $1\n"
 
-# ./target_0/release/spl-token --program-id E6MGqpUar31wjvconpQxzdBts7Z3pvBookQgAgeH4VtS create-token
 echo -e "Creating token\n";
 OUTPUT=$($cli create-token --output json)
 TOKEN=$(jq -r .commandOutput.address <<< "$OUTPUT")
