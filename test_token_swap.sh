@@ -16,7 +16,7 @@ cd .. # Home dir
 
 export PATH=./domichain/target/release/:$PATH
 
-TOKEN_PROGRAM=$(domichain-keygen pubkey ./domichain-program-library/spl_token-4.0.0-keypair.json)
+TOKEN_PROGRAM="7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s"
 
 
 echo "Building"
@@ -78,23 +78,23 @@ cd -
 # wasm-strip
 
 
-echo "Deploying"
-
+# echo "Deploying"
+# 
 # 7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s
-cd ./domichain-program-library
-domichain-wasm program deploy ./spl_token-4.0.0.wasm \
-    --program-id ./spl_token-4.0.0-keypair.json &
-domichain-wasm program deploy ./spl_token-2022-0.6.1.wasm \
-    --program-id ./spl_token-2022-0.6.1-keypair.json &
-domichain-wasm program deploy ./spl_token-btci-4.0.0.wasm \
-    --program-id ./spl_token-btci-4.0.0-keypair.json &
-domichain-wasm program deploy ./spl_associated-token-account-1.0.5.wasm \
-    --program-id ./spl_associated-token-account-1.0.5-keypair.json &
-domichain-wasm program deploy ./spl_token-swap-3.0.0.wasm \
-    --program-id ./spl_token-swap-3.0.0-keypair.json &
-cd -
+# cd ./domichain-program-library
+# domichain-wasm program deploy --url http://108.48.39.243:8899/ ./spl_token-4.0.0.wasm \
+#     --program-id ./spl_token-4.0.0-keypair.json &
+# domichain-wasm program deploy --url http://108.48.39.243:8899/ ./spl_token-2022-0.6.1.wasm \
+#     --program-id ./spl_token-2022-0.6.1-keypair.json &
+# domichain-wasm program deploy --url http://108.48.39.243:8899/ ./spl_token-btci-4.0.0.wasm \
+#     --program-id ./spl_token-btci-4.0.0-keypair.json &
+# domichain-wasm program deploy --url http://108.48.39.243:8899/ ./spl_associated-token-account-1.0.5.wasm \
+#     --program-id ./spl_associated-token-account-1.0.5-keypair.json &
+# domichain-wasm program deploy --url http://108.48.39.243:8899/ ./spl_token-swap-3.0.0.wasm \
+#     --program-id ./spl_token-swap-3.0.0-keypair.json &
+# cd -
 
-wait # Deploying
+# wait # Deploying
 
 
 echo "Testing token-swap with token program $TOKEN_PROGRAM"
