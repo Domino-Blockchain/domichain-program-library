@@ -477,6 +477,8 @@ export class TokenSwap {
     userTransferAuthority: Account,
     amountIn: number | Numberu64,
     minimumAmountOut: number | Numberu64,
+    ddmiAddress: PublicKey,
+    ddmiMint: PublicKey,
     confirmOptions?: ConfirmOptions,
   ): Promise<TransactionSignature> {
     return await sendAndConfirmTransaction(
@@ -501,6 +503,8 @@ export class TokenSwap {
           this.poolTokenProgramId,
           amountIn,
           minimumAmountOut,
+          ddmiAddress,
+          ddmiMint,
         ),
       ),
       [this.payer, userTransferAuthority],
@@ -527,6 +531,8 @@ export class TokenSwap {
     poolTokenProgramId: PublicKey,
     amountIn: number | Numberu64,
     minimumAmountOut: number | Numberu64,
+    ddmiAddress: PublicKey,
+    ddmiMint: PublicKey,
   ): TransactionInstruction {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8('instruction'),
@@ -559,6 +565,8 @@ export class TokenSwap {
       {pubkey: sourceTokenProgramId, isSigner: false, isWritable: false},
       {pubkey: destinationTokenProgramId, isSigner: false, isWritable: false},
       {pubkey: poolTokenProgramId, isSigner: false, isWritable: false},
+      {pubkey: ddmiAddress, isSigner: false, isWritable: false},
+      {pubkey: ddmiMint, isSigner: false, isWritable: false},
     ];
     if (hostFeeAccount !== null) {
       keys.push({pubkey: hostFeeAccount, isSigner: false, isWritable: true});
