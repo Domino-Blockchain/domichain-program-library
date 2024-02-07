@@ -18,6 +18,8 @@ cd .. # Home dir
 
 export PATH=~/domichain/target/release/:$PATH
 
+domichain transfer ~/.config/domichain/id.json 20 --keypair ~/domichain/config/bootstrap-validator/identity.json --allow-unfunded-recipient
+
 TOKEN_PROGRAM="7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s"
 
 echo "Testing mint of deployed token program $TOKEN_PROGRAM"
