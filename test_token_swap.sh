@@ -19,10 +19,11 @@ cd .. # Home dir
 export PATH=~/domichain/target/release/:$PATH
 
 domichain transfer ~/domichain/config/faucet.json 100 --keypair ~/domichain/config/bootstrap-validator/identity.json --allow-unfunded-recipient
-TOKEN_PROGRAM="7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s"
+TOKEN_PROGRAM="TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s"
 
 echo "Testing token-swap with token program $TOKEN_PROGRAM"
 cd ~/domichain-program-library/token-swap/js
+
 # curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
 # sudo apt-get install -y nodejs
 # npm i

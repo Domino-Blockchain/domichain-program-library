@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 /** Address of the SPL Token program */
-export const TOKEN_PROGRAM_ID = new PublicKey('7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s');
+export const TOKEN_PROGRAM_ID = new PublicKey('TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s');
 
 /** Address of the SPL Token 2022 program */
 export const TOKEN_2022_PROGRAM_ID = new PublicKey('BvVePGKKwuGb6QVJHG6LvCrULB7QBgjocqnYxYHUkNEd');

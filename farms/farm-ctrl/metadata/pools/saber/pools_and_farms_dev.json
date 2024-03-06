@@ -119,7 +119,7 @@
         "config": {
           "swapAccount": "AQsYrKkFLuv9Jw7kCcPH7SkeMQ2aZkP1KcBs4RYegHbv",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "ChFJZQK4gNpmcrbF71e5Wo2HzF8qePYGnqsgZ6u7anFA"
         },
         "state": {
@@ -301,7 +301,7 @@
         "config": {
           "swapAccount": "B94iYzzWe7Q3ksvRnt5yJm6G5YquerRFKpsUVUvasdmA",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "BgktRz16U7M7gnT2mzeL1idLyndxKFHeWRdKXUD9VGRz"
         },
         "state": {
@@ -462,7 +462,7 @@
         "config": {
           "swapAccount": "DoycojcYVwc42yCpGb4CvkbuKJkQ6KBTugLdJXv3U8ZE",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "8BC6eAF59beKMctxpH7jkx8faR6jdyKc5doHB7Tiffig"
         },
         "state": {
@@ -623,7 +623,7 @@
         "config": {
           "swapAccount": "AqBGfWy3D9NpW8LuknrSSuv93tJUBiPWYxkBrettkG7x",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "CzyZPuuszgHNyxcPxWKw6r1nrVKB7LdkGZMyQx6Tohpa"
         },
         "state": {
@@ -790,7 +790,7 @@
         "config": {
           "swapAccount": "VeNkoB1HvSP6bSeGybQDnx9wTWFsQb2NBCemeCDSuKL",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "72E8LfHqoxQCxnxmBbDG6WSHnDx1rWPUHNKwYvoL5qDm"
         },
         "state": {
@@ -972,7 +972,7 @@
         "config": {
           "swapAccount": "TEJVTFTsqFEuoNNGu864ED4MJuZr8weByrsYYpZGCfQ",
           "swapProgramID": "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ",
-          "tokenProgramID": "7t5SuBhmxxKuQyjwTnmPpFpqJurCDM4dvM14nUGiza4s",
+          "tokenProgramID": "TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s",
           "authority": "52ZVLaKbh1jumxHWxiNpv4igyUvfMz8TbP7Vogcw2VDE"
         },
         "state": {

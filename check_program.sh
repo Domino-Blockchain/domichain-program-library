@@ -1,4 +1,6 @@
 #!/bin/bash
+# Compare deployed program with local file
+# True if programs the same
 
 # Exit on error
 set -o errexit
