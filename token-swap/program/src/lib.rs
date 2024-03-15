@@ -16,4 +16,4 @@ mod entrypoint;
 // Export current sdk types for downstream users building with a different sdk version
 pub use domichain_program;
 
-domichain_program::declare_id!("SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw");
+domichain_program::declare_id!("SwapLyqLfyxTHPYf3A3sUYS9qHo2jCFXyhJP4w2UVUd");

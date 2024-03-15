@@ -10,7 +10,7 @@ The Token-2022 Program is a superset of the functionality provided by the
 
 | Information | Account Address |
 | --- | --- |
-| Token-2022 Program | `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb` |
+| Token-2022 Program | `BvVePGKKwuGb6QVJHG6LvCrULB7QBgjocqnYxYHUkNEd` |
 
 ## Motivation
 

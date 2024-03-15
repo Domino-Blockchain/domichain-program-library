@@ -14,8 +14,8 @@ contains information about program audits.
 
 | Network | Version | Program Address |
 | --- | --- | --- |
-| Testnet | 3.0.0 | `SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw` |
-| Devnet | 3.0.0 | `SwapsVeCiPHMUAtzQWZw7RjsKjgCjhwU55QGu4U1Szw` |
+| Testnet | 3.0.0 | `SwapLyqLfyxTHPYf3A3sUYS9qHo2jCFXyhJP4w2UVUd` |
+| Devnet | 3.0.0 | `SwapLyqLfyxTHPYf3A3sUYS9qHo2jCFXyhJP4w2UVUd` |
 
 While third-party deployments of token-swap exist on Mainnet Beta, the team has
 no plans to deploy it themselves.

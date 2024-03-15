@@ -6,12 +6,17 @@ import {
   Transaction,
   sendAndConfirmTransaction
 } from '@solana/web3.js';
-import {AccountLayout, Token, TOKEN_PROGRAM_ID} from '@solana/spl-token';
+import {AccountLayout, Token, /*TOKEN_PROGRAM_ID*/} from '@solana/spl-token';
 
 import {TokenSwap, CurveType, TOKEN_SWAP_PROGRAM_ID} from '../src';
 import {newAccountWithSatomis} from '../src/util/new-account-with-lamports';
 import {sleep} from '../src/util/sleep';
 import {Numberu64} from '../src';
+
+// New token program ID
+const TOKEN_PROGRAM_ID: PublicKey = new PublicKey(
+  'TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s',
+);
 
 // The following globals are created by `createTokenSwap` and used by subsequent tests
 // Token swap
