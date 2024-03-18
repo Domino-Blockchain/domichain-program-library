@@ -22,6 +22,9 @@ TOKEN_PROGRAM="TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s"
 echo "Building"
 n="0"
 
+# We build each program into separate target folders to prevent cache rebuilding each time.
+# Speeds up recompilation.
+
 cd ./domichain-program-library
 cargo build --release --manifest-path token/cli/Cargo.toml --target-dir target_0 & # CLI
 ((n+=1))
@@ -34,6 +37,11 @@ cargo wasi build --release --manifest-path token/program-btci/Cargo.toml --targe
 cargo wasi build --release --manifest-path associated-token-account/program/Cargo.toml --target-dir target_4 & # Associated Token
 ((n+=1))
 cargo wasi build --release --manifest-path token-swap/program/Cargo.toml --target-dir target_5 & # Token swap
+((n+=1))
+cd -
+
+cd ./ddex/dex
+cargo wasi build --release & # Serum DEX
 ((n+=1))
 cd -
 
@@ -54,14 +62,16 @@ cp ./target_4/wasm32-wasi/release/spl_associated_token_account.wasm ./spl_associ
 cp ./target_5/wasm32-wasi/release/spl_token_swap.wasm ./spl_token-swap-3.0.0.wasm &
 cd -
 
+cp ./ddex/dex/target/wasm32-wasi/release/serum_dex.wasm ./domichain-program-library/serum_dex.wasm &
+
 wait # Copying
 
 
 echo "wasm-strip"
 
 cd ./domichain-program-library/
-for i in ./spl_*.wasm;
-    do echo $i ; wasmtime --dir=. ~/wabt-1.0.34-wasi/wabt-1.0.34/bin/wasm-strip $i ;
+for i in ./*.wasm;
+    do echo $i ; wasmtime --dir=. ~/wabt-1.0.34/bin/wasm-strip $i ;
 done
 cd -
 
