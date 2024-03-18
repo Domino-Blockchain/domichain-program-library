@@ -14,3 +14,7 @@ test-ledger
 docker-target
 .idea
 .coderrect
+
+spl_*.wasm
+serum_dex.wasm
+test*.json

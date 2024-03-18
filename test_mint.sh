@@ -48,4 +48,8 @@ echo DONE
 # strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
 
 # curl https://wasmtime.dev/install.sh -sSf | bash
-# wasmtime ~/wabt-1.0.34-wasi/wabt-1.0.34/bin/wasm-strip --help
+# cd ~
+# wget https://github.com/WebAssembly/wabt/releases/download/1.0.34/wabt-1.0.34-wasi.tar.gz
+# tar -xf wabt-1.0.34-wasi.tar.gz
+# wasmtime ~/wabt-1.0.34/bin/wasm-strip --help
+
