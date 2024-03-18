@@ -1,4 +1,3 @@
-# scp domi@localhost:~/domichain-program-library/spl*.wasm .
 export URL="http://108.48.39.242:8899/" # Devnet
 
 # TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s
