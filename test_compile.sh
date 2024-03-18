@@ -73,6 +73,7 @@ cd ./domichain-program-library/
 for i in ./*.wasm;
     do echo $i ; wasmtime --dir=. ~/wabt-1.0.34/bin/wasm-strip $i ;
 done
+wasmtime --dir=. ~/wabt-1.0.34/bin/wasm-strip serum_dex.wasm
 cd -
 
 # wasm-strip
