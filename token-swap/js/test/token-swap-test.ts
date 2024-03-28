@@ -83,7 +83,7 @@ let connection: Connection;
 async function getConnection(): Promise<Connection> {
   if (connection) return connection;
 
-  const url = 'http://localhost:8899';
+  const url = 'http://103.106.59.69:8899';
   connection = new Connection(url, 'recent');
   // const version = await connection.getVersion();
 

@@ -18,7 +18,7 @@ cd .. # Home dir
 
 export PATH=~/domichain/target/release/:$PATH
 
-domichain transfer ~/domichain/config/faucet.json 100 --keypair ~/domichain/config/bootstrap-validator/identity.json --allow-unfunded-recipient
+# domichain transfer ~/domichain/config/faucet.json 100 --keypair ~/domichain/config/bootstrap-validator/identity.json --allow-unfunded-recipient
 TOKEN_PROGRAM="TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s"
 
 echo "Testing token-swap with token program $TOKEN_PROGRAM"
