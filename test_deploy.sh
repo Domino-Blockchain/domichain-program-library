@@ -1,3 +1,9 @@
+#!/bin/bash
+
+# Exit on error
+set -o errexit
+
+echo "Deploying smart contracts on the Devnet"
 export URL="http://108.48.39.242:8899/" # Devnet
 
 # TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s
@@ -37,3 +43,15 @@ export URL="http://108.48.39.242:8899/" # Devnet
   --url $URL \
   ./serum_dex.wasm \
   --program-id ~/keys_spl_tokens/DexobvLtDf7UbtNJQgf5SsuExkS1JaftvAMNsnEiAvxL.json
+
+# MetaXKaVt8cn9dGYns81au23cqBYUH4DU4WpC8tAbhQ
+~/domichain/target/release/domichain-wasm program deploy \
+  --url $URL \
+  ./token_metadata.wasm \
+  --program-id ~/keys_spl_tokens/MetaXKaVt8cn9dGYns81au23cqBYUH4DU4WpC8tAbhQ.json
+
+# 1NSA9E2dwbXfhmvP3VnnjpT8G5R89qnyw7AkXCjhzoB
+~/domichain/target/release/domichain-wasm program deploy \
+  --url $URL \
+  ./mpl_inscription_program.wasm \
+  --program-id ~/keys_spl_tokens/1NSA9E2dwbXfhmvP3VnnjpT8G5R89qnyw7AkXCjhzoB.json
