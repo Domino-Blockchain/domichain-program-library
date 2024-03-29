@@ -45,6 +45,16 @@ cargo wasi build --release & # Serum DEX
 ((n+=1))
 cd -
 
+cd ./token-metadata/programs/token-metadata
+cargo wasi build --release & # Token Metadata
+((n+=1))
+cd -
+
+cd ./mpl-inscription/programs/inscription
+cargo wasi build --release & # MPL Inscription
+((n+=1))
+cd -
+
 for i in $(seq 1 $n);
     do wait -n || { pkill -P $$; sleep 0.5; echo FAILURE; exit 1; }
 done
@@ -63,6 +73,10 @@ cp ./target_5/wasm32-wasi/release/spl_token_swap.wasm ./spl_token-swap-3.0.0.was
 cd -
 
 cp ./ddex/dex/target/wasm32-wasi/release/serum_dex.wasm ./domichain-program-library/serum_dex.wasm &
+
+cp ./token-metadata/programs/token-metadata/target/wasm32-wasi/release/token_metadata.wasm ./domichain-program-library/token_metadata.wasm &
+
+cp ./mpl-inscription/programs/inscription/target/wasm32-wasi/release/mpl_inscription_program.wasm ./domichain-program-library/mpl_inscription_program.wasm &
 
 wait # Copying
 
