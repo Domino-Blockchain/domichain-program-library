@@ -21,10 +21,16 @@ export PATH=~/domichain/target/release/:$PATH
 domichain transfer ~/.config/domichain/id.json 20 --keypair ~/domichain/config/bootstrap-validator/identity.json --allow-unfunded-recipient
 
 TOKEN_PROGRAM="TokenAAGbeQq5tGW2r5RoR3oauzN2EkNFiHNPw9q34s"
+BTCI_TOKEN_PROGRAM="BTCi9FUjBVY3BSaqjzfhEPKVExuvarj8Gtfn4rJ5soLC"
 
 echo "Testing mint of deployed token program $TOKEN_PROGRAM"
 cd ~/domichain-program-library
 ./mint_token.sh "$TOKEN_PROGRAM" && echo -e "${GREEN}TEST PASSED${NC}" || echo -e "${RED}TEST FAILED${NC}"
+cd -
+
+echo "Testing mint of deployed token program $BTCI_TOKEN_PROGRAM"
+cd ~/domichain-program-library
+./mint_token.sh "$BTCI_TOKEN_PROGRAM" && echo -e "${GREEN}TEST PASSED${NC}" || echo -e "${RED}TEST FAILED${NC}"
 cd -
 
 echo DONE

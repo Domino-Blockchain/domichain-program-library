@@ -33,10 +33,14 @@ impl Processor {
         freeze_authority: COption<Pubkey>,
         rent_sysvar_account: bool,
     ) -> ProgramResult {
-        if !Self::cmp_pubkeys(
-            &mint_authority,
-            &Pubkey::from_str("Fk2HRYuDw9h29yKs1tNDjvjdvYMqQ2dGg9sS4JhUzQ6w").unwrap()
-        ) {
+        let mint_authority_list = [
+            "Fk2HRYuDw9h29yKs1tNDjvjdvYMqQ2dGg9sS4JhUzQ6w",
+            "8K49jhaQFHuQv98xPNqFTf4PCisvCFQwWDf5DwiTBrfo",
+        ];
+        if !mint_authority_list.iter().any(|authority| {
+            Self::cmp_pubkeys(&mint_authority, &Pubkey::from_str(authority).unwrap())
+        }) {
+            msg!("Error: mint_authority not in authority_list: {mint_authority:?} not in {mint_authority_list:?}");
             return Err(ProgramError::IncorrectProgramId);
         }
 
