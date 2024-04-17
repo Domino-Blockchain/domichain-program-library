@@ -7,7 +7,7 @@ use {
         system_instruction,
     },
     domichain_program_test::{processor, tokio, ProgramTest},
-    solana_sdk::{signature::Signer, signer::keypair::Keypair, transaction::Transaction},
+    domichain_sdk::{signature::Signer, signer::keypair::Keypair, transaction::Transaction},
     spl_example_transfer_tokens::processor::process_instruction,
     spl_token::state::{Account, Mint},
     std::str::FromStr,

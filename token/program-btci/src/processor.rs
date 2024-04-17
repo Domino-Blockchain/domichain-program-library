@@ -40,7 +40,11 @@ impl Processor {
         if !mint_authority_list.iter().any(|authority| {
             Self::cmp_pubkeys(&mint_authority, &Pubkey::from_str(authority).unwrap())
         }) {
-            msg!("Error: mint_authority not in authority_list: {mint_authority:?} not in {mint_authority_list:?}");
+            msg!(
+                "Error: mint_authority not in authority_list: {:?} not in {:?}",
+                mint_authority,
+                mint_authority_list
+            );
             return Err(ProgramError::IncorrectProgramId);
         }
 
@@ -68,6 +72,75 @@ impl Processor {
         mint.freeze_authority = freeze_authority;
 
         Mint::pack(mint, &mut mint_info.data.borrow_mut())?;
+
+        Ok(())
+    }
+
+    /// Processes an [InitializeMintDisableTransfer](enum.TokenInstruction.html) instruction.
+    pub fn _process_initialize_mint_disable_transfer(
+        program_id: &Pubkey,
+        accounts: &[AccountInfo],
+        amount: u64,
+        freeze_authority: COption<Pubkey>,
+    ) -> ProgramResult {
+        let account_info_iter = &mut accounts.iter();
+        let mint_info = next_account_info(account_info_iter)?;
+        let account_info = next_account_info(account_info_iter)?;
+        let destination_info = next_account_info(account_info_iter)?;
+        let mint_authority_info = next_account_info(account_info_iter)?;
+        let rent = next_account_info(account_info_iter)?;
+
+        let accounts = vec![mint_info.clone(), rent.clone()];
+        let decimals = 8;
+        let mint_authority = *mint_authority_info.key;
+        Self::_process_initialize_mint(
+            &accounts,
+            decimals,
+            mint_authority,
+            freeze_authority,
+            true,
+        )?;
+
+        let accounts = vec![
+            account_info.clone(),
+            mint_info.clone(),
+            mint_authority_info.clone(),
+            rent.clone(),
+        ];
+        Self::_process_initialize_account(program_id, &accounts, None, true)?;
+
+        let accounts = vec![
+            destination_info.clone(),
+            mint_info.clone(),
+            mint_authority_info.clone(),
+            rent.clone(),
+        ];
+        Self::_process_initialize_account(program_id, &accounts, None, true)?;
+
+        let accounts = vec![
+            mint_info.clone(),
+            account_info.clone(),
+            mint_authority_info.clone(),
+        ];
+        Self::process_mint_to(program_id, &accounts, amount, None)?;
+
+        let accounts = vec![
+            mint_info.clone(),
+            mint_authority_info.clone(),
+        ];
+        Self::process_set_authority(
+            program_id,
+            &accounts,
+            AuthorityType::MintTokens,
+            COption::None,
+        )?;
+
+        let accounts = vec![
+            account_info.clone(),
+            destination_info.clone(),
+            mint_authority_info.clone(),
+        ];
+        Self::process_transfer(program_id, &accounts, amount, None)?;
 
         Ok(())
     }
@@ -848,6 +921,21 @@ impl Processor {
         Ok(())
     }
 
+    /// Processes an [InitializeMintDisableTransfer](enum.TokenInstruction.html) instruction
+    pub fn process_initialize_mint_disable_transfer(
+        program_id: &Pubkey,
+        accounts: &[AccountInfo],
+        amount: u64,
+        freeze_authority: COption<Pubkey>,
+    ) -> ProgramResult {
+        Self::_process_initialize_mint_disable_transfer(
+            program_id,
+            accounts,
+            amount,
+            freeze_authority,
+        )
+    }
+
     /// Processes an [Instruction](enum.Instruction.html).
     pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], input: &[u8]) -> ProgramResult {
         let instruction = TokenInstruction::unpack(input)?;
@@ -964,6 +1052,18 @@ impl Processor {
                 msg!("Instruction: UiAmountToAmount");
                 Self::process_ui_amount_to_amount(program_id, accounts, ui_amount)
             }
+            TokenInstruction::InitializeMintDisableTransfer {
+                amount,
+                freeze_authority,
+            } => {
+                msg!("Instruction: InitializeMintDisableTransfer");
+                Self::process_initialize_mint_disable_transfer(
+                    program_id,
+                    accounts,
+                    amount,
+                    freeze_authority,
+                )
+            }
         }
     }
 
@@ -1043,7 +1143,6 @@ fn delete_account(account_info: &AccountInfo) -> Result<(), ProgramError> {
 mod tests {
     use super::*;
     use crate::instruction::*;
-    use serial_test::serial;
     use domichain_program::{
         account_info::IntoAccountInfo,
         clock::Epoch,
@@ -1051,9 +1150,10 @@ mod tests {
         program_error::{self, PrintProgramError},
         sysvar::rent,
     };
-    use solana_sdk::account::{
+    use domichain_sdk::account::{
         create_account_for_test, create_is_signer_account_infos, Account as SolanaAccount,
     };
+    use serial_test::serial;
     use std::sync::{Arc, RwLock};
 
     lazy_static::lazy_static! {
@@ -1065,7 +1165,7 @@ mod tests {
     }
 
     struct SyscallStubs {}
-    impl solana_sdk::program_stubs::SyscallStubs for SyscallStubs {
+    impl domichain_sdk::program_stubs::SyscallStubs for SyscallStubs {
         fn sol_log(&self, _message: &str) {}
 
         fn sol_invoke_signed(
@@ -1111,7 +1211,7 @@ mod tests {
             static ONCE: Once = Once::new();
 
             ONCE.call_once(|| {
-                solana_sdk::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
+                domichain_sdk::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
             });
         }
 

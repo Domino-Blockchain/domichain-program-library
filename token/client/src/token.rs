@@ -28,6 +28,7 @@ use {
         domichain_zk_token_sdk::errors::ProofError,
         state::{Account, AccountState, Mint, Multisig},
     },
+    spl_token_btci::instruction as btci_instruction,
     std::{
         fmt, io,
         sync::{Arc, RwLock},
@@ -520,6 +521,51 @@ where
             mint_authority,
             freeze_authority,
             decimals,
+        )?);
+
+        self.process_ixs(&instructions, signing_keypairs).await
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub async fn initialize_mint_disable_transfer<'a, S: Signers>(
+        &self,
+        mint_authority: &'a Pubkey,
+        freeze_authority: Option<&'a Pubkey>,
+        account: &'a Pubkey,
+        destination: &'a Pubkey,
+        amount: u64,
+        extension_initialization_params: Vec<ExtensionInitializationParams>,
+        signing_keypairs: &S,
+    ) -> TokenResult<T::Output> {
+        let extension_types = extension_initialization_params
+            .iter()
+            .map(|e| e.extension())
+            .collect::<Vec<_>>();
+        let space = ExtensionType::get_account_len::<Mint>(&extension_types);
+
+        let mut instructions = vec![system_instruction::create_account(
+            &self.payer.pubkey(),
+            &self.pubkey,
+            self.client
+                .get_minimum_balance_for_rent_exemption(space)
+                .await
+                .map_err(TokenError::Client)?,
+            space as u64,
+            &self.program_id,
+        )];
+
+        for params in extension_initialization_params {
+            instructions.push(params.instruction(&self.program_id, &self.pubkey)?);
+        }
+
+        instructions.push(btci_instruction::initialize_mint_disable_transfer(
+            &self.program_id,
+            &self.pubkey,
+            account,
+            destination,
+            mint_authority,
+            freeze_authority,
+            amount,
         )?);
 
         self.process_ixs(&instructions, signing_keypairs).await
@@ -1022,8 +1068,7 @@ where
             &multisig_signers,
         )?];
 
-        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await
-        {
+        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await {
             if let Ok(destination_obj) =
                 StateWithExtensionsOwned::<Account>::unpack(destination_account.data)
             {
@@ -1090,8 +1135,7 @@ where
             &multisig_signers,
         )?);
 
-        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await
-        {
+        if let Ok(Some(destination_account)) = self.client.get_account(*satomis_destination).await {
             if let Ok(destination_obj) =
                 StateWithExtensionsOwned::<Account>::unpack(destination_account.data)
             {

@@ -11,7 +11,7 @@ use {
         keypair::signer_from_path,
     },
     solana_client::rpc_client::RpcClient,
-    domichain_program::{native_token::satomis_to_sol, program_pack::Pack, pubkey::Pubkey},
+    domichain_program::{native_token::satomis_to_domi, program_pack::Pack, pubkey::Pubkey},
     solana_sdk::{
         commitment_config::CommitmentConfig,
         message::Message,
@@ -699,8 +699,8 @@ fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(),
         Err(format!(
             "Fee payer, {}, has insufficient balance: {} required, {} available",
             config.fee_payer.pubkey(),
-            satomis_to_sol(required_balance),
-            satomis_to_sol(balance)
+            satomis_to_domi(required_balance),
+            satomis_to_domi(balance)
         )
         .into())
     } else {

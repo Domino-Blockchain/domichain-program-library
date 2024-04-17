@@ -464,6 +464,54 @@ pub enum TokenInstruction<'a> {
         /// The ui_amount of tokens to reformat.
         ui_amount: &'a str,
     },
+    /// - InitializeMint
+    /// Accounts expected by this instruction:
+    ///
+    ///   0. `[writable]` The mint to initialize.
+    ///   1. `[]` Rent sysvar
+    ///
+    /// - InitializeAccount
+    ///  Accounts expected by this instruction:
+    ///
+    ///   0. `[writable]`  The account to initialize.
+    ///   1. `[]` The mint this account will be associated with.
+    ///   2. `[]` The new account's owner/multisignature.
+    ///   3. `[]` Rent sysvar
+    ///
+    /// - MintTo
+    /// Accounts expected by this instruction:
+    ///
+    ///   0. `[writable]` The mint.
+    ///   1. `[writable]` The account to mint tokens to.
+    ///   2. `[signer]` The mint's minting authority.
+    ///
+    /// - SetAuthority
+    /// Accounts expected by this instruction:
+    ///   0. `[writable]` The mint or account to change the authority of.
+    ///   1. `[signer]` The current authority of the mint or account.
+    ///
+    /// - Transfer
+    /// Accounts expected by this instruction:
+    ///   0. `[writable]` The source account.
+    ///   1. `[writable]` The destination account.
+    ///   2. `[signer]` The source account's owner/delegate.
+    ///
+    ///
+    ///
+    /// - InitializeMintDisableTransfer
+    /// Accounts expected by this instruction:
+    ///
+    ///   0. `[writable]` The mint to initialize.
+    ///   1. `[writable]` The account to initialize.
+    ///   2. `[writable]` The destination account.
+    ///   3. `[signer]`   The mint's minting authority.
+    ///   4. `[]`         Rent sysvar.
+    InitializeMintDisableTransfer {
+        /// Amount to mint
+        amount: u64,
+        /// The freeze authority/multisignature of the mint.
+        freeze_authority: COption<Pubkey>,
+    },
     // Any new variants also need to be added to program-2022 `TokenInstruction`, so that the
     // latter remains a superset of this instruction set. New variants also need to be added to
     // token/js/src/instructions/types.ts to maintain @solana/spl-token compatibility
@@ -568,6 +616,14 @@ impl<'a> TokenInstruction<'a> {
             24 => {
                 let ui_amount = std::str::from_utf8(rest).map_err(|_| InvalidInstruction)?;
                 Self::UiAmountToAmount { ui_amount }
+            }
+            25 => {
+                let (amount, rest) = Self::unpack_u64(rest)?;
+                let (freeze_authority, _rest) = Self::unpack_pubkey_option(rest)?;
+                Self::InitializeMintDisableTransfer {
+                    amount,
+                    freeze_authority,
+                }
             }
             _ => return Err(TokenError::InvalidInstruction.into()),
         })
@@ -678,6 +734,14 @@ impl<'a> TokenInstruction<'a> {
             Self::UiAmountToAmount { ui_amount } => {
                 buf.push(24);
                 buf.extend_from_slice(ui_amount.as_bytes());
+            }
+            Self::InitializeMintDisableTransfer {
+                amount,
+                freeze_authority,
+            } => {
+                buf.push(25);
+                buf.extend_from_slice(&amount.to_le_bytes());
+                Self::pack_pubkey_option(freeze_authority, &mut buf);
             }
         };
         buf
@@ -1424,6 +1488,39 @@ pub fn ui_amount_to_amount(
     })
 }
 
+/// Creates a `InitializeMintDisableTransfer` instruction.
+pub fn initialize_mint_disable_transfer(
+    token_program_id: &Pubkey,
+    mint_pubkey: &Pubkey,
+    account_pubkey: &Pubkey,
+    destination_pubkey: &Pubkey,
+    mint_authority_pubkey: &Pubkey,
+    freeze_authority_pubkey: Option<&Pubkey>,
+    amount: u64,
+) -> Result<Instruction, ProgramError> {
+    check_program_account(token_program_id)?;
+    let freeze_authority = freeze_authority_pubkey.cloned().into();
+    let data = TokenInstruction::InitializeMintDisableTransfer {
+        amount,
+        freeze_authority,
+    }
+    .pack();
+
+    let accounts = vec![
+        AccountMeta::new(*mint_pubkey, false),
+        AccountMeta::new(*account_pubkey, false),
+        AccountMeta::new(*destination_pubkey, false),
+        AccountMeta::new(*mint_authority_pubkey, true),
+        AccountMeta::new_readonly(sysvar::rent::id(), false),
+    ];
+
+    Ok(Instruction {
+        program_id: *token_program_id,
+        accounts,
+        data,
+    })
+}
+
 /// Utility function that checks index is between MIN_SIGNERS and MAX_SIGNERS
 pub fn is_valid_signer_index(index: usize) -> bool {
     (MIN_SIGNERS..=MAX_SIGNERS).contains(&index)
@@ -1669,6 +1766,18 @@ mod test {
         let check = TokenInstruction::UiAmountToAmount { ui_amount: "0.42" };
         let packed = check.pack();
         let expect = vec![24u8, 48, 46, 52, 50];
+        assert_eq!(packed, expect);
+        let unpacked = TokenInstruction::unpack(&expect).unwrap();
+        assert_eq!(unpacked, check);
+
+        let check = TokenInstruction::InitializeMintDisableTransfer {
+            amount: 42,
+            freeze_authority: COption::None,
+        };
+        let packed = check.pack();
+        let mut expect = Vec::from([25u8]);
+        expect.extend_from_slice(&[42, 0, 0, 0, 0, 0, 0, 0]);
+        expect.extend_from_slice(&[0]);
         assert_eq!(packed, expect);
         let unpacked = TokenInstruction::unpack(&expect).unwrap();
         assert_eq!(unpacked, check);
