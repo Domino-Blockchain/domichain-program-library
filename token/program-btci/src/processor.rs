@@ -93,6 +93,7 @@ impl Processor {
         let accounts = vec![mint_info.clone(), rent.clone()];
         let decimals = 8;
         let mint_authority = *mint_authority_info.key;
+        msg!("{}:{}", file!(), line!());
         Self::_process_initialize_mint(
             &accounts,
             decimals,
@@ -107,6 +108,7 @@ impl Processor {
             mint_authority_info.clone(),
             rent.clone(),
         ];
+        msg!("{}:{}", file!(), line!());
         Self::_process_initialize_account(program_id, &accounts, None, true)?;
 
         let accounts = vec![
@@ -115,6 +117,7 @@ impl Processor {
             mint_authority_info.clone(),
             rent.clone(),
         ];
+        msg!("{}:{}", file!(), line!());
         Self::_process_initialize_account(program_id, &accounts, None, true)?;
 
         let accounts = vec![
@@ -122,12 +125,14 @@ impl Processor {
             account_info.clone(),
             mint_authority_info.clone(),
         ];
+        msg!("{}:{}", file!(), line!());
         Self::process_mint_to(program_id, &accounts, amount, None)?;
 
         let accounts = vec![
             mint_info.clone(),
             mint_authority_info.clone(),
         ];
+        msg!("{}:{}", file!(), line!());
         Self::process_set_authority(
             program_id,
             &accounts,
@@ -140,6 +145,7 @@ impl Processor {
             destination_info.clone(),
             mint_authority_info.clone(),
         ];
+        msg!("{}:{}", file!(), line!());
         Self::process_transfer(program_id, &accounts, amount, None)?;
 
         Ok(())
@@ -172,24 +178,32 @@ impl Processor {
         rent_sysvar_account: bool,
     ) -> ProgramResult {
         let account_info_iter = &mut accounts.iter();
+        msg!("_process_initialize_account {}", line!());
         let new_account_info = next_account_info(account_info_iter)?;
+        msg!("_process_initialize_account {}", line!());
         let mint_info = next_account_info(account_info_iter)?;
+        msg!("_process_initialize_account {}", line!());
         let owner = if let Some(owner) = owner {
             owner
         } else {
             next_account_info(account_info_iter)?.key
         };
+        msg!("_process_initialize_account {}", line!());
         let new_account_info_data_len = new_account_info.data_len();
         let rent = if rent_sysvar_account {
             Rent::from_account_info(next_account_info(account_info_iter)?)?
         } else {
             Rent::get()?
         };
+        msg!("_process_initialize_account {}", line!());
 
+        // FIXME: InvalidAccountData
         let mut account = Account::unpack_unchecked(&new_account_info.data.borrow())?;
+        msg!("_process_initialize_account {}", line!());
         if account.is_initialized() {
             return Err(TokenError::AlreadyInUse.into());
         }
+        msg!("_process_initialize_account {}", line!());
 
         if !rent.is_exempt(new_account_info.satomis(), new_account_info_data_len) {
             return Err(TokenError::NotRentExempt.into());
@@ -221,6 +235,7 @@ impl Processor {
         };
 
         Account::pack(account, &mut new_account_info.data.borrow_mut())?;
+        msg!("_process_initialize_account {}", line!());
 
         Ok(())
     }
@@ -1070,6 +1085,7 @@ impl Processor {
     /// Checks that the account is owned by the expected program
     pub fn check_account_owner(program_id: &Pubkey, account_info: &AccountInfo) -> ProgramResult {
         if !Self::cmp_pubkeys(program_id, account_info.owner) {
+            msg!("check_account_owner: {:?} != {:?}", program_id, account_info.owner);
             Err(ProgramError::IncorrectProgramId)
         } else {
             Ok(())
