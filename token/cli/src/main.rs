@@ -104,7 +104,7 @@ pub const MULTISIG_SIGNER_ARG: ArgConstant<'static> = ArgConstant {
     help: "Member signer of a multisig account",
 };
 
-static VALID_TOKEN_PROGRAM_IDS: [Pubkey; 3] = [
+static VALID_TOKEN_PROGRAM_IDS: [Pubkey; 4] = [
     spl_token_2022::ID,
     spl_token::ID,
     spl_token_btci::ID,

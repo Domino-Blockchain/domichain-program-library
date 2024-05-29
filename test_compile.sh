@@ -79,7 +79,7 @@ cp ./ddex/dex/target/wasm32-wasi/release/serum_dex.wasm ./domichain-program-libr
 
 cp ./token-metadata/programs/token-metadata/target/wasm32-wasi/release/token_metadata.wasm ./domichain-program-library/token_metadata.wasm &
 
-cp ./mpl-inscription/programs/inscription/target/wasm32-wasi/release/mpl_inscription_program.wasm ./domichain-program-library/mpl_inscription_program.wasm &
+# cp ./mpl-inscription/programs/inscription/target/wasm32-wasi/release/mpl_inscription_program.wasm ./domichain-program-library/mpl_inscription_program.wasm &
 
 wait # Copying
 
