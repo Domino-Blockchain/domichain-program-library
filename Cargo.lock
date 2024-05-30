@@ -1710,6 +1710,7 @@ dependencies = [
  "spl-token 3.5.0",
  "spl-token-2022 0.6.1",
  "spl-token-btci",
+ "spl-token-usdt",
  "thiserror",
  "zstd",
 ]
@@ -7550,6 +7551,7 @@ dependencies = [
  "spl-memo 3.0.1",
  "spl-token 3.5.0",
  "spl-token-btci",
+ "spl-token-usdt",
  "thiserror",
 ]
 
@@ -7610,6 +7612,7 @@ dependencies = [
  "spl-token-2022 0.6.1",
  "spl-token-btci",
  "spl-token-client",
+ "spl-token-usdt",
  "strum",
  "strum_macros",
  "tempfile",
@@ -7631,6 +7634,7 @@ dependencies = [
  "spl-token 3.5.0",
  "spl-token-2022 0.6.1",
  "spl-token-btci",
+ "spl-token-usdt",
  "thiserror",
 ]
 
@@ -7737,6 +7741,19 @@ dependencies = [
  "spl-token-upgrade",
  "tokio",
  "walkdir",
+]
+
+[[package]]
+name = "spl-token-usdt"
+version = "3.5.0"
+dependencies = [
+ "arrayref",
+ "bytemuck",
+ "domichain-program",
+ "num-derive",
+ "num-traits",
+ "num_enum 0.5.9",
+ "thiserror",
 ]
 
 [[package]]

@@ -38,6 +38,8 @@ cargo wasi build --release --manifest-path associated-token-account/program/Carg
 ((n+=1))
 cargo wasi build --release --manifest-path token-swap/program/Cargo.toml --target-dir target_5 & # Token swap
 ((n+=1))
+cargo wasi build --release --manifest-path token/program-usdt/Cargo.toml --target-dir target_6 & # Token USDT
+((n+=1))
 cd -
 
 cd ./ddex/dex
@@ -70,13 +72,14 @@ cp ./target_2/wasm32-wasi/release/spl_token_2022.wasm ./spl_token-2022-0.6.1.was
 cp ./target_3/wasm32-wasi/release/spl_token_btci.wasm ./spl_token-btci-4.0.0.wasm &
 cp ./target_4/wasm32-wasi/release/spl_associated_token_account.wasm ./spl_associated-token-account-1.0.5.wasm &
 cp ./target_5/wasm32-wasi/release/spl_token_swap.wasm ./spl_token-swap-3.0.0.wasm &
+cp ./target_6/wasm32-wasi/release/spl_token_usdt.wasm ./spl_token-usdt-4.0.0.wasm &
 cd -
 
 cp ./ddex/dex/target/wasm32-wasi/release/serum_dex.wasm ./domichain-program-library/serum_dex.wasm &
 
 cp ./token-metadata/programs/token-metadata/target/wasm32-wasi/release/token_metadata.wasm ./domichain-program-library/token_metadata.wasm &
 
-cp ./mpl-inscription/programs/inscription/target/wasm32-wasi/release/mpl_inscription_program.wasm ./domichain-program-library/mpl_inscription_program.wasm &
+# cp ./mpl-inscription/programs/inscription/target/wasm32-wasi/release/mpl_inscription_program.wasm ./domichain-program-library/mpl_inscription_program.wasm &
 
 wait # Copying
 
