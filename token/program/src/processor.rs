@@ -1038,7 +1038,7 @@ mod tests {
         program_error::{self, PrintProgramError},
         sysvar::rent,
     };
-    use solana_sdk::account::{
+    use domichain_sdk::account::{
         create_account_for_test, create_is_signer_account_infos, Account as SolanaAccount,
     };
     use std::sync::{Arc, RwLock};
@@ -1052,7 +1052,7 @@ mod tests {
     }
 
     struct SyscallStubs {}
-    impl solana_sdk::program_stubs::SyscallStubs for SyscallStubs {
+    impl domichain_sdk::program_stubs::SyscallStubs for SyscallStubs {
         fn sol_log(&self, _message: &str) {}
 
         fn sol_invoke_signed(
@@ -1098,7 +1098,7 @@ mod tests {
             static ONCE: Once = Once::new();
 
             ONCE.call_once(|| {
-                solana_sdk::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
+                domichain_sdk::program_stubs::set_syscall_stubs(Box::new(SyscallStubs {}));
             });
         }
 

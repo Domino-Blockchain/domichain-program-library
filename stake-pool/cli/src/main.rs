@@ -535,7 +535,7 @@ fn command_increase_validator_stake(
     vote_account: &Pubkey,
     amount: f64,
 ) -> CommandResult {
-    let satomis = native_token::sol_to_satomis(amount);
+    let satomis = native_token::domi_to_satomis(amount);
     if !config.no_update {
         command_update(config, stake_pool_address, false, false)?;
     }
@@ -574,7 +574,7 @@ fn command_decrease_validator_stake(
     vote_account: &Pubkey,
     amount: f64,
 ) -> CommandResult {
-    let satomis = native_token::sol_to_satomis(amount);
+    let satomis = native_token::domi_to_satomis(amount);
     if !config.no_update {
         command_update(config, stake_pool_address, false, false)?;
     }
@@ -950,7 +950,7 @@ fn command_deposit_sol(
         command_update(config, stake_pool_address, false, false)?;
     }
 
-    let amount = native_token::sol_to_satomis(amount);
+    let amount = native_token::domi_to_satomis(amount);
 
     // Check withdraw_from balance
     let from_pubkey = from

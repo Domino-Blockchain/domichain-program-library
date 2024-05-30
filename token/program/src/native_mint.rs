@@ -14,10 +14,10 @@ mod tests {
     #[test]
     fn test_decimals() {
         assert!(
-            (satomis_to_sol(42) - crate::amount_to_ui_amount(42, DECIMALS)).abs() < f64::EPSILON
+            (satomis_to_domi(42) - crate::amount_to_ui_amount(42, DECIMALS)).abs() < f64::EPSILON
         );
         assert_eq!(
-            sol_to_satomis(42.),
+            domi_to_satomis(42.),
             crate::ui_amount_to_amount(42., DECIMALS)
         );
     }

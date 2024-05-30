@@ -50,10 +50,10 @@ cargo wasi build --release & # Token Metadata
 ((n+=1))
 cd -
 
-cd ./mpl-inscription/programs/inscription
-cargo wasi build --release & # MPL Inscription
-((n+=1))
-cd -
+# cd ./mpl-inscription/programs/inscription
+# cargo wasi build --release & # MPL Inscription
+# ((n+=1))
+# cd -
 
 for i in $(seq 1 $n);
     do wait -n || { pkill -P $$; sleep 0.5; echo FAILURE; exit 1; }
