@@ -30,13 +30,7 @@ n="0"
   --program-id ~/keys_spl_tokens/BTCi9FUjBVY3BSaqjzfhEPKVExuvarj8Gtfn4rJ5soLC.json &
 ((n+=1))
 
-# # FIXME: no key file
-# # USDTx3HDeSKemTNpycea2xxqJHQbo9veLvgWPTK1Vh1
-# ~/domichain/target/release/domichain-wasm program deploy \
-#   --url $URL \
-#   ./spl_token-usdt-4.0.0.wasm \
-#   --program-id ~/keys_spl_tokens/USDTx3HDeSKemTNpycea2xxqJHQbo9veLvgWPTK1Vh1.json &
-# ((n+=1))
+echo "WARNING: USDTx3HDeSKemTNpycea2xxqJHQbo9veLvgWPTK1Vh1 IS NOT DEPLOYED"
 
 # Dt8fRCpjeV6JDemhPmtcTKijgKdPxXHn9Wo9cXY5agtG
 ~/domichain/target/release/domichain-wasm program deploy \
