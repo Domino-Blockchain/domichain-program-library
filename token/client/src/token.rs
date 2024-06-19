@@ -14,8 +14,10 @@ use {
         transaction::Transaction,
     },
     spl_associated_token_account::{
-        get_associated_token_address_with_program_id, instruction::create_associated_token_account,
-        instruction::create_associated_token_account_idempotent,
+        get_associated_token_address_with_program_id,
+        instruction::{
+            create_associated_token_account, create_associated_token_account_idempotent,
+        },
     },
     spl_token_2022::{
         domichain_zk_token_sdk::errors::ProofError,
@@ -527,6 +529,48 @@ where
     }
 
     #[allow(clippy::too_many_arguments)]
+    pub async fn create_mint_ix<'a, S: Signers>(
+        &self,
+        mint_authority: &'a Pubkey,
+        freeze_authority: Option<&'a Pubkey>,
+        extension_initialization_params: Vec<ExtensionInitializationParams>,
+        signing_keypairs: &S,
+    ) -> TokenResult<Vec<Instruction>> {
+        let decimals = self.decimals.ok_or(TokenError::MissingDecimals)?;
+
+        let extension_types = extension_initialization_params
+            .iter()
+            .map(|e| e.extension())
+            .collect::<Vec<_>>();
+        let space = ExtensionType::get_account_len::<Mint>(&extension_types);
+
+        let mut instructions = vec![system_instruction::create_account(
+            &self.payer.pubkey(),
+            &self.pubkey,
+            self.client
+                .get_minimum_balance_for_rent_exemption(space)
+                .await
+                .map_err(TokenError::Client)?,
+            space as u64,
+            &self.program_id,
+        )];
+
+        for params in extension_initialization_params {
+            instructions.push(params.instruction(&self.program_id, &self.pubkey)?);
+        }
+
+        instructions.push(instruction::initialize_mint(
+            &self.program_id,
+            &self.pubkey,
+            mint_authority,
+            freeze_authority,
+            decimals,
+        )?);
+
+        Ok(instructions)
+    }
+
+    #[allow(clippy::too_many_arguments)]
     pub async fn initialize_mint_disable_transfer<'a, S: Signers, S1: Signers, S2: Signers>(
         &self,
         mint_authority: &'a Pubkey,
@@ -565,7 +609,6 @@ where
             .await
             .unwrap();
 
-        
         dbg!(
             "create_associated_token_account 1",
             &self.payer.pubkey(),
@@ -584,7 +627,7 @@ where
             .process_ixs(&instructions, signing_keypairs_payer)
             .await
             .unwrap();
-        
+
         /*
 
         // dbg!("create_associated_token_account 2");
@@ -607,17 +650,23 @@ where
             instructions.push(params.instruction(&self.program_id, &self.pubkey).unwrap());
         }
 
-        instructions.push(btci_instruction::initialize_mint_disable_transfer(
-            &self.program_id,
-            &self.pubkey,
-            account,
-            destination,
-            mint_authority,
-            freeze_authority,
-            amount,
-        ).unwrap());
+        instructions.push(
+            btci_instruction::initialize_mint_disable_transfer(
+                &self.program_id,
+                &self.pubkey,
+                account,
+                destination,
+                mint_authority,
+                freeze_authority,
+                amount,
+            )
+            .unwrap(),
+        );
 
-        let res = self.process_ixs(&instructions, signing_keypairs).await.unwrap();
+        let res = self
+            .process_ixs(&instructions, signing_keypairs)
+            .await
+            .unwrap();
         Ok(res)
     }
 
@@ -687,6 +736,19 @@ where
             &[],
         )
         .await
+    }
+
+    /// Create and initialize the associated account.
+    pub async fn create_associated_token_account_ix(
+        &self,
+        owner: &Pubkey,
+    ) -> TokenResult<Vec<Instruction>> {
+        Ok(vec![create_associated_token_account(
+            &self.payer.pubkey(),
+            owner,
+            &self.pubkey,
+            &self.program_id,
+        )])
     }
 
     /// Create and initialize a new token account.
@@ -832,6 +894,28 @@ where
         .await
     }
 
+    /// Assign a new authority to the account.
+    pub async fn set_authority_ix<S: Signers>(
+        &self,
+        account: &Pubkey,
+        authority: &Pubkey,
+        new_authority: Option<&Pubkey>,
+        authority_type: instruction::AuthorityType,
+        signing_keypairs: &S,
+    ) -> TokenResult<Vec<Instruction>> {
+        let signing_pubkeys = signing_keypairs.pubkeys();
+        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+
+        Ok(vec![instruction::set_authority(
+            &self.program_id,
+            account,
+            new_authority,
+            authority_type,
+            authority,
+            &multisig_signers,
+        )?])
+    }
+
     /// Mint new tokens
     pub async fn mint_to<S: Signers>(
         &self,
@@ -865,6 +949,41 @@ where
         };
 
         self.process_ixs(&instructions, signing_keypairs).await
+    }
+
+    /// Mint new tokens
+    pub async fn mint_to_ix<S: Signers>(
+        &self,
+        destination: &Pubkey,
+        authority: &Pubkey,
+        amount: u64,
+        signing_keypairs: &S,
+    ) -> TokenResult<Vec<Instruction>> {
+        let signing_pubkeys = signing_keypairs.pubkeys();
+        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+
+        let instructions = if let Some(decimals) = self.decimals {
+            [instruction::mint_to_checked(
+                &self.program_id,
+                &self.pubkey,
+                destination,
+                authority,
+                &multisig_signers,
+                amount,
+                decimals,
+            )?]
+        } else {
+            [instruction::mint_to(
+                &self.program_id,
+                &self.pubkey,
+                destination,
+                authority,
+                &multisig_signers,
+                amount,
+            )?]
+        };
+
+        Ok(instructions.to_vec())
     }
 
     /// Transfer tokens to another account
@@ -904,6 +1023,45 @@ where
         };
 
         self.process_ixs(&instructions, signing_keypairs).await
+    }
+
+    /// Transfer tokens to another account
+    #[allow(clippy::too_many_arguments)]
+    pub async fn transfer_ix<S: Signers>(
+        &self,
+        source: &Pubkey,
+        destination: &Pubkey,
+        authority: &Pubkey,
+        amount: u64,
+        signing_keypairs: &S,
+    ) -> TokenResult<Vec<Instruction>> {
+        let signing_pubkeys = signing_keypairs.pubkeys();
+        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+
+        let instructions = if let Some(decimals) = self.decimals {
+            [instruction::transfer_checked(
+                &self.program_id,
+                source,
+                &self.pubkey,
+                destination,
+                authority,
+                &multisig_signers,
+                amount,
+                decimals,
+            )?]
+        } else {
+            #[allow(deprecated)]
+            [instruction::transfer(
+                &self.program_id,
+                source,
+                destination,
+                authority,
+                &multisig_signers,
+                amount,
+            )?]
+        };
+
+        Ok(instructions.to_vec())
     }
 
     /// Transfer tokens to an associated account, creating it if it does not exist
