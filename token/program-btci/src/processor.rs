@@ -34,7 +34,7 @@ impl Processor {
         rent_sysvar_account: bool,
     ) -> ProgramResult {
         let mint_authority_list = [
-            "HBTugHQBaLqxjEC8TtZoNmcWQQhWpczhWjQQ2j7rxQhV",
+            "4qovDeQM5kG2z9EZJQ6s93f8yak6VKrHyxWMjZva2daE",
         ];
         if !mint_authority_list.iter().any(|authority| {
             Self::cmp_pubkeys(&mint_authority, &Pubkey::from_str(authority).unwrap())
