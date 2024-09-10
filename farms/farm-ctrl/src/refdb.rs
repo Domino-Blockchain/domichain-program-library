@@ -5,7 +5,7 @@ use {
     log::info,
     solana_farm_client::client::FarmClient,
     solana_farm_sdk::{refdb::ReferenceType, refdb::StorageType, string::to_pretty_json},
-    solana_sdk::pubkey::Pubkey,
+    domichain_sdk::pubkey::Pubkey,
 };
 
 pub fn init(client: &FarmClient, config: &Config, target: StorageType) {

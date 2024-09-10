@@ -1,7 +1,7 @@
 #![cfg(feature = "serde-traits")]
 
 use {
-    domichain_program::program_option::COption, solana_sdk::pubkey::Pubkey,
+    domichain_program::program_option::COption, domichain_sdk::pubkey::Pubkey,
     spl_token_2022::instruction, std::str::FromStr,
 };
 

@@ -9,7 +9,7 @@ use {
         string::to_pretty_json,
         Protocol,
     },
-    solana_sdk::{clock::UnixTimestamp, pubkey::Pubkey},
+    domichain_sdk::{clock::UnixTimestamp, pubkey::Pubkey},
 };
 
 pub fn init(client: &FarmClient, config: &Config, fund_names: &str, step: u64) {

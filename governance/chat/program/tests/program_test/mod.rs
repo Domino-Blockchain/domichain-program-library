@@ -3,7 +3,7 @@ use std::str::FromStr;
 use domichain_program::{program_error::ProgramError, pubkey::Pubkey};
 use domichain_program_test::{processor, ProgramTest};
 
-use solana_sdk::{signature::Keypair, signer::Signer};
+use domichain_sdk::{signature::Keypair, signer::Signer};
 use spl_governance::{
     instruction::{
         create_governance, create_proposal, create_realm, create_token_owner_record,

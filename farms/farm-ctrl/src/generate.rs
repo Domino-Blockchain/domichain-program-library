@@ -16,7 +16,7 @@ use {
         vault::{Vault, VaultStrategy, VaultType},
         Protocol,
     },
-    solana_sdk::pubkey::Pubkey,
+    domichain_sdk::pubkey::Pubkey,
     std::collections::HashMap,
     std::str::FromStr,
 };

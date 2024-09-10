@@ -40,7 +40,7 @@ mod tests {
     use domichain_program::{
         account_info::IntoAccountInfo, program_error::ProgramError, pubkey::Pubkey,
     };
-    use solana_sdk::account::Account;
+    use domichain_sdk::account::Account;
 
     #[test]
     fn test_utf8_memo() {

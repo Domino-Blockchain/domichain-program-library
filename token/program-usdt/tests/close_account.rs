@@ -2,7 +2,7 @@
 
 use {
     domichain_program_test::{processor, tokio, ProgramTest, ProgramTestContext},
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError,
         program_pack::Pack,
         pubkey::Pubkey,

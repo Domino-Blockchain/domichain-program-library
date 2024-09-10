@@ -5,7 +5,7 @@ use domichain_program_test::*;
 
 use crate::program_test::args::RealmSetupArgs;
 use program_test::*;
-use solana_sdk::signature::Keypair;
+use domichain_sdk::signature::Keypair;
 use spl_governance::{error::GovernanceError, state::enums::VoteThreshold};
 use spl_governance_tools::error::GovernanceToolsError;
 

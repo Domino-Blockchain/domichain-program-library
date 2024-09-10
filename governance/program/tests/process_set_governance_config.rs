@@ -4,7 +4,7 @@ mod program_test;
 
 use program_test::*;
 use domichain_program_test::tokio;
-use solana_sdk::{signature::Keypair, signer::Signer};
+use domichain_sdk::{signature::Keypair, signer::Signer};
 use spl_governance::{
     error::GovernanceError, instruction::set_governance_config, state::enums::VoteThreshold,
 };

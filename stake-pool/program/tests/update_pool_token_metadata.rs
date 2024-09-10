@@ -10,7 +10,7 @@ use {
     },
     domichain_program::instruction::InstructionError,
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
     },

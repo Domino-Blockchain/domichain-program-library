@@ -15,7 +15,7 @@ use {
         vault::Vault,
         ProgramIDType,
     },
-    solana_sdk::{
+    domichain_sdk::{
         bpf_loader_upgradeable,
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,

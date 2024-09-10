@@ -9,7 +9,7 @@ use {
     num_enum::TryFromPrimitive,
     solana_farm_client::client::FarmClient,
     solana_farm_sdk::{fund::FundVaultType, id::DAO_CUSTODY_NAME, token::TokenSelector},
-    solana_sdk::{bpf_loader_upgradeable, instruction::Instruction, pubkey::Pubkey},
+    domichain_sdk::{bpf_loader_upgradeable, instruction::Instruction, pubkey::Pubkey},
     spl_associated_token_account::create_associated_token_account,
     std::str::FromStr,
 };
@@ -19,7 +19,7 @@ fn main() {
 
     // set log verbosity level
     let log_level = "solana=".to_string() + matches.value_of("log_level").unwrap();
-    solana_logger::setup_with_default(log_level.as_str());
+    domichain_logger::setup_with_default(log_level.as_str());
 
     // load config params
     let config = config::Config::new(&matches);

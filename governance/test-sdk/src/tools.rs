@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use domichain_program::{instruction::InstructionError, program_error::ProgramError};
-use solana_sdk::{signature::Keypair, transaction::TransactionError, transport::TransportError};
+use domichain_sdk::{signature::Keypair, transaction::TransactionError, transport::TransportError};
 
 /// TODO: Add to Solana SDK
 /// Instruction errors not mapped in the sdk

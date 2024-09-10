@@ -6,7 +6,7 @@ use {
         instruction::vault::VaultInstruction, pool::PoolRoute, program::multisig::Multisig,
         token::TokenSelector, vault::VaultStrategy,
     },
-    solana_sdk::{
+    domichain_sdk::{
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         pubkey::Pubkey,

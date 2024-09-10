@@ -6,7 +6,7 @@ use domichain_program_test::*;
 mod program_test;
 
 use program_test::*;
-use solana_sdk::signature::{Keypair, Signer};
+use domichain_sdk::signature::{Keypair, Signer};
 use spl_governance::{error::GovernanceError, instruction::set_governance_delegate};
 
 #[tokio::test]

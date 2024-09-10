@@ -8,7 +8,7 @@ use {
         tokio::{self, sync::Mutex},
         ProgramTest,
     },
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError, pubkey::Pubkey, signature::Signer, signer::keypair::Keypair,
         transaction::TransactionError, transport::TransportError,
     },

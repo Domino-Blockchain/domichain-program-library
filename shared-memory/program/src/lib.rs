@@ -39,7 +39,7 @@ fn fast_copy(mut src: &[u8], mut dst: &mut [u8]) {
 
 /// Deserializes only the particular input parameters that the shared memory
 /// program uses.  For more information about the format of the serialized input
-/// parameters see `solana_sdk::entrypoint::deserialize`
+/// parameters see `domichain_sdk::entrypoint::deserialize`
 unsafe fn deserialize_input_parameters<'a>(
     input: *mut u8,
 ) -> Result<(&'a mut [u8], &'a [u8]), u64> {
@@ -88,7 +88,7 @@ unsafe fn deserialize_input_parameters<'a>(
 ///
 /// This program uses the raw Solana runtime's entrypoint which takes a pointer
 /// to serialized input parameters.  For more information about the format of
-/// the serialized input parameters see `solana_sdk::entrypoint::deserialize`
+/// the serialized input parameters see `domichain_sdk::entrypoint::deserialize`
 ///
 /// # Safety
 #[no_mangle]

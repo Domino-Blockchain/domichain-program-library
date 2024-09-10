@@ -13,7 +13,7 @@ use {
         stake, system_instruction, system_program,
     },
     domichain_program_test::{processor, BanksClient, ProgramTest, ProgramTestContext},
-    solana_sdk::{
+    domichain_sdk::{
         account::{Account as SolanaAccount, WritableAccount},
         clock::{Clock, Epoch},
         compute_budget::ComputeBudgetInstruction,

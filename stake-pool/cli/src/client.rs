@@ -1,7 +1,7 @@
 use {
     bincode::deserialize,
     solana_account_decoder::UiAccountEncoding,
-    solana_client::{
+    domichain_client::{
         client_error::ClientError,
         rpc_client::RpcClient,
         rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},

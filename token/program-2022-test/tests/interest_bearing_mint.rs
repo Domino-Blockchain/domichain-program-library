@@ -8,7 +8,7 @@ use {
         tokio::{self, sync::Mutex},
         ProgramTest,
     },
-    solana_sdk::{
+    domichain_sdk::{
         account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
         instruction::{AccountMeta, Instruction, InstructionError},

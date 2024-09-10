@@ -14,7 +14,7 @@ mod fund_stats;
 use {
     clap::{crate_description, crate_name, App, Arg},
     log::{debug, info},
-    solana_clap_utils::input_validators::is_url,
+    domichain_clap_utils::input_validators::is_url,
     url::Url,
 };
 
@@ -117,7 +117,7 @@ async fn main() {
     if let Some(level) = matches.value_of("log_level") {
         log_level = "solana=".to_string() + level;
     }
-    solana_logger::setup_with_default(log_level.as_str());
+    domichain_logger::setup_with_default(log_level.as_str());
 
     info!("Loading configuration...");
 

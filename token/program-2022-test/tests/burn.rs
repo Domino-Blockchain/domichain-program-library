@@ -4,7 +4,7 @@ mod program_test;
 use {
     program_test::{TestContext, TokenContext},
     domichain_program_test::tokio,
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError, pubkey::Pubkey, signature::Signer, signer::keypair::Keypair,
         transaction::TransactionError, transport::TransportError,
     },

@@ -7,7 +7,7 @@ use {
     helpers::*,
     domichain_program::{borsh::try_from_slice_unchecked, pubkey::Pubkey, stake},
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         native_token::SATOMIS_PER_SOL,
         signature::{Keypair, Signer},
         transaction::Transaction,

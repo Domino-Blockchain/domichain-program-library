@@ -10,7 +10,7 @@ use {
         clock::Epoch, hash::Hash, instruction::InstructionError, pubkey::Pubkey, stake,
     },
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         signature::{Keypair, Signer},
         stake::instruction::StakeError,
         transaction::{Transaction, TransactionError},

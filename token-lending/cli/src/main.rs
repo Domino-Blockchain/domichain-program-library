@@ -4,15 +4,15 @@ use {
         crate_description, crate_name, crate_version, value_t, App, AppSettings, Arg, ArgMatches,
         SubCommand,
     },
-    solana_clap_utils::{
+    domichain_clap_utils::{
         fee_payer::fee_payer_arg,
         input_parsers::{keypair_of, pubkey_of, value_of},
         input_validators::{is_amount, is_keypair, is_parsable, is_pubkey, is_url},
         keypair::signer_from_path,
     },
-    solana_client::rpc_client::RpcClient,
+    domichain_client::rpc_client::RpcClient,
     domichain_program::{native_token::satomis_to_domi, program_pack::Pack, pubkey::Pubkey},
-    solana_sdk::{
+    domichain_sdk::{
         commitment_config::CommitmentConfig,
         message::Message,
         signature::{Keypair, Signer},
@@ -48,7 +48,7 @@ type CommandResult = Result<(), Error>;
 const PYTH_PROGRAM_ID: &str = "gSbePebfvPy7tRqimPoVecS2UsBvYv46ynrzWocc92s";
 
 fn main() {
-    solana_logger::setup_with_default("solana=info");
+    domichain_logger::setup_with_default("solana=info");
 
     let default_lending_program_id: &str = &spl_token_lending::id().to_string();
 
@@ -64,7 +64,7 @@ fn main() {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
                 arg.default_value(config_file)
             } else {
                 arg
@@ -315,9 +315,9 @@ fn main() {
     let mut wallet_manager = None;
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            domichain_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
         let json_rpc_url = value_t!(matches, "json_rpc_url", String)
             .unwrap_or_else(|_| cli_config.json_rpc_url.clone());
@@ -711,7 +711,7 @@ fn check_fee_payer_balance(config: &Config, required_balance: u64) -> Result<(),
 fn send_transaction(
     config: &Config,
     transaction: Transaction,
-) -> solana_client::client_error::Result<()> {
+) -> domichain_client::client_error::Result<()> {
     if config.dry_run {
         let result = config.rpc_client.simulate_transaction(&transaction)?;
         println!("Simulate result: {:?}", result);

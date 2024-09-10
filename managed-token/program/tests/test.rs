@@ -1,6 +1,6 @@
 use domichain_program::program_option::COption;
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     commitment_config::CommitmentLevel,
     instruction::Instruction,
     native_token::SATOMIS_PER_SOL,

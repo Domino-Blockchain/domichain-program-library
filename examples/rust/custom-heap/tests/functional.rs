@@ -1,7 +1,7 @@
 use {
     domichain_program::{instruction::Instruction, pubkey::Pubkey},
     domichain_program_test::*,
-    solana_sdk::{signature::Signer, transaction::Transaction},
+    domichain_sdk::{signature::Signer, transaction::Transaction},
     spl_example_custom_heap::processor::process_instruction,
     std::str::FromStr,
 };

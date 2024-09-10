@@ -7,7 +7,7 @@ use {
     helpers::*,
     domichain_program::{borsh::try_from_slice_unchecked, program_pack::Pack, pubkey::Pubkey},
     domichain_program_test::*,
-    solana_sdk::{hash::Hash, signature::Signer, stake::state::StakeState},
+    domichain_sdk::{hash::Hash, signature::Signer, stake::state::StakeState},
     spl_stake_pool::{
         state::{StakePool, StakeStatus, ValidatorList},
         MAX_VALIDATORS_TO_UPDATE, MINIMUM_RESERVE_SATOMIS,

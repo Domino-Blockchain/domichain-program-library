@@ -6,7 +6,7 @@ mod helpers;
 use helpers::*;
 use domichain_program::pubkey::Pubkey;
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     instruction::InstructionError,
     signature::{read_keypair_file, Keypair, Signer},
     transaction::{Transaction, TransactionError},

@@ -5,7 +5,7 @@ mod program_test;
 use {
     program_test::{TestContext, TokenContext},
     domichain_program_test::tokio,
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError, pubkey::Pubkey, signature::Signer, signer::keypair::Keypair,
         transaction::TransactionError, transport::TransportError,
     },
@@ -32,7 +32,7 @@ use {
 };
 
 #[cfg(feature = "zk-ops")]
-use {solana_sdk::epoch_info::EpochInfo, spl_token_2022::solana_zk_token_sdk::zk_token_elgamal};
+use {domichain_sdk::epoch_info::EpochInfo, spl_token_2022::solana_zk_token_sdk::zk_token_elgamal};
 
 #[cfg(feature = "zk-ops")]
 const TEST_MAXIMUM_FEE: u64 = 100;

@@ -7,7 +7,7 @@ use {
     helpers::*,
     domichain_program::hash::Hash,
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         borsh::try_from_slice_unchecked,
         instruction::InstructionError,
         pubkey::Pubkey,

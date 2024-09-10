@@ -9,7 +9,7 @@ use {
         system_program,
     },
     domichain_program_test::*,
-    solana_sdk::{account::Account, signature::Signer, transaction::Transaction},
+    domichain_sdk::{account::Account, signature::Signer, transaction::Transaction},
     spl_example_cross_program_invocation::processor::{process_instruction, SIZE},
     std::str::FromStr,
 };

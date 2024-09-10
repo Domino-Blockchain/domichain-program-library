@@ -13,7 +13,7 @@ use {
         stake, system_instruction, sysvar,
     },
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
         transport::TransportError,

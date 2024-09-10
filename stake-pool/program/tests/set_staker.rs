@@ -12,7 +12,7 @@ use {
         instruction::{AccountMeta, Instruction},
     },
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError,
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},

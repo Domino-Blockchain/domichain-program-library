@@ -1287,7 +1287,7 @@ mod tests {
         clock::Clock, entrypoint::SUCCESS, instruction::Instruction, program_pack::Pack,
         program_stubs, rent::Rent,
     };
-    use solana_sdk::account::{
+    use domichain_sdk::account::{
         create_account_for_test, create_is_signer_account_infos, Account as SolanaAccount,
     };
     use spl_token_2022::{

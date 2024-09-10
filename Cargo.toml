@@ -27,9 +27,9 @@ members = [
   "managed-token/program",
   "record/program",
   "shared-memory/program",
-  "stake-pool/cli",
-  "stake-pool/program",
-  "stateless-asks/program",
+  # "stake-pool/cli",
+  # "stake-pool/program",
+  # "stateless-asks/program",
   "token-lending/cli",
   "token-lending/program",
   "token-swap/program",
@@ -57,6 +57,9 @@ exclude = [
   "farms/router-saber",
   "farms/router-orca",
   "farms/vaults",
+  "stake-pool/cli",
+  "stake-pool/program",
+  "stateless-asks/program",
 ]
 
 [profile.dev]

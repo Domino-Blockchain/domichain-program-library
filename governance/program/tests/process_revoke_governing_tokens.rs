@@ -14,7 +14,7 @@ use spl_governance::{
 use spl_governance_test_sdk::tools::{clone_keypair, NopOverride};
 
 use crate::program_test::args::RealmSetupArgs;
-use solana_sdk::signature::{Keypair, Signer};
+use domichain_sdk::signature::{Keypair, Signer};
 
 #[tokio::test]
 async fn test_revoke_community_tokens() {

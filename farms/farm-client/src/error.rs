@@ -1,8 +1,8 @@
 use {
     pyth_client::PythError,
     solana_account_decoder::parse_account_data::ParseAccountError,
-    solana_client::client_error::ClientError,
-    solana_sdk::{program_error::ProgramError, pubkey::PubkeyError},
+    domichain_client::client_error::ClientError,
+    domichain_sdk::{program_error::ProgramError, pubkey::PubkeyError},
     thiserror::Error,
 };
 

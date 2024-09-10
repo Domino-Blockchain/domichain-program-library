@@ -2,7 +2,7 @@
 
 use {
     solana_farm_client::client::FarmClient,
-    solana_sdk::{
+    domichain_sdk::{
         clock::UnixTimestamp, pubkey::Pubkey, signature::Keypair,
         signer::keypair::read_keypair_file,
     },
@@ -10,10 +10,10 @@ use {
 
 #[allow(dead_code)]
 pub fn get_endpoint_and_keypair() -> (String, Keypair) {
-    let cli_config = if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
-        solana_cli_config::Config::load(config_file).unwrap()
+    let cli_config = if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
+        domichain_cli_config::Config::load(config_file).unwrap()
     } else {
-        solana_cli_config::Config::default()
+        domichain_cli_config::Config::default()
     };
 
     (

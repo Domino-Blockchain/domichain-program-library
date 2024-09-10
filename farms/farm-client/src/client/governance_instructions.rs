@@ -6,7 +6,7 @@ use {
         id::{DAO_PROGRAM_NAME, DAO_TOKEN_NAME},
         token::Token,
     },
-    solana_sdk::{borsh::try_from_slice_unchecked, instruction::Instruction, pubkey::Pubkey},
+    domichain_sdk::{borsh::try_from_slice_unchecked, instruction::Instruction, pubkey::Pubkey},
     spl_governance::instruction as dao_instruction,
     spl_governance::state::{
         governance::GovernanceConfig,

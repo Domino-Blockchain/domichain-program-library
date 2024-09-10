@@ -13,7 +13,7 @@ mod remove;
 mod vault;
 
 use {
-    log::error, solana_farm_client::client::FarmClient, solana_sdk::pubkey::Pubkey,
+    log::error, solana_farm_client::client::FarmClient, domichain_sdk::pubkey::Pubkey,
     std::str::FromStr,
 };
 
@@ -22,7 +22,7 @@ fn main() {
 
     // set log verbosity level
     let log_level = "solana=".to_string() + matches.value_of("log_level").unwrap();
-    solana_logger::setup_with_default(log_level.as_str());
+    domichain_logger::setup_with_default(log_level.as_str());
 
     // load config params
     let config = config::Config::new(&matches);

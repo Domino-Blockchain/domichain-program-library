@@ -16,7 +16,7 @@ use {
         token::OracleType,
         vault::VaultStrategy,
     },
-    solana_sdk::{
+    domichain_sdk::{
         instruction::{AccountMeta, Instruction},
         program_error::ProgramError,
         pubkey::Pubkey,

@@ -7,7 +7,7 @@ use {
         instruction::{amm::AmmInstruction, fund::FundInstruction, vault::VaultInstruction},
         Protocol,
     },
-    solana_sdk::{
+    domichain_sdk::{
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
         sysvar,

@@ -6,7 +6,7 @@ use {
     program_test::program_test_2022,
     domichain_program::{instruction::*, pubkey::Pubkey},
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         account::Account as SolanaAccount,
         program_option::COption,
         program_pack::Pack,

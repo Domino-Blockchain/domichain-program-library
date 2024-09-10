@@ -16,7 +16,7 @@ debug = []
 domichain-farm-sdk = { path = "../../farms/farm-sdk" }
 domichain-program = { path = "../../../domichain/sdk/program" }
 solana-security-txt = "1.0.1"
-spl-token = { version = "3.2.0", features = ["no-entrypoint"] }
+spl-token = { version = "3.2.0", path = "../../token/program", features = ["no-entrypoint"] }
 num_enum = "0.5.7"
 
 [dev-dependencies]

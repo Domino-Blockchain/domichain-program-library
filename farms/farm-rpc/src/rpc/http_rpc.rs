@@ -37,7 +37,7 @@ use {
         vault::{Vault, VaultInfo, VaultUserInfo},
         ProtocolInfo,
     },
-    solana_sdk::{
+    domichain_sdk::{
         commitment_config::CommitmentConfig, instruction::Instruction, pubkey::Pubkey,
         signature::Keypair,
     },

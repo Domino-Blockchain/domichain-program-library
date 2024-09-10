@@ -3,7 +3,7 @@
 use {
     crate::error::FarmClientError,
     solana_farm_sdk::{farm::FarmRoute, instruction::amm::AmmInstruction},
-    solana_sdk::{instruction::Instruction, pubkey::Pubkey},
+    domichain_sdk::{instruction::Instruction, pubkey::Pubkey},
 };
 
 use super::FarmClient;
