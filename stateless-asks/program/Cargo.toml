@@ -11,11 +11,10 @@ no-entrypoint = []
 test-sbf = []
 
 [dependencies]
-borsh = "0.10.3"
+borsh = "0.10"
 domichain-program = { path = "../../../domichain/sdk/program" }
 spl-token = { version = "3.5", path = "../../token/program", features = ["no-entrypoint"] }
 spl-associated-token-account = {version = "1.1", path = "../../associated-token-account/program", features = ["no-entrypoint"]}
-metaplex-token-metadata = { version = "0.0.1", features = ["no-entrypoint"] }
 thiserror = "1.0"
 
 [dev-dependencies]

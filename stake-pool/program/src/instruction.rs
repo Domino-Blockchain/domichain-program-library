@@ -7,11 +7,11 @@ use {
         find_deposit_authority_program_address, find_ephemeral_stake_program_address,
         find_stake_program_address, find_transient_stake_program_address,
         find_withdraw_authority_program_address,
+        inline_mpl_token_metadata::{self, pda::find_metadata_account},
         state::{Fee, FeeType, StakePool, ValidatorList},
         MAX_VALIDATORS_TO_UPDATE,
     },
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    mpl_token_metadata::pda::find_metadata_account,
     domichain_program::{
         instruction::{AccountMeta, Instruction},
         pubkey::Pubkey,
@@ -112,11 +112,14 @@ pub enum StakePoolInstruction {
     ///   2. `[]` Stake pool withdraw authority
     ///   3. `[w]` Validator stake list storage account
     ///   4. `[w]` Stake account to remove from the pool
-    ///   5. `[]` Transient stake account, to check that that we're not trying to activate
+    ///   5. `[w]` Transient stake account, to deactivate if necessary
     ///   6. `[]` Sysvar clock
     ///   7. `[]` Stake program id,
     RemoveValidatorFromPool,
 
+    /// NOTE: This instruction has been deprecated since version 0.7.0. Please
+    /// use `DecreaseValidatorStakeWithReserve` instead.
+    ///
     /// (Staker only) Decrease active stake on a validator, eventually moving it to the reserve
     ///
     /// Internally, this instruction splits a validator stake account into its
@@ -446,24 +449,28 @@ pub enum StakePoolInstruction {
     ///
     /// Works regardless if the transient stake account already exists.
     ///
-    /// Internally, this instruction splits a validator stake account into an
-    /// ephemeral stake account, deactivates it, then merges or splits it into
-    /// the transient stake account delegated to the appropriate validator.
+    /// Internally, this instruction:
+    ///  * withdraws rent-exempt reserve satomis from the reserve into the ephemeral stake
+    ///  * splits a validator stake account into an ephemeral stake account
+    ///  * deactivates the ephemeral account
+    ///  * merges or splits the ephemeral account into the transient stake account
+    ///    delegated to the appropriate validator
     ///
-    ///  The amount of satomis to move must be at least rent-exemption plus
+    ///  The amount of satomis to move must be at least
     /// `max(crate::MINIMUM_ACTIVE_STAKE, domichain_program::stake::tools::get_minimum_delegation())`.
     ///
     ///  0. `[]` Stake pool
     ///  1. `[s]` Stake pool staker
     ///  2. `[]` Stake pool withdraw authority
     ///  3. `[w]` Validator list
-    ///  4. `[w]` Canonical stake account to split from
-    ///  5. `[w]` Uninitialized ephemeral stake account to receive stake
-    ///  6. `[w]` Transient stake account
-    ///  7. `[]` Clock sysvar
-    ///  8. '[]' Stake history sysvar
-    ///  9. `[]` System program
-    /// 10. `[]` Stake program
+    ///  4. `[w]` Reserve stake account, to fund rent exempt reserve
+    ///  5. `[w]` Canonical stake account to split from
+    ///  6. `[w]` Uninitialized ephemeral stake account to receive stake
+    ///  7. `[w]` Transient stake account
+    ///  8. `[]` Clock sysvar
+    ///  9. '[]' Stake history sysvar
+    /// 10. `[]` System program
+    /// 11. `[]` Stake program
     DecreaseAdditionalValidatorStake {
         /// amount of satomis to split into the transient stake account
         satomis: u64,
@@ -471,6 +478,40 @@ pub enum StakePoolInstruction {
         transient_stake_seed: u64,
         /// seed used to create ephemeral account.
         ephemeral_stake_seed: u64,
+    },
+
+    /// (Staker only) Decrease active stake on a validator, eventually moving it to the reserve
+    ///
+    /// Internally, this instruction:
+    /// * withdraws enough satomis to make the transient account rent-exempt
+    /// * splits from a validator stake account into a transient stake account
+    /// * deactivates the transient stake account
+    ///
+    /// In order to rebalance the pool without taking custody, the staker needs
+    /// a way of reducing the stake on a stake account. This instruction splits
+    /// some amount of stake, up to the total activated stake, from the canonical
+    /// validator stake account, into its "transient" stake account.
+    ///
+    /// The instruction only succeeds if the transient stake account does not
+    /// exist. The amount of satomis to move must be at least rent-exemption plus
+    /// `max(crate::MINIMUM_ACTIVE_STAKE, domichain_program::stake::tools::get_minimum_delegation())`.
+    ///
+    ///  0. `[]` Stake pool
+    ///  1. `[s]` Stake pool staker
+    ///  2. `[]` Stake pool withdraw authority
+    ///  3. `[w]` Validator list
+    ///  4. `[w]` Reserve stake account, to fund rent exempt reserve
+    ///  5. `[w]` Canonical stake account to split from
+    ///  6. `[w]` Transient stake account to receive split
+    ///  7. `[]` Clock sysvar
+    ///  8. '[]' Stake history sysvar
+    ///  9. `[]` System program
+    /// 10. `[]` Stake program
+    DecreaseValidatorStakeWithReserve {
+        /// amount of satomis to split into the transient stake account
+        satomis: u64,
+        /// seed used to create transient stake account
+        transient_stake_seed: u64,
     },
 
     /// (Staker only) Redelegate active stake on a validator, eventually moving it to another
@@ -487,34 +528,36 @@ pub enum StakePoolInstruction {
     /// The instruction only succeeds if the source transient stake account and
     /// ephemeral stake account do not exist.
     ///
-    /// The amount of satomis to move must be at least twice rent-exemption
-    /// plus the minimum delegation amount. Rent-exemption is required for the
-    /// source transient stake account, and rent-exemption plus minimum delegation
+    /// The amount of satomis to move must be at least rent-exemption plus the
+    /// minimum delegation amount. Rent-exemption plus minimum delegation
     /// is required for the destination ephemeral stake account.
     ///
+    /// The rent-exemption for the source transient account comes from the stake
+    /// pool reserve, if needed.
+    ///
     /// The amount that arrives at the destination validator in the end is
-    /// `redelegate_satomis - 2 * rent_exemption` if the destination transient
-    /// account does *not* exist, and `redelegate_satomis - rent_exemption` if
-    /// the destination transient account already exists. One `rent_exemption`
-    /// is deactivated with the source transient account during redelegation,
-    /// and another `rent_exemption` is deactivated when creating the destination
-    /// transient stake account.
+    /// `redelegate_satomis - rent_exemption` if the destination transient
+    /// account does *not* exist, and `redelegate_satomis` if the destination
+    /// transient account already exists. The `rent_exemption` is not activated
+    /// when creating the destination transient stake account, but if it already
+    /// exists, then the full amount is delegated.
     ///
     ///  0. `[]` Stake pool
     ///  1. `[s]` Stake pool staker
     ///  2. `[]` Stake pool withdraw authority
     ///  3. `[w]` Validator list
-    ///  4. `[w]` Source canonical stake account to split from
-    ///  5. `[w]` Source transient stake account to receive split and be redelegated
-    ///  6. `[w]` Uninitialized ephemeral stake account to receive redelegation
-    ///  7. `[w]` Destination transient stake account to receive ephemeral stake by merge
-    ///  8. `[]` Destination stake account to receive transient stake after activation
-    ///  9. `[]` Destination validator vote account
-    /// 10. `[]` Clock sysvar
-    /// 11. `[]` Stake History sysvar
-    /// 12. `[]` Stake Config sysvar
-    /// 13. `[]` System program
-    /// 14. `[]` Stake program
+    ///  4. `[w]` Reserve stake account, to withdraw rent exempt reserve
+    ///  5. `[w]` Source canonical stake account to split from
+    ///  6. `[w]` Source transient stake account to receive split and be redelegated
+    ///  7. `[w]` Uninitialized ephemeral stake account to receive redelegation
+    ///  8. `[w]` Destination transient stake account to receive ephemeral stake by merge
+    ///  9. `[]` Destination stake account to receive transient stake after activation
+    /// 10. `[]` Destination validator vote account
+    /// 11. `[]` Clock sysvar
+    /// 12. `[]` Stake History sysvar
+    /// 13. `[]` Stake Config sysvar
+    /// 14. `[]` System program
+    /// 15. `[]` Stake program
     Redelegate {
         /// Amount of satomis to redelegate
         #[allow(dead_code)] // but it's not
@@ -703,6 +746,7 @@ pub fn add_validator_to_pool(
         AccountMeta::new_readonly(sysvar::rent::id(), false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(sysvar::stake_history::id(), false),
+        #[allow(deprecated)]
         AccountMeta::new_readonly(stake::config::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(stake::program::id(), false),
@@ -733,7 +777,7 @@ pub fn remove_validator_from_pool(
         AccountMeta::new_readonly(*stake_pool_withdraw, false),
         AccountMeta::new(*validator_list, false),
         AccountMeta::new(*stake_account, false),
-        AccountMeta::new_readonly(*transient_stake_account, false),
+        AccountMeta::new(*transient_stake_account, false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(stake::program::id(), false),
     ];
@@ -748,6 +792,10 @@ pub fn remove_validator_from_pool(
 
 /// Creates `DecreaseValidatorStake` instruction (rebalance from validator account to
 /// transient account)
+#[deprecated(
+    since = "0.7.0",
+    note = "please use `decrease_validator_stake_with_reserve`"
+)]
 pub fn decrease_validator_stake(
     program_id: &Pubkey,
     stake_pool: &Pubkey,
@@ -791,6 +839,7 @@ pub fn decrease_additional_validator_stake(
     staker: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     validator_list: &Pubkey,
+    reserve_stake: &Pubkey,
     validator_stake: &Pubkey,
     ephemeral_stake: &Pubkey,
     transient_stake: &Pubkey,
@@ -803,6 +852,7 @@ pub fn decrease_additional_validator_stake(
         AccountMeta::new_readonly(*staker, true),
         AccountMeta::new_readonly(*stake_pool_withdraw_authority, false),
         AccountMeta::new(*validator_list, false),
+        AccountMeta::new(*reserve_stake, false),
         AccountMeta::new(*validator_stake, false),
         AccountMeta::new(*ephemeral_stake, false),
         AccountMeta::new(*transient_stake, false),
@@ -818,6 +868,45 @@ pub fn decrease_additional_validator_stake(
             satomis,
             transient_stake_seed,
             ephemeral_stake_seed,
+        }
+        .try_to_vec()
+        .unwrap(),
+    }
+}
+
+/// Creates `DecreaseValidatorStakeWithReserve` instruction (rebalance from
+/// validator account to transient account)
+pub fn decrease_validator_stake_with_reserve(
+    program_id: &Pubkey,
+    stake_pool: &Pubkey,
+    staker: &Pubkey,
+    stake_pool_withdraw_authority: &Pubkey,
+    validator_list: &Pubkey,
+    reserve_stake: &Pubkey,
+    validator_stake: &Pubkey,
+    transient_stake: &Pubkey,
+    satomis: u64,
+    transient_stake_seed: u64,
+) -> Instruction {
+    let accounts = vec![
+        AccountMeta::new_readonly(*stake_pool, false),
+        AccountMeta::new_readonly(*staker, true),
+        AccountMeta::new_readonly(*stake_pool_withdraw_authority, false),
+        AccountMeta::new(*validator_list, false),
+        AccountMeta::new(*reserve_stake, false),
+        AccountMeta::new(*validator_stake, false),
+        AccountMeta::new(*transient_stake, false),
+        AccountMeta::new_readonly(sysvar::clock::id(), false),
+        AccountMeta::new_readonly(sysvar::stake_history::id(), false),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(stake::program::id(), false),
+    ];
+    Instruction {
+        program_id: *program_id,
+        accounts,
+        data: StakePoolInstruction::DecreaseValidatorStakeWithReserve {
+            satomis,
+            transient_stake_seed,
         }
         .try_to_vec()
         .unwrap(),
@@ -851,6 +940,7 @@ pub fn increase_validator_stake(
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(sysvar::rent::id(), false),
         AccountMeta::new_readonly(sysvar::stake_history::id(), false),
+        #[allow(deprecated)]
         AccountMeta::new_readonly(stake::config::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(stake::program::id(), false),
@@ -896,6 +986,7 @@ pub fn increase_additional_validator_stake(
         AccountMeta::new_readonly(*validator, false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(sysvar::stake_history::id(), false),
+        #[allow(deprecated)]
         AccountMeta::new_readonly(stake::config::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(stake::program::id(), false),
@@ -920,6 +1011,7 @@ pub fn redelegate(
     staker: &Pubkey,
     stake_pool_withdraw_authority: &Pubkey,
     validator_list: &Pubkey,
+    reserve_stake: &Pubkey,
     source_validator_stake: &Pubkey,
     source_transient_stake: &Pubkey,
     ephemeral_stake: &Pubkey,
@@ -936,6 +1028,7 @@ pub fn redelegate(
         AccountMeta::new_readonly(*staker, true),
         AccountMeta::new_readonly(*stake_pool_withdraw_authority, false),
         AccountMeta::new(*validator_list, false),
+        AccountMeta::new(*reserve_stake, false),
         AccountMeta::new(*source_validator_stake, false),
         AccountMeta::new(*source_transient_stake, false),
         AccountMeta::new(*ephemeral_stake, false),
@@ -944,6 +1037,7 @@ pub fn redelegate(
         AccountMeta::new_readonly(*validator, false),
         AccountMeta::new_readonly(sysvar::clock::id(), false),
         AccountMeta::new_readonly(sysvar::stake_history::id(), false),
+        #[allow(deprecated)]
         AccountMeta::new_readonly(stake::config::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
         AccountMeta::new_readonly(stake::program::id(), false),
@@ -1160,12 +1254,13 @@ pub fn decrease_validator_stake_with_vote(
         stake_pool_address,
         transient_stake_seed,
     );
-    decrease_validator_stake(
+    decrease_validator_stake_with_reserve(
         program_id,
         stake_pool_address,
         &stake_pool.staker,
         &pool_withdraw_authority,
         &stake_pool.validator_list,
+        &stake_pool.reserve_stake,
         &validator_stake_address,
         &transient_stake_address,
         satomis,
@@ -1207,6 +1302,7 @@ pub fn decrease_additional_validator_stake_with_vote(
         &stake_pool.staker,
         &pool_withdraw_authority,
         &stake_pool.validator_list,
+        &stake_pool.reserve_stake,
         &validator_stake_address,
         &ephemeral_stake_address,
         &transient_stake_address,
@@ -1247,13 +1343,13 @@ pub fn update_validator_list_balance(
                         program_id,
                         vote_account_address,
                         stake_pool,
-                        NonZeroU32::new(validator_stake_info.validator_seed_suffix),
+                        NonZeroU32::new(validator_stake_info.validator_seed_suffix.into()),
                     );
                     let (transient_stake_account, _) = find_transient_stake_program_address(
                         program_id,
                         vote_account_address,
                         stake_pool,
-                        validator_stake_info.transient_seed_suffix,
+                        validator_stake_info.transient_seed_suffix.into(),
                     );
                     vec![
                         AccountMeta::new(validator_stake_account, false),
@@ -2228,7 +2324,7 @@ pub fn update_token_metadata(
         AccountMeta::new_readonly(*manager, true),
         AccountMeta::new_readonly(stake_pool_withdraw_authority, false),
         AccountMeta::new(token_metadata, false),
-        AccountMeta::new_readonly(mpl_token_metadata::id(), false),
+        AccountMeta::new_readonly(inline_mpl_token_metadata::id(), false),
     ];
 
     Instruction {
@@ -2263,7 +2359,7 @@ pub fn create_token_metadata(
         AccountMeta::new_readonly(*pool_mint, false),
         AccountMeta::new(*payer, true),
         AccountMeta::new(token_metadata, false),
-        AccountMeta::new_readonly(mpl_token_metadata::id(), false),
+        AccountMeta::new_readonly(inline_mpl_token_metadata::id(), false),
         AccountMeta::new_readonly(system_program::id(), false),
     ];
 

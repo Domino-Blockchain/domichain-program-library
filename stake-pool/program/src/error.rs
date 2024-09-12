@@ -88,8 +88,8 @@ pub enum StakePoolError {
     #[error("NonZeroPoolTokenSupply")]
     NonZeroPoolTokenSupply,
     /// The satomis in the validator stake account is not equal to the minimum
-    #[error("StakeSatomisNotEqualToMinimum")]
-    StakeSatomisNotEqualToMinimum,
+    #[error("StakesatomisNotEqualToMinimum")]
+    StakesatomisNotEqualToMinimum,
     /// The provided deposit stake account is not delegated to the preferred deposit vote account
     #[error("IncorrectDepositVoteAddress")]
     IncorrectDepositVoteAddress,
@@ -144,6 +144,19 @@ pub enum StakePoolError {
     /// Instruction exceeds desired slippage limit
     #[error("Instruction exceeds desired slippage limit")]
     ExceededSlippage,
+
+    // 40.
+    /// Provided mint does not have 9 decimals to match SOL
+    #[error("IncorrectMintDecimals")]
+    IncorrectMintDecimals,
+    /// Pool reserve does not have enough satomis to fund rent-exempt reserve in split
+    /// destination. Deposit more SOL in reserve, or pre-fund split destination with
+    /// the rent-exempt reserve for a stake account.
+    #[error("ReserveDepleted")]
+    ReserveDepleted,
+    /// Missing required sysvar account
+    #[error("Missing required sysvar account")]
+    MissingRequiredSysvar,
 }
 impl From<StakePoolError> for ProgramError {
     fn from(e: StakePoolError) -> Self {

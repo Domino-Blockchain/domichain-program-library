@@ -1,13 +1,15 @@
 use {
     bincode::deserialize,
-    solana_account_decoder::UiAccountEncoding,
+    domichain_account_decoder::UiAccountEncoding,
     domichain_client::{
         client_error::ClientError,
         rpc_client::RpcClient,
         rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},
         rpc_filter::{Memcmp, RpcFilterType},
     },
-    domichain_program::{borsh::try_from_slice_unchecked, program_pack::Pack, pubkey::Pubkey, stake},
+    domichain_program::{
+        borsh::try_from_slice_unchecked, program_pack::Pack, pubkey::Pubkey, stake,
+    },
     spl_stake_pool::{
         find_withdraw_authority_program_address,
         state::{StakePool, ValidatorList},
@@ -133,7 +135,7 @@ pub(crate) fn get_all_stake(
                 RpcFilterType::Memcmp(Memcmp::new_base58_encoded(12, authorized_staker.as_ref())),
             ]),
             account_config: RpcAccountInfoConfig {
-                encoding: Some(solana_account_decoder::UiAccountEncoding::Base64),
+                encoding: Some(domichain_account_decoder::UiAccountEncoding::Base64),
                 commitment: Some(rpc_client.commitment()),
                 ..RpcAccountInfoConfig::default()
             },
