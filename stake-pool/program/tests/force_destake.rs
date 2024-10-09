@@ -7,7 +7,7 @@ use {
     helpers::*,
     domichain_program::{instruction::InstructionError, pubkey::Pubkey, stake},
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         account::{Account, WritableAccount},
         clock::Epoch,
         signature::Signer,

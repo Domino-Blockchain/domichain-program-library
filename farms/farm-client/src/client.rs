@@ -20,7 +20,7 @@
 //! A few examples:
 //! #  use {
 //! #      solana_farm_client::client::FarmClient,
-//! #      solana_sdk::{pubkey::Pubkey, signer::Signer},
+//! #      domichain_sdk::{pubkey::Pubkey, signer::Signer},
 //! #  };
 //! #
 //! #  let client = FarmClient::new("https://api.mainnet-beta.solana.com");
@@ -177,7 +177,7 @@ use {
         parse_token::{parse_token, TokenAccountType, UiAccountState, UiMint, UiTokenAccount},
         UiAccountEncoding,
     },
-    solana_client::{
+    domichain_client::{
         client_error::ClientErrorKind,
         rpc_client::RpcClient,
         rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig},
@@ -214,7 +214,7 @@ use {
         vault::{Vault, VaultInfo, VaultStrategy, VaultUserInfo},
         ProgramIDType, Protocol, ProtocolInfo,
     },
-    solana_sdk::{
+    domichain_sdk::{
         account::Account,
         borsh::try_from_slice_unchecked,
         bpf_loader_upgradeable,
@@ -4164,7 +4164,7 @@ impl FarmClient {
         if max_price_age_sec > 0 {
             let current_slot = self.rpc_client.get_slot()?;
             let last_update_age_sec = if current_slot > pyth_price.valid_slot {
-                (current_slot - pyth_price.valid_slot) * solana_sdk::clock::DEFAULT_MS_PER_SLOT
+                (current_slot - pyth_price.valid_slot) * domichain_sdk::clock::DEFAULT_MS_PER_SLOT
                     / 1000
             } else {
                 0

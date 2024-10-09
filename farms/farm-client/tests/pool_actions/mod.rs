@@ -1,6 +1,6 @@
 use {
     solana_farm_client::client::FarmClient,
-    solana_sdk::{commitment_config::CommitmentConfig, signature::Keypair, signer::Signer},
+    domichain_sdk::{commitment_config::CommitmentConfig, signature::Keypair, signer::Signer},
 };
 
 use crate::{utils, utils::Swap};

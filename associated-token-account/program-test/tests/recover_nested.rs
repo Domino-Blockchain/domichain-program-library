@@ -7,7 +7,7 @@ use {
     program_test::{program_test, program_test_2022},
     domichain_program::{pubkey::Pubkey, system_instruction},
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         instruction::{AccountMeta, InstructionError},
         signature::Signer,
         signer::keypair::Keypair,

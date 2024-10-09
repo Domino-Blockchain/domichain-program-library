@@ -15,7 +15,7 @@ use {
         stake, system_program, sysvar,
     },
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
         transport::TransportError,

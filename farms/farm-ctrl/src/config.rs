@@ -2,9 +2,9 @@
 
 use {
     clap::{crate_description, crate_name, App, AppSettings, Arg, ArgMatches, SubCommand},
-    solana_clap_utils::{input_validators::is_url, keypair::signer_from_path},
+    domichain_clap_utils::{input_validators::is_url, keypair::signer_from_path},
     solana_farm_sdk::{program::multisig::Multisig, refdb},
-    solana_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey, signature::Signer},
+    domichain_sdk::{commitment_config::CommitmentConfig, pubkey::Pubkey, signature::Signer},
     std::str::FromStr,
 };
 
@@ -21,14 +21,14 @@ pub struct Config {
 impl Config {
     pub fn new(matches: &ArgMatches) -> Self {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            match solana_cli_config::Config::load(config_file) {
+            match domichain_cli_config::Config::load(config_file) {
                 Err(e) => {
                     panic!("Failed to load config file \"{}\":{}", config_file, e);
                 }
                 Ok(config) => config,
             }
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
 
         let farm_client_url = matches
@@ -220,7 +220,7 @@ pub fn get_clap_app<'a, 'b>(version: &'b str) -> App<'a, 'b> {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
                 arg.default_value(config_file)
             } else {
                 arg

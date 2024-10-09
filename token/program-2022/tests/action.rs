@@ -1,6 +1,6 @@
 use {
     domichain_program_test::BanksClient,
-    solana_sdk::{
+    domichain_sdk::{
         hash::Hash,
         program_pack::Pack,
         pubkey::Pubkey,

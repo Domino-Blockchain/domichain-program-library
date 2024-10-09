@@ -6,7 +6,7 @@ pub mod genesis;
 use assert_matches::*;
 use domichain_program::{program_option::COption, program_pack::Pack, pubkey::Pubkey};
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     account::Account,
     signature::{read_keypair_file, Keypair, Signer},
     system_instruction::create_account,

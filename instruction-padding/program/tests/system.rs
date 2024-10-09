@@ -2,7 +2,7 @@
 
 use {
     domichain_program_test::{processor, tokio, ProgramTest},
-    solana_sdk::{
+    domichain_sdk::{
         instruction::AccountMeta, native_token::SATOMIS_PER_SOL, pubkey::Pubkey,
         signature::Signer, system_instruction, transaction::Transaction,
     },

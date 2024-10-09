@@ -5,7 +5,7 @@ mod helpers;
 
 use helpers::*;
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     instruction::InstructionError,
     signature::Signer,
     transaction::{Transaction, TransactionError},

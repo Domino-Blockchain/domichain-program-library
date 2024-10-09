@@ -3,7 +3,7 @@
 mod action;
 use {
     domichain_program_test::{processor, tokio, ProgramTest},
-    solana_sdk::{
+    domichain_sdk::{
         program_pack::Pack,
         pubkey::Pubkey,
         signature::{Keypair, Signer},

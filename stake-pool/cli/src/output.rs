@@ -1,9 +1,11 @@
 use {
     serde::{Deserialize, Serialize},
-    solana_cli_output::{QuietDisplay, VerboseDisplay},
-    solana_sdk::native_token::Sol,
-    solana_sdk::{pubkey::Pubkey, stake::state::Lockup},
-    spl_stake_pool::state::{Fee, StakePool, StakeStatus, ValidatorList, ValidatorStakeInfo},
+    domichain_cli_output::{QuietDisplay, VerboseDisplay},
+    domichain_sdk::native_token::Domi,
+    domichain_sdk::{pubkey::Pubkey, stake::state::Lockup},
+    spl_stake_pool::state::{
+        Fee, PodStakeStatus, StakePool, StakeStatus, ValidatorList, ValidatorStakeInfo,
+    },
     std::fmt::{Display, Formatter, Result, Write},
 };
 
@@ -18,7 +20,7 @@ impl Display for CliStakePools {
         for pool in &self.pools {
             writeln!(
                 f,
-                "Address: {}\tManager: {}\tSatomis: {}\tPool tokens: {}\tValidators: {}",
+                "Address: {}\tManager: {}\tLamports: {}\tPool tokens: {}\tValidators: {}",
                 pool.address,
                 pool.manager,
                 pool.total_satomis,
@@ -254,21 +256,21 @@ impl Display for CliStakePoolDetails {
             f,
             "Reserve Account: {}\tAvailable Balance: {}",
             &self.reserve_stake_account_address,
-            Sol(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
+            Domi(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
         )?;
         for stake_account in &self.stake_accounts {
             writeln!(
                 f,
                 "Vote Account: {}\tBalance: {}\tLast Update Epoch: {}",
                 stake_account.vote_account_address,
-                Sol(stake_account.validator_satomis),
+                Domi(stake_account.validator_satomis),
                 stake_account.validator_last_update_epoch,
             )?;
         }
         writeln!(
             f,
             "Total Pool Stake: {} {}",
-            Sol(self.total_satomis),
+            Domi(self.total_satomis),
             if self.update_required {
                 " [UPDATE REQUIRED]"
             } else {
@@ -299,7 +301,7 @@ impl VerboseDisplay for CliStakePoolDetails {
             w,
             "Reserve Account: {}\tAvailable Balance: {}",
             &self.reserve_stake_account_address,
-            Sol(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
+            Domi(self.reserve_stake_satomis - self.minimum_reserve_stake_balance),
         )?;
         for stake_account in &self.stake_accounts {
             writeln!(
@@ -307,9 +309,9 @@ impl VerboseDisplay for CliStakePoolDetails {
                 "Vote Account: {}\tStake Account: {}\tActive Balance: {}\tTransient Stake Account: {}\tTransient Balance: {}\tLast Update Epoch: {}{}",
                 stake_account.vote_account_address,
                 stake_account.stake_account_address,
-                Sol(stake_account.validator_active_stake_satomis),
+                Domi(stake_account.validator_active_stake_satomis),
                 stake_account.validator_transient_stake_account_address,
-                Sol(stake_account.validator_transient_stake_satomis),
+                Domi(stake_account.validator_transient_stake_satomis),
                 stake_account.validator_last_update_epoch,
                 if stake_account.update_required {
                     " [UPDATE REQUIRED]"
@@ -321,7 +323,7 @@ impl VerboseDisplay for CliStakePoolDetails {
         writeln!(
             w,
             "Total Pool Stake: {} {}",
-            Sol(self.total_satomis),
+            Domi(self.total_satomis),
             if self.update_required {
                 " [UPDATE REQUIRED]"
             } else {
@@ -372,20 +374,21 @@ pub(crate) struct CliStakePoolValidator {
 impl From<ValidatorStakeInfo> for CliStakePoolValidator {
     fn from(v: ValidatorStakeInfo) -> Self {
         Self {
-            active_stake_satomis: v.active_stake_satomis,
-            transient_stake_satomis: v.transient_stake_satomis,
-            last_update_epoch: v.last_update_epoch,
-            transient_seed_suffix: v.transient_seed_suffix,
-            unused: v.unused,
-            validator_seed_suffix: v.validator_seed_suffix,
+            active_stake_satomis: v.active_stake_satomis.into(),
+            transient_stake_satomis: v.transient_stake_satomis.into(),
+            last_update_epoch: v.last_update_epoch.into(),
+            transient_seed_suffix: v.transient_seed_suffix.into(),
+            unused: v.unused.into(),
+            validator_seed_suffix: v.validator_seed_suffix.into(),
             status: CliStakePoolValidatorStakeStatus::from(v.status),
             vote_account_address: v.vote_account_address.to_string(),
         }
     }
 }
 
-impl From<StakeStatus> for CliStakePoolValidatorStakeStatus {
-    fn from(s: StakeStatus) -> CliStakePoolValidatorStakeStatus {
+impl From<PodStakeStatus> for CliStakePoolValidatorStakeStatus {
+    fn from(s: PodStakeStatus) -> CliStakePoolValidatorStakeStatus {
+        let s = StakeStatus::try_from(s).unwrap();
         match s {
             StakeStatus::Active => CliStakePoolValidatorStakeStatus::Active,
             StakeStatus::DeactivatingTransient => {

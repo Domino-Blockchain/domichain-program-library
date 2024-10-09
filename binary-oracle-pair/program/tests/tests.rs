@@ -3,7 +3,7 @@
 use borsh::de::BorshDeserialize;
 use domichain_program::{hash::Hash, program_pack::Pack, pubkey::Pubkey, system_instruction};
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     account::Account,
     signature::{Keypair, Signer},
     transaction::Transaction,

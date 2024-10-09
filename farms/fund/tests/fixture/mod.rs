@@ -12,7 +12,7 @@ use {
         token::{OracleType, Token, TokenType},
         vault::{Vault, VaultStrategy, VaultType},
     },
-    solana_sdk::{pubkey::Pubkey, signature::Keypair},
+    domichain_sdk::{pubkey::Pubkey, signature::Keypair},
 };
 
 #[allow(dead_code)]

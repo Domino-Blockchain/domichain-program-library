@@ -1,4 +1,4 @@
-#![cfg(all(target_os = "wasi", not(feature = "no-entrypoint")))]
+#![cfg(all(target_os = "domichain", not(feature = "no-entrypoint")))]
 
 use domichain_program::{
     account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, pubkey::Pubkey,

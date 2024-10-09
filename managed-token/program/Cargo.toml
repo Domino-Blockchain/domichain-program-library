@@ -24,7 +24,7 @@ test = []
 [dependencies]
 domichain-program = { path = "../../../domichain/sdk/program" }
 shank = "^0.0.5"
-spl-token = { version = "3.5.0", features = ["no-entrypoint"] }
+spl-token = { path = "../../token/program", features = ["no-entrypoint"] }
 spl-associated-token-account = { path = "../../associated-token-account/program", features = [ "no-entrypoint", ] }
 thiserror = "^1.0.24"
 borsh = "0.10.3"

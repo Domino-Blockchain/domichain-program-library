@@ -7,7 +7,7 @@ use domichain_program_test::{
 };
 
 use domichain_program::hash::hashv;
-use solana_sdk::{
+use domichain_sdk::{
     signature::{Keypair, Signer},
     transaction::Transaction,
     transport::TransportError,

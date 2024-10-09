@@ -8,7 +8,7 @@ use {
     helpers::*,
     domichain_program::{borsh::try_from_slice_unchecked, pubkey::Pubkey, stake},
     domichain_program_test::*,
-    solana_sdk::signature::{Keypair, Signer},
+    domichain_sdk::signature::{Keypair, Signer},
     spl_stake_pool::{minimum_stake_satomis, state},
 };
 

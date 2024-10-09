@@ -6,7 +6,7 @@ use {
         instruction::amm::AmmInstruction, pool::PoolRoute, program::account, token::TokenSelector,
         Protocol,
     },
-    solana_sdk::{instruction::Instruction, program_error::ProgramError, pubkey::Pubkey},
+    domichain_sdk::{instruction::Instruction, program_error::ProgramError, pubkey::Pubkey},
 };
 
 use super::FarmClient;

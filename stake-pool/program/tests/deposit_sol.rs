@@ -9,7 +9,7 @@ use {
         borsh::try_from_slice_unchecked, instruction::InstructionError, pubkey::Pubkey,
     },
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         signature::{Keypair, Signer},
         transaction::{Transaction, TransactionError},
         transport::TransportError,

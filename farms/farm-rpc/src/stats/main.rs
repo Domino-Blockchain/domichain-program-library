@@ -6,7 +6,7 @@ mod fund_stats;
 use {
     clap::{crate_description, crate_name, App, Arg},
     log::{error, info},
-    solana_clap_utils::input_validators::is_url,
+    domichain_clap_utils::input_validators::is_url,
     std::{thread, time::Duration},
 };
 
@@ -32,7 +32,7 @@ fn main() {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
                 arg.default_value(config_file)
             } else {
                 arg
@@ -73,21 +73,21 @@ fn main() {
 
     // set log verbosity level
     let log_level = "solana=".to_string() + matches.value_of("log_level").unwrap();
-    solana_logger::setup_with_default(log_level.as_str());
+    domichain_logger::setup_with_default(log_level.as_str());
 
     // load config params
     let farm_client_url = if let Some(farm_client_url) = matches.value_of("farm_client_url") {
         farm_client_url.to_string()
     } else {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            match solana_cli_config::Config::load(config_file) {
+            match domichain_cli_config::Config::load(config_file) {
                 Err(e) => {
                     panic!("Failed to load config file \"{}\":{}", config_file, e);
                 }
                 Ok(config) => config,
             }
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
         cli_config.json_rpc_url
     };

@@ -6,11 +6,11 @@ use {
         WITHDRAWAL_BASELINE_FEE,
     },
     borsh::{BorshDeserialize, BorshSchema, BorshSerialize},
-    num_derive::FromPrimitive,
-    num_traits::FromPrimitive,
+    bytemuck::{Pod, Zeroable},
     domichain_program::{
         account_info::AccountInfo,
         borsh::get_instance_packed_len,
+        // borsh0_10::get_instance_packed_len,
         msg,
         program_error::ProgramError,
         program_memory::sol_memcmp,
@@ -18,6 +18,9 @@ use {
         pubkey::{Pubkey, PUBKEY_BYTES},
         stake::state::Lockup,
     },
+    num_derive::{FromPrimitive, ToPrimitive},
+    num_traits::{FromPrimitive, ToPrimitive},
+    // spl_pod::primitives::{PodU32, PodU64},
     spl_token_2022::{
         extension::{BaseStateWithExtensions, ExtensionType, StateWithExtensions},
         state::{Account, AccountState, Mint},
@@ -26,20 +29,15 @@ use {
 };
 
 /// Enum representing the account type managed by the program
-#[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+#[derive(Clone, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
 pub enum AccountType {
     /// If the account has not been initialized, the enum will be 0
+    #[default]
     Uninitialized,
     /// Stake pool
     StakePool,
     /// Validator stake list
     ValidatorList,
-}
-
-impl Default for AccountType {
-    fn default() -> Self {
-        AccountType::Uninitialized
-    }
 }
 
 /// Initialized program details.
@@ -558,7 +556,15 @@ pub struct ValidatorListHeader {
 
 /// Status of the stake account in the validator list, for accounting
 #[derive(
-    FromPrimitive, Copy, Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema,
+    ToPrimitive,
+    FromPrimitive,
+    Copy,
+    Clone,
+    Debug,
+    PartialEq,
+    BorshDeserialize,
+    BorshSerialize,
+    BorshSchema,
 )]
 pub enum StakeStatus {
     /// Stake account is active, there may be a transient stake as well
@@ -576,29 +582,67 @@ pub enum StakeStatus {
     /// a validator is removed with a transient stake active
     DeactivatingAll,
 }
-impl StakeStatus {
-    /// Downgrade the status towards ready for removal by removing the validator stake
-    pub fn remove_validator_stake(&mut self) {
-        let new_self = match self {
-            Self::Active | Self::DeactivatingTransient | Self::ReadyForRemoval => *self,
-            Self::DeactivatingAll => Self::DeactivatingTransient,
-            Self::DeactivatingValidator => Self::ReadyForRemoval,
-        };
-        *self = new_self;
-    }
-    /// Downgrade the status towards ready for removal by removing the transient stake
-    pub fn remove_transient_stake(&mut self) {
-        let new_self = match self {
-            Self::Active | Self::DeactivatingValidator | Self::ReadyForRemoval => *self,
-            Self::DeactivatingAll => Self::DeactivatingValidator,
-            Self::DeactivatingTransient => Self::ReadyForRemoval,
-        };
-        *self = new_self;
-    }
-}
 impl Default for StakeStatus {
     fn default() -> Self {
         Self::Active
+    }
+}
+
+/// Wrapper struct that can be `Pod`, containing a byte that *should* be a valid
+/// `StakeStatus` underneath.
+#[repr(transparent)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Pod,
+    Zeroable,
+    BorshDeserialize,
+    BorshSerialize,
+    BorshSchema,
+)]
+pub struct PodStakeStatus(u8);
+impl PodStakeStatus {
+    /// Downgrade the status towards ready for removal by removing the validator stake
+    pub fn remove_validator_stake(&mut self) -> Result<(), ProgramError> {
+        let status = StakeStatus::try_from(*self)?;
+        let new_self = match status {
+            StakeStatus::Active
+            | StakeStatus::DeactivatingTransient
+            | StakeStatus::ReadyForRemoval => status,
+            StakeStatus::DeactivatingAll => StakeStatus::DeactivatingTransient,
+            StakeStatus::DeactivatingValidator => StakeStatus::ReadyForRemoval,
+        };
+        *self = new_self.into();
+        Ok(())
+    }
+    /// Downgrade the status towards ready for removal by removing the transient stake
+    pub fn remove_transient_stake(&mut self) -> Result<(), ProgramError> {
+        let status = StakeStatus::try_from(*self)?;
+        let new_self = match status {
+            StakeStatus::Active
+            | StakeStatus::DeactivatingValidator
+            | StakeStatus::ReadyForRemoval => status,
+            StakeStatus::DeactivatingAll => StakeStatus::DeactivatingValidator,
+            StakeStatus::DeactivatingTransient => StakeStatus::ReadyForRemoval,
+        };
+        *self = new_self.into();
+        Ok(())
+    }
+}
+impl TryFrom<PodStakeStatus> for StakeStatus {
+    type Error = ProgramError;
+    fn try_from(pod: PodStakeStatus) -> Result<Self, Self::Error> {
+        FromPrimitive::from_u8(pod.0).ok_or(ProgramError::InvalidAccountData)
+    }
+}
+impl From<StakeStatus> for PodStakeStatus {
+    fn from(status: StakeStatus) -> Self {
+        // unwrap is safe here because the variants of `StakeStatus` fit very
+        // comfortably within a `u8`
+        PodStakeStatus(status.to_u8().unwrap())
     }
 }
 
@@ -613,43 +657,90 @@ pub(crate) enum StakeWithdrawSource {
     ValidatorRemoval,
 }
 
+/// Simple macro for implementing conversion functions between Pod* ints and standard ints.
+///
+/// The standard int types can cause alignment issues when placed in a `Pod`,
+/// so these replacements are usable in all `Pod`s.
+#[macro_export]
+macro_rules! impl_int_conversion {
+    ($P:ty, $I:ty) => {
+        impl From<$I> for $P {
+            fn from(n: $I) -> Self {
+                Self(n.to_le_bytes())
+            }
+        }
+        impl From<$P> for $I {
+            fn from(pod: $P) -> Self {
+                Self::from_le_bytes(pod.0)
+            }
+        }
+    };
+}
+
+/// `u32` type that can be used in `Pod`s
+#[cfg_attr(feature = "serde-traits", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde-traits", serde(from = "u32", into = "u32"))]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable, BorshDeserialize, BorshSerialize, BorshSchema)]
+#[repr(transparent)]
+pub struct PodU32([u8; 4]);
+impl_int_conversion!(PodU32, u32);
+
+/// `u64` type that can be used in Pods
+#[cfg_attr(feature = "serde-traits", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde-traits", serde(from = "u64", into = "u64"))]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Pod, Zeroable, BorshDeserialize, BorshSerialize, BorshSchema)]
+#[repr(transparent)]
+pub struct PodU64([u8; 8]);
+impl_int_conversion!(PodU64, u64);
+
 /// Information about a validator in the pool
 ///
 /// NOTE: ORDER IS VERY IMPORTANT HERE, PLEASE DO NOT RE-ORDER THE FIELDS UNLESS
 /// THERE'S AN EXTREMELY GOOD REASON.
 ///
-/// To save on BPF instructions, the serialized bytes are reinterpreted with an
-/// unsafe pointer cast, which means that this structure cannot have any
+/// To save on BPF instructions, the serialized bytes are reinterpreted with a
+/// bytemuck transmute, which means that this structure cannot have any
 /// undeclared alignment-padding in its representation.
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Pod,
+    Zeroable,
+    BorshDeserialize,
+    BorshSerialize,
+    BorshSchema,
+)]
 pub struct ValidatorStakeInfo {
     /// Amount of satomis on the validator stake account, including rent
     ///
     /// Note that if `last_update_epoch` does not match the current epoch then
     /// this field may not be accurate
-    pub active_stake_satomis: u64,
+    pub active_stake_satomis: PodU64,
 
     /// Amount of transient stake delegated to this validator
     ///
     /// Note that if `last_update_epoch` does not match the current epoch then
     /// this field may not be accurate
-    pub transient_stake_satomis: u64,
+    pub transient_stake_satomis: PodU64,
 
     /// Last epoch the active and transient stake satomis fields were updated
-    pub last_update_epoch: u64,
+    pub last_update_epoch: PodU64,
 
     /// Transient account seed suffix, used to derive the transient stake account address
-    pub transient_seed_suffix: u64,
+    pub transient_seed_suffix: PodU64,
 
     /// Unused space, initially meant to specify the end of seed suffixes
-    pub unused: u32,
+    pub unused: PodU32,
 
     /// Validator account seed suffix
-    pub validator_seed_suffix: u32, // really `Option<NonZeroU32>` so 0 is `None`
+    pub validator_seed_suffix: PodU32, // really `Option<NonZeroU32>` so 0 is `None`
 
     /// Status of the validator stake account
-    pub status: StakeStatus,
+    pub status: PodStakeStatus,
 
     /// Validator vote account address
     pub vote_account_address: Pubkey,
@@ -658,8 +749,8 @@ pub struct ValidatorStakeInfo {
 impl ValidatorStakeInfo {
     /// Get the total satomis on this validator (active and transient)
     pub fn stake_satomis(&self) -> Result<u64, StakePoolError> {
-        self.active_stake_satomis
-            .checked_add(self.transient_stake_satomis)
+        u64::from(self.active_stake_satomis)
+            .checked_add(self.transient_stake_satomis.into())
             .ok_or(StakePoolError::CalculationFailure)
     }
 
@@ -701,7 +792,7 @@ impl Pack for ValidatorStakeInfo {
         let mut data = data;
         // Removing this unwrap would require changing from `Pack` to some other
         // trait or `bytemuck`, so it stays in for now
-        self.serialize(&mut data).unwrap();
+        borsh::to_writer(&mut data, self).unwrap();
     }
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
         let unpacked = Self::try_from_slice(src)?;
@@ -751,7 +842,9 @@ impl ValidatorList {
 
     /// Check if the list has any active stake
     pub fn has_active_stake(&self) -> bool {
-        self.validators.iter().any(|x| x.active_stake_satomis > 0)
+        self.validators
+            .iter()
+            .any(|x| u64::from(x.active_stake_satomis) > 0)
     }
 }
 
@@ -770,14 +863,12 @@ impl ValidatorListHeader {
 
     /// Extracts a slice of ValidatorStakeInfo types from the vec part
     /// of the ValidatorList
-    pub fn deserialize_mut_slice(
-        data: &mut [u8],
+    pub fn deserialize_mut_slice<'a>(
+        big_vec: &'a mut BigVec,
         skip: usize,
         len: usize,
-    ) -> Result<(Self, Vec<&mut ValidatorStakeInfo>), ProgramError> {
-        let (header, mut big_vec) = Self::deserialize_vec(data)?;
-        let validator_list = big_vec.deserialize_mut_slice::<ValidatorStakeInfo>(skip, len)?;
-        Ok((header, validator_list))
+    ) -> Result<&'a mut [ValidatorStakeInfo], ProgramError> {
+        big_vec.deserialize_mut_slice::<ValidatorStakeInfo>(skip, len)
     }
 
     /// Extracts the validator list into its header and internal BigVec
@@ -977,12 +1068,12 @@ mod test {
     #![allow(clippy::integer_arithmetic)]
     use {
         super::*,
-        proptest::prelude::*,
         domichain_program::{
-            borsh::{get_instance_packed_len, get_packed_len, try_from_slice_unchecked},
+            borsh::{get_packed_len, try_from_slice_unchecked},
             clock::{DEFAULT_SLOTS_PER_EPOCH, DEFAULT_S_PER_SLOT, SECONDS_PER_DAY},
-            native_token::SATOMIS_PER_SOL,
+            native_token::SATOMIS_PER_DOMI,
         },
+        proptest::prelude::*,
     };
 
     fn uninitialized_validator_list() -> ValidatorList {
@@ -1003,34 +1094,34 @@ mod test {
             },
             validators: vec![
                 ValidatorStakeInfo {
-                    status: StakeStatus::Active,
+                    status: StakeStatus::Active.into(),
                     vote_account_address: Pubkey::new_from_array([1; 32]),
-                    active_stake_satomis: u64::from_le_bytes([255; 8]),
-                    transient_stake_satomis: u64::from_le_bytes([128; 8]),
-                    last_update_epoch: u64::from_le_bytes([64; 8]),
-                    transient_seed_suffix: 0,
-                    unused: 0,
-                    validator_seed_suffix: 0,
+                    active_stake_satomis: u64::from_le_bytes([255; 8]).into(),
+                    transient_stake_satomis: u64::from_le_bytes([128; 8]).into(),
+                    last_update_epoch: u64::from_le_bytes([64; 8]).into(),
+                    transient_seed_suffix: 0.into(),
+                    unused: 0.into(),
+                    validator_seed_suffix: 0.into(),
                 },
                 ValidatorStakeInfo {
-                    status: StakeStatus::DeactivatingTransient,
+                    status: StakeStatus::DeactivatingTransient.into(),
                     vote_account_address: Pubkey::new_from_array([2; 32]),
-                    active_stake_satomis: 998877665544,
-                    transient_stake_satomis: 222222222,
-                    last_update_epoch: 11223445566,
-                    transient_seed_suffix: 0,
-                    unused: 0,
-                    validator_seed_suffix: 0,
+                    active_stake_satomis: 998877665544.into(),
+                    transient_stake_satomis: 222222222.into(),
+                    last_update_epoch: 11223445566.into(),
+                    transient_seed_suffix: 0.into(),
+                    unused: 0.into(),
+                    validator_seed_suffix: 0.into(),
                 },
                 ValidatorStakeInfo {
-                    status: StakeStatus::ReadyForRemoval,
+                    status: StakeStatus::ReadyForRemoval.into(),
                     vote_account_address: Pubkey::new_from_array([3; 32]),
-                    active_stake_satomis: 0,
-                    transient_stake_satomis: 0,
-                    last_update_epoch: 999999999999999,
-                    transient_seed_suffix: 0,
-                    unused: 0,
-                    validator_seed_suffix: 0,
+                    active_stake_satomis: 0.into(),
+                    transient_stake_satomis: 0.into(),
+                    last_update_epoch: 999999999999999.into(),
+                    transient_seed_suffix: 0.into(),
+                    unused: 0.into(),
+                    validator_seed_suffix: 0.into(),
                 },
             ],
         }
@@ -1042,8 +1133,8 @@ mod test {
         let size = get_instance_packed_len(&ValidatorList::new(max_validators)).unwrap();
         let stake_list = uninitialized_validator_list();
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
 
@@ -1056,16 +1147,16 @@ mod test {
             validators: vec![],
         };
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
 
         // With several accounts
         let stake_list = test_validator_list(max_validators);
         let mut byte_vec = vec![0u8; size];
-        let mut bytes = byte_vec.as_mut_slice();
-        stake_list.serialize(&mut bytes).unwrap();
+        let bytes = byte_vec.as_mut_slice();
+        borsh::to_writer(bytes, &stake_list).unwrap();
         let stake_list_unpacked = try_from_slice_unchecked::<ValidatorList>(&byte_vec).unwrap();
         assert_eq!(stake_list_unpacked, stake_list);
     }
@@ -1076,7 +1167,7 @@ mod test {
         let mut validator_list = test_validator_list(max_validators);
         assert!(validator_list.has_active_stake());
         for validator in validator_list.validators.iter_mut() {
-            validator.active_stake_satomis = 0;
+            validator.active_stake_satomis = 0.into();
         }
         assert!(!validator_list.has_active_stake());
     }
@@ -1086,8 +1177,9 @@ mod test {
         let max_validators = 10;
         let stake_list = test_validator_list(max_validators);
         let mut serialized = stake_list.try_to_vec().unwrap();
-        let (header, list) = ValidatorListHeader::deserialize_mut_slice(
-            &mut serialized,
+        let (header, mut big_vec) = ValidatorListHeader::deserialize_vec(&mut serialized).unwrap();
+        let list = ValidatorListHeader::deserialize_mut_slice(
+            &mut big_vec,
             0,
             stake_list.validators.len(),
         )
@@ -1097,30 +1189,30 @@ mod test {
         assert!(list
             .iter()
             .zip(stake_list.validators.iter())
-            .all(|(a, b)| *a == b));
+            .all(|(a, b)| a == b));
 
-        let (_, list) = ValidatorListHeader::deserialize_mut_slice(&mut serialized, 1, 2).unwrap();
+        let list = ValidatorListHeader::deserialize_mut_slice(&mut big_vec, 1, 2).unwrap();
         assert!(list
             .iter()
             .zip(stake_list.validators[1..].iter())
-            .all(|(a, b)| *a == b));
-        let (_, list) = ValidatorListHeader::deserialize_mut_slice(&mut serialized, 2, 1).unwrap();
+            .all(|(a, b)| a == b));
+        let list = ValidatorListHeader::deserialize_mut_slice(&mut big_vec, 2, 1).unwrap();
         assert!(list
             .iter()
             .zip(stake_list.validators[2..].iter())
-            .all(|(a, b)| *a == b));
-        let (_, list) = ValidatorListHeader::deserialize_mut_slice(&mut serialized, 0, 2).unwrap();
+            .all(|(a, b)| a == b));
+        let list = ValidatorListHeader::deserialize_mut_slice(&mut big_vec, 0, 2).unwrap();
         assert!(list
             .iter()
             .zip(stake_list.validators[..2].iter())
-            .all(|(a, b)| *a == b));
+            .all(|(a, b)| a == b));
 
         assert_eq!(
-            ValidatorListHeader::deserialize_mut_slice(&mut serialized, 0, 4).unwrap_err(),
+            ValidatorListHeader::deserialize_mut_slice(&mut big_vec, 0, 4).unwrap_err(),
             ProgramError::AccountDataTooSmall
         );
         assert_eq!(
-            ValidatorListHeader::deserialize_mut_slice(&mut serialized, 1, 3).unwrap_err(),
+            ValidatorListHeader::deserialize_mut_slice(&mut big_vec, 1, 3).unwrap_err(),
             ProgramError::AccountDataTooSmall
         );
     }
@@ -1132,7 +1224,9 @@ mod test {
         let mut serialized = stake_list.try_to_vec().unwrap();
         let (_, big_vec) = ValidatorListHeader::deserialize_vec(&mut serialized).unwrap();
         for (a, b) in big_vec
-            .iter::<ValidatorStakeInfo>()
+            .deserialize_slice::<ValidatorStakeInfo>(0, big_vec.len() as usize)
+            .unwrap()
+            .iter()
             .zip(stake_list.validators.iter())
         {
             assert_eq!(a, b);
@@ -1177,12 +1271,12 @@ mod test {
             denominator: 10,
         };
         let mut stake_pool = StakePool {
-            total_satomis: 100 * SATOMIS_PER_SOL,
-            pool_token_supply: 100 * SATOMIS_PER_SOL,
+            total_satomis: 100 * SATOMIS_PER_DOMI,
+            pool_token_supply: 100 * SATOMIS_PER_DOMI,
             epoch_fee,
             ..StakePool::default()
         };
-        let reward_satomis = 10 * SATOMIS_PER_SOL;
+        let reward_satomis = 10 * SATOMIS_PER_DOMI;
         let pool_token_fee = stake_pool.calc_epoch_fee_amount(reward_satomis).unwrap();
 
         stake_pool.total_satomis += reward_satomis;
@@ -1191,7 +1285,7 @@ mod test {
         let fee_satomis = stake_pool
             .calc_satomis_withdraw_amount(pool_token_fee)
             .unwrap();
-        assert_eq!(fee_satomis, SATOMIS_PER_SOL - 1); // off-by-one due to truncation
+        assert_eq!(fee_satomis, SATOMIS_PER_DOMI - 1); // off-by-one due to truncation
     }
 
     #[test]

@@ -4,7 +4,7 @@ mod program_test;
 use {
     program_test::{TestContext, TokenContext},
     domichain_program_test::tokio,
-    solana_sdk::{signature::Signer, signer::keypair::Keypair},
+    domichain_sdk::{signature::Signer, signer::keypair::Keypair},
     spl_token_2022::state::AccountState,
 };
 

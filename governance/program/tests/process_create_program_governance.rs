@@ -4,7 +4,7 @@ mod program_test;
 use domichain_program_test::*;
 
 use program_test::*;
-use solana_sdk::signature::{Keypair, Signer};
+use domichain_sdk::signature::{Keypair, Signer};
 use spl_governance::{
     error::GovernanceError, tools::bpf_loader_upgradeable::get_program_upgrade_authority,
 };

@@ -21,7 +21,7 @@ stable-swap-client = "1.8.1"
 quarry-mine = { version = "5.0.2", features = ["no-entrypoint"] }
 quarry-mint-wrapper = { version = "5.0.2", features = ["no-entrypoint"] }
 quarry-redeemer = { version = "5.0.2", features = ["no-entrypoint"] }
-spl-token = { version = "3.2.0", features = ["no-entrypoint"] }
+spl-token = { version = "3.2.0", path = "../../token/program", features = ["no-entrypoint"] }
 
 [dev-dependencies]
 domichain-program-test = { path = "../../../domichain/program-test" }

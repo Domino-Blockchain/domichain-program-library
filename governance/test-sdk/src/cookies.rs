@@ -1,5 +1,5 @@
 use domichain_program::pubkey::Pubkey;
-use solana_sdk::account::Account;
+use domichain_sdk::account::Account;
 
 #[derive(Debug)]
 pub struct TokenAccountCookie {

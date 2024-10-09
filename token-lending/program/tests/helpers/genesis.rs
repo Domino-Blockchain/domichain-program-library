@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use domichain_program::bpf_loader_upgradeable;
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     account::Account,
     bpf_loader_upgradeable::UpgradeableLoaderState,
     pubkey::Pubkey,

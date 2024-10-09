@@ -9,7 +9,7 @@ use domichain_program::{
     stake_history::Epoch, system_instruction, system_program, sysvar,
 };
 use domichain_program_test::{ProgramTest, ProgramTestContext};
-use solana_sdk::{
+use domichain_sdk::{
     account::{Account, AccountSharedData, WritableAccount},
     signature::Keypair,
     signer::Signer,

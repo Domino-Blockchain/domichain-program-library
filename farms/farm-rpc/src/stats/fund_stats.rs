@@ -3,7 +3,7 @@ use {
     rusqlite::{Connection, OptionalExtension},
     serde::{Deserialize, Serialize},
     serde_json::to_string,
-    solana_sdk::program_error::ProgramError,
+    domichain_sdk::program_error::ProgramError,
 };
 
 #[allow(dead_code)]

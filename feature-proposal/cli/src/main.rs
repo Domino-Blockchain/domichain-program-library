@@ -5,12 +5,12 @@ use {
         crate_description, crate_name, crate_version, value_t_or_exit, App, AppSettings, Arg,
         SubCommand,
     },
-    solana_clap_utils::{
+    domichain_clap_utils::{
         input_parsers::{keypair_of, pubkey_of},
         input_validators::{is_keypair, is_url, is_valid_percentage, is_valid_pubkey},
     },
-    solana_client::rpc_client::RpcClient,
-    solana_sdk::{
+    domichain_client::rpc_client::RpcClient,
+    domichain_sdk::{
         clock::UnixTimestamp,
         commitment_config::CommitmentConfig,
         program_pack::Pack,
@@ -46,7 +46,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
                 arg.default_value(config_file)
             } else {
                 arg
@@ -143,9 +143,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            domichain_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
 
         Config {
@@ -161,7 +161,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             verbose: matches.is_present("verbose"),
         }
     };
-    solana_logger::setup_with_default("solana=info");
+    domichain_logger::setup_with_default("solana=info");
     let rpc_client =
         RpcClient::new_with_commitment(config.json_rpc_url.clone(), CommitmentConfig::confirmed());
 

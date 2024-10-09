@@ -2,7 +2,7 @@
 #![cfg(feature = "test-sbf")]
 
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     account::Account,
     instruction::InstructionError,
     instruction::{AccountMeta, Instruction},

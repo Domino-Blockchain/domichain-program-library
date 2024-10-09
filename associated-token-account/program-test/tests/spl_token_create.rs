@@ -7,7 +7,7 @@ use {
     program_test::program_test,
     domichain_program::pubkey::Pubkey,
     domichain_program_test::*,
-    solana_sdk::{program_pack::Pack, signature::Signer, transaction::Transaction},
+    domichain_sdk::{program_pack::Pack, signature::Signer, transaction::Transaction},
     spl_associated_token_account::{
         get_associated_token_address, instruction::create_associated_token_account,
     },

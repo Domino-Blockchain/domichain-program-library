@@ -3,7 +3,7 @@
 
 use {
     domichain_program_test::*,
-    solana_sdk::{signature::Signer, transaction::Transaction},
+    domichain_sdk::{signature::Signer, transaction::Transaction},
     spl_math::{id, instruction, processor::process_instruction},
 };
 

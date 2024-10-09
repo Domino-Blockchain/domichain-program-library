@@ -4,7 +4,7 @@ use {
         pubkey::Pubkey,
     },
     domichain_program_test::*,
-    solana_sdk::{account::Account, signature::Signer, transaction::Transaction},
+    domichain_sdk::{account::Account, signature::Signer, transaction::Transaction},
     spl_example_transfer_satomis::processor::process_instruction,
     std::str::FromStr,
 };

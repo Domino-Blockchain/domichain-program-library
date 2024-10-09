@@ -6,7 +6,7 @@ mod helpers;
 use helpers::*;
 use domichain_program::instruction::{AccountMeta, Instruction};
 use domichain_program_test::*;
-use solana_sdk::{
+use domichain_sdk::{
     instruction::InstructionError,
     pubkey::Pubkey,
     signature::{Keypair, Signer},

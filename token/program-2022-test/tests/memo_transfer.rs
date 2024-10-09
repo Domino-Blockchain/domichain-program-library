@@ -7,7 +7,7 @@ use {
         tokio::{self, sync::Mutex},
         ProgramTestContext,
     },
-    solana_sdk::{
+    domichain_sdk::{
         instruction::InstructionError,
         pubkey::Pubkey,
         signature::Signer,

@@ -5,7 +5,7 @@ use {
         sysvar::{self},
     },
     domichain_program_test::*,
-    solana_sdk::{signature::Signer, transaction::Transaction},
+    domichain_sdk::{signature::Signer, transaction::Transaction},
     spl_example_sysvar::processor::process_instruction,
     std::str::FromStr,
 };

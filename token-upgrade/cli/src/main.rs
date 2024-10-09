@@ -1,6 +1,6 @@
 use {
     clap::{crate_description, crate_name, crate_version, Arg, Command},
-    solana_clap_v3_utils::{
+    domichain_clap_v3_utils::{
         input_parsers::pubkey_of,
         input_validators::{
             is_url_or_moniker, is_valid_pubkey, is_valid_signer, normalize_to_url_if_moniker,
@@ -9,9 +9,9 @@ use {
             signer_from_path, signer_from_path_with_config, DefaultSigner, SignerFromPathConfig,
         },
     },
-    solana_client::nonblocking::rpc_client::RpcClient,
-    solana_remote_wallet::remote_wallet::RemoteWalletManager,
-    solana_sdk::{
+    domichain_client::nonblocking::rpc_client::RpcClient,
+    domichain_remote_wallet::remote_wallet::RemoteWalletManager,
+    domichain_sdk::{
         commitment_config::CommitmentConfig,
         message::Message,
         program_option::COption,
@@ -215,7 +215,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .takes_value(true)
                 .global(true)
                 .help("Configuration file to use");
-            if let Some(ref config_file) = *solana_cli_config::CONFIG_FILE {
+            if let Some(ref config_file) = *domichain_cli_config::CONFIG_FILE {
                 arg.default_value(config_file)
             } else {
                 arg
@@ -348,9 +348,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = {
         let cli_config = if let Some(config_file) = matches.value_of("config_file") {
-            solana_cli_config::Config::load(config_file).unwrap_or_default()
+            domichain_cli_config::Config::load(config_file).unwrap_or_default()
         } else {
-            solana_cli_config::Config::default()
+            domichain_cli_config::Config::default()
         };
 
         let payer = DefaultSigner::new(
@@ -381,7 +381,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             verbose: matches.is_present("verbose"),
         }
     };
-    solana_logger::setup_with_default("solana=info");
+    domichain_logger::setup_with_default("solana=info");
 
     if config.verbose {
         println!("JSON RPC URL: {}", config.json_rpc_url);
@@ -495,14 +495,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
 mod test {
     use {
         super::*,
-        solana_sdk::{bpf_loader, signer::keypair::Keypair},
+        domichain_sdk::{bpf_loader, signer::keypair::Keypair},
         solana_test_validator::{ProgramInfo, TestValidator, TestValidatorGenesis},
         spl_token_client::client::{ProgramClient, SendTransaction},
         std::path::PathBuf,
     };
 
     async fn new_validator_for_test() -> (TestValidator, Keypair) {
-        solana_logger::setup();
+        domichain_logger::setup();
         let mut test_validator_genesis = TestValidatorGenesis::default();
         test_validator_genesis.add_programs_with_path(&[
             ProgramInfo {

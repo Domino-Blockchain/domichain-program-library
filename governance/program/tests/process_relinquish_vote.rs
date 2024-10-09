@@ -6,7 +6,7 @@ use domichain_program::{instruction::AccountMeta, pubkey::Pubkey};
 use domichain_program_test::tokio;
 
 use program_test::*;
-use solana_sdk::signer::Signer;
+use domichain_sdk::signer::Signer;
 use spl_governance::{
     error::GovernanceError,
     instruction::{cast_vote, relinquish_vote},

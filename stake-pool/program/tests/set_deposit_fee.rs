@@ -6,7 +6,7 @@ mod helpers;
 use {
     helpers::*,
     domichain_program_test::*,
-    solana_sdk::{
+    domichain_sdk::{
         borsh::try_from_slice_unchecked,
         instruction::InstructionError,
         signature::{Keypair, Signer},

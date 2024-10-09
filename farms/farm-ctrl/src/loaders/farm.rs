@@ -14,7 +14,7 @@ use {
         string::str_to_as64,
         token::GitToken,
     },
-    solana_sdk::{hash::Hasher, pubkey::Pubkey},
+    domichain_sdk::{hash::Hasher, pubkey::Pubkey},
     std::str::FromStr,
 };
 

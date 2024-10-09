@@ -10,7 +10,7 @@ use {
         borsh::try_from_slice_unchecked, instruction::InstructionError, pubkey::Pubkey, stake,
     },
     domichain_program_test::*,
-    solana_sdk::{signature::Signer, transaction::TransactionError},
+    domichain_sdk::{signature::Signer, transaction::TransactionError},
     spl_stake_pool::{error::StakePoolError, instruction, state, MINIMUM_RESERVE_SATOMIS},
     test_case::test_case,
 };

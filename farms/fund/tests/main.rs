@@ -13,7 +13,7 @@ use {
         string::str_to_as64,
         Protocol,
     },
-    solana_sdk::{
+    domichain_sdk::{
         commitment_config::{CommitmentConfig, CommitmentLevel},
         signature::Keypair,
         signer::Signer,
@@ -25,7 +25,7 @@ use {
 // Runs all integration tests. Default config should have rpc url set to
 // localhost or devnet and kepair_path should point to the admin keypair.
 fn run_tests() -> Result<(), FarmClientError> {
-    solana_logger::setup_with_default("main=debug,solana=debug");
+    domichain_logger::setup_with_default("main=debug,solana=debug");
 
     let (endpoint, admin_keypair) = utils::get_endpoint_and_keypair();
     let user_keypair = Keypair::new();
