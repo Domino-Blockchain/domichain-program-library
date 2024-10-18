@@ -529,12 +529,11 @@ where
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub async fn create_mint_ix<'a, S: Signers>(
+    pub async fn create_mint_ix<'a>(
         &self,
         mint_authority: &'a Pubkey,
         freeze_authority: Option<&'a Pubkey>,
         extension_initialization_params: Vec<ExtensionInitializationParams>,
-        signing_keypairs: &S,
     ) -> TokenResult<Vec<Instruction>> {
         let decimals = self.decimals.ok_or(TokenError::MissingDecimals)?;
 
@@ -576,7 +575,7 @@ where
         mint_authority: &'a Pubkey,
         freeze_authority: Option<&'a Pubkey>,
         account: &'a Pubkey,
-        destination_wallet: &'a Pubkey,
+        _destination_wallet: &'a Pubkey,
         destination: &'a Pubkey,
         amount: u64,
         extension_initialization_params: Vec<ExtensionInitializationParams>,
@@ -895,16 +894,15 @@ where
     }
 
     /// Assign a new authority to the account.
-    pub async fn set_authority_ix<S: Signers>(
+    pub async fn set_authority_ix(
         &self,
         account: &Pubkey,
         authority: &Pubkey,
         new_authority: Option<&Pubkey>,
         authority_type: instruction::AuthorityType,
-        signing_keypairs: &S,
+        signing_pubkeys: &[Pubkey],
     ) -> TokenResult<Vec<Instruction>> {
-        let signing_pubkeys = signing_keypairs.pubkeys();
-        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+        let multisig_signers = self.get_multisig_signers(authority, signing_pubkeys);
 
         Ok(vec![instruction::set_authority(
             &self.program_id,
@@ -952,15 +950,14 @@ where
     }
 
     /// Mint new tokens
-    pub async fn mint_to_ix<S: Signers>(
+    pub async fn mint_to_ix(
         &self,
         destination: &Pubkey,
         authority: &Pubkey,
         amount: u64,
-        signing_keypairs: &S,
+        signing_pubkeys: &[Pubkey],
     ) -> TokenResult<Vec<Instruction>> {
-        let signing_pubkeys = signing_keypairs.pubkeys();
-        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+        let multisig_signers = self.get_multisig_signers(authority, signing_pubkeys);
 
         let instructions = if let Some(decimals) = self.decimals {
             [instruction::mint_to_checked(
@@ -1027,16 +1024,15 @@ where
 
     /// Transfer tokens to another account
     #[allow(clippy::too_many_arguments)]
-    pub async fn transfer_ix<S: Signers>(
+    pub async fn transfer_ix(
         &self,
         source: &Pubkey,
         destination: &Pubkey,
         authority: &Pubkey,
         amount: u64,
-        signing_keypairs: &S,
+        signing_pubkeys: &[Pubkey],
     ) -> TokenResult<Vec<Instruction>> {
-        let signing_pubkeys = signing_keypairs.pubkeys();
-        let multisig_signers = self.get_multisig_signers(authority, &signing_pubkeys);
+        let multisig_signers = self.get_multisig_signers(authority, signing_pubkeys);
 
         let instructions = if let Some(decimals) = self.decimals {
             [instruction::transfer_checked(
