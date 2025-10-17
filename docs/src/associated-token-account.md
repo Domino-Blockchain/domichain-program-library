@@ -61,7 +61,7 @@ import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID: PublicKey = new PublicKey(
-  'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+  'Dt8fRCpjeV6JDemhPmtcTKijgKdPxXHn9Wo9cXY5agtG',
 );
 
 function findAssociatedTokenAddress(
