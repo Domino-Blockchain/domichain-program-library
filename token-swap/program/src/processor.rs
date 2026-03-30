@@ -14,6 +14,8 @@ use crate::{
     },
     state::{SwapState, SwapV1, SwapVersion},
 };
+use domichain_program::dbg_syscall;
+use domichain_program::program_pack::Pack;
 use num_traits::FromPrimitive;
 use domichain_program::{
     account_info::{next_account_info, AccountInfo},
@@ -398,6 +400,19 @@ impl Processor {
         let source_token_program_info = next_account_info(account_info_iter)?;
         let destination_token_program_info = next_account_info(account_info_iter)?;
         let pool_token_program_info = next_account_info(account_info_iter)?;
+        let ddmi_address = next_account_info(account_info_iter)?;
+        let ddmi_mint = next_account_info(account_info_iter)?;
+        dbg_syscall!(ddmi_address);
+        dbg_syscall!(ddmi_mint);
+        let mut fee_decrease_rate = 1;
+        if let Ok(ddmi_address_data) = dbg_syscall!(Account::unpack(&ddmi_address.data.borrow())) {
+            // TODO: validate `ddmi_mint`
+            if ddmi_address_data.mint == *ddmi_mint.key {
+                if ddmi_address_data.amount > 1000 {
+                    fee_decrease_rate = 5;
+                }
+            }
+        }
 
         if swap_info.owner != program_id {
             return Err(ProgramError::IncorrectProgramId);
@@ -470,6 +485,15 @@ impl Processor {
         } else {
             TradeDirection::BtoA
         };
+
+        let mut fees = dbg_syscall!(token_swap.fees()).clone();
+        
+        // FIXME: which fee numerator should we decrease?
+        fees.trade_fee_numerator /= fee_decrease_rate;
+        fees.owner_trade_fee_numerator /= fee_decrease_rate;
+        fees.host_fee_numerator /= fee_decrease_rate;
+        dbg_syscall!(&fees);
+
         let result = token_swap
             .swap_curve()
             .swap(
@@ -477,7 +501,7 @@ impl Processor {
                 to_u128(source_account.amount)?,
                 to_u128(dest_account.amount)?,
                 trade_direction,
-                token_swap.fees(),
+                &fees,
             )
             .ok_or(SwapError::ZeroTradingTokens)?;
 
